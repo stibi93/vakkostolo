@@ -19,7 +19,9 @@ Ezek közül a `/host` belépési és munkamenet-kezelési része elkészült; a
 játékszerkesztés és a többi játékútvonal még terv. A kezdőlap a `/` címen van;
 a jelenlegi demo a `/demo` alatt három nézetkapcsolóval egy oldalon fut.
 Az MVP-kivetítő a játékmester bejelentkezett böngészőjének másik lapja;
-megosztható, csak olvasható prezentációtoken későbbi bővítés.
+megosztható, csak olvasható prezentációtoken későbbi bővítés. A váróállapota kész:
+kóstolócím, QR-kód, link és becenevek; boradatot nem kér le. A meghívó tokenjét a
+host böngészője tárolja, ezért más böngészőben a kivetítő nem tudja megmutatni.
 
 ## Játékfolyamat
 

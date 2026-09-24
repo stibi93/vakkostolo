@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { GameStatus } from '../domain/game';
 import { QrCode } from './QrCode';
 import { inviteErrorMessage } from './api';
-import { inviteUrl, readStoredInvite, storeInvite } from './model';
+import { inviteUrl, publicAppOrigin, readStoredInvite, storeInvite } from './model';
 import type { Invite, InvitesApi, Participant } from './model';
 import './invites.css';
 
@@ -30,7 +30,7 @@ export function InvitePanel({ api, gameId, status, onStatusChange }: {
       setPending(false);
     }
   }
-  const url = invite ? inviteUrl(window.location.origin, invite.token) : null;
+  const url = invite ? inviteUrl(publicAppOrigin(), invite.token) : null;
   async function copy() {
     if (!url) return;
     try {
@@ -53,10 +53,14 @@ export function InvitePanel({ api, gameId, status, onStatusChange }: {
       <p>Olvassátok be a telefon kamerájával, vagy küldd el a linket.</p>
       <p className="invite-link"><code>{url}</code></p>
       <div className="actions">
+        <a className="button-primary" href={`/present/${gameId}`} target="_blank" rel="noopener">
+          Kivetítő nézet</a>
         <button className="button-secondary" onClick={() => void copy()}>{copied ? 'Link kimásolva' : 'Link másolása'}</button>
         <button className="button-secondary" disabled={pending} onClick={() => void issue()}>
           {pending ? 'Új meghívó készítése…' : 'Új meghívó'}</button>
       </div>
+      <p className="game-hint">A kivetítő nézet új lapon nyílik: csak a kóstoló címét, a QR-kódot és a belépett
+        beceneveket mutatja, a borok adatait nem. Húzd át a lapot a projektor képernyőjére.</p>
       <p className="game-hint">Érvényes eddig: {new Date(invite.expiresAt).toLocaleString('hu-HU',
         { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}. Új meghívónál a régi link és
         QR-kód érvényét veszti; aki már belépett, bent marad.</p>
@@ -74,7 +78,7 @@ export function InvitePanel({ api, gameId, status, onStatusChange }: {
 type ListState = { status: 'loading' } | { status: 'error'; message: string } |
   { status: 'ready'; data: Participant[]; stale: boolean };
 
-function ParticipantList({ api, gameId }: { api: InvitesApi; gameId: string }) {
+export function ParticipantList({ api, gameId }: { api: InvitesApi; gameId: string }) {
   const [state, setState] = useState<ListState>({ status: 'loading' });
   useEffect(() => {
     let active = true;

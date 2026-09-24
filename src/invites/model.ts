@@ -1,4 +1,5 @@
 import type { GameStatus } from '../domain/game';
+import { readPublicAppOrigin } from '../lib/config';
 
 export interface Invite { token: string; expiresAt: string }
 export interface IssuedInvite extends Invite { status: GameStatus }
@@ -15,6 +16,7 @@ export interface InvitesApi {
 export const isInviteToken = (value: unknown): value is string =>
   typeof value === 'string' && /^[A-Za-z0-9_-]{43}$/.test(value);
 export const inviteUrl = (origin: string, token: string) => `${origin}/join/${token}`;
+export const publicAppOrigin = () => readPublicAppOrigin(import.meta.env.VITE_PUBLIC_APP_URL, window.location.origin);
 
 export function nicknameError(value: string): string | null {
   const length = Array.from(value.trim()).length;

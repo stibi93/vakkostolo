@@ -6,6 +6,7 @@ import './app.css';
 
 const DemoApp = lazy(() => import('../demo/DemoApp').then((module) => ({ default: module.DemoApp })));
 const HostArea = lazy(() => import('../auth/HostArea').then((module) => ({ default: module.HostArea })));
+const ProjectorPage = lazy(() => import('../invites/ProjectorPage').then((module) => ({ default: module.ProjectorPage })));
 const JoinPage = lazy(() => import('../invites/JoinPage').then((module) => ({ default: module.JoinPage })));
 
 export function App() {
@@ -16,6 +17,7 @@ export function App() {
         <Route path="/demo" element={<DemoApp />} />
         <Route path="/host" element={<HostArea />} />
         <Route path="/host/:gameId" element={<HostArea />} />
+        <Route path="/present/:gameId" element={<ProjectorPage />} />
         <Route path="/auth/callback" element={<HostArea />} />
         <Route path="/join/:token" element={<JoinPage />} />
         <Route path="*" element={<PageFrame>

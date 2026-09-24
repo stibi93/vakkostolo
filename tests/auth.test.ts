@@ -1,7 +1,7 @@
 import { AuthError } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readSupabaseConfig } from '../src/lib/config';
+import { readPublicAppOrigin, readSupabaseConfig } from '../src/lib/config';
 import { readAuthCallback } from '../src/auth/callback';
 import { createAuthStore } from '../src/auth/store';
 import { authSession, authUser } from './fixtures/auth';
@@ -46,6 +46,31 @@ describe('publikus konfiguráció', () => {
     'hibás vagy nem biztonságos URL-t elutasít: %s', (url) => {
       expect(readSupabaseConfig(url, 'sb_publishable_fixture').status).toBe('invalid');
     });
+  it('relatív címet csak megadott originnel old fel (fejlesztői proxy)', () => {
+    expect(readSupabaseConfig('/', 'sb_publishable_fixture')).toEqual({ status: 'invalid' });
+    expect(readSupabaseConfig('/', 'sb_publishable_fixture', { origin: 'http://127.0.0.1:5173' }))
+      .toEqual({ status: 'ready', config: { url: 'http://127.0.0.1:5173', key: 'sb_publishable_fixture' } });
+    expect(readSupabaseConfig('/', 'sb_publishable_fixture', { origin: 'https://vakkostolo.test' }).status).toBe('ready');
+  });
+  it('HTTP-t privát LAN-címre csak fejlesztői engedéllyel fogad el', () => {
+    const lan = { origin: 'http://192.168.1.73:5173' };
+    expect(readSupabaseConfig('/', 'sb_publishable_fixture', lan).status).toBe('invalid');
+    expect(readSupabaseConfig('/', 'sb_publishable_fixture', { ...lan, allowLanHttp: true }).status).toBe('ready');
+    for (const origin of ['http://10.0.0.5:5173', 'http://172.20.1.1:5173']) {
+      expect(readSupabaseConfig('/', 'sb_publishable_fixture', { origin, allowLanHttp: true }).status).toBe('ready');
+    }
+    for (const origin of ['http://8.8.8.8:5173', 'http://172.32.0.1:5173', 'http://192.168.1.73.evil.test']) {
+      expect(readSupabaseConfig('/', 'sb_publishable_fixture', { origin, allowLanHttp: true }).status).toBe('invalid');
+    }
+  });
+  it('a meghívó originje a megadott publikus címre vált, hibás értéknél marad az oldalé', () => {
+    const page = 'http://127.0.0.1:5173';
+    expect(readPublicAppOrigin(undefined, page)).toBe(page);
+    expect(readPublicAppOrigin('http://192.168.1.73:5173/', page)).toBe('http://192.168.1.73:5173');
+    for (const value of ['', 'nem url', 'javascript:alert(1)', 'http://user:pass@lan.test']) {
+      expect(readPublicAppOrigin(value, page)).toBe(page);
+    }
+  });
   it('anon JWT-t elfogad, privilegizált és hibás kulcsot elutasít', () => {
     const jwt = (role: string) => `header.${btoa(JSON.stringify({ role }))}.signature`;
     expect(readSupabaseConfig('https://example.test', jwt('anon')).status).toBe('ready');

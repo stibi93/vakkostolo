@@ -51,7 +51,30 @@ skip_nonce_check = false
 ```
 
 Ilyenkor a Google felé engedélyezett Supabase callback:
-`http://127.0.0.1:54321/auth/v1/callback`.
+`http://127.0.0.1:54321/auth/v1/callback`. Ez a Google visszatérési címe, nem
+böngészőben megnyitandó oldal; közvetlenül megnyitva „OAuth state parameter missing” hibát ad.
+
+## Próba telefonokkal ugyanazon a hálózaton (hosztolás előtt)
+
+`npm run dev:lan` a helyi Supabase-szel:
+
+- a Vite a `0.0.0.0` címen figyel, és a `/auth/v1`, `/rest/v1`, `/realtime/v1`,
+  `/storage/v1`, `/functions/v1` kéréseket a `127.0.0.1:54321` stackre továbbítja
+  (`VITE_SUPABASE_URL=/`), így a telefonnak csak az alkalmazás portja kell;
+- a meghívó link és QR-kód a gép hálózati címére mutat (`VITE_PUBLIC_APP_URL`,
+  a szkript kiírja; felülírás: `LAN_HOST=192.168.x.y npm run dev:lan`);
+- titkosítatlan HTTP csak loopback és privát IPv4 címre, csak fejlesztői módban
+  elfogadott; buildben továbbra is HTTPS kell.
+
+A játékmester ugyanezen a gépen a `http://127.0.0.1:5173/host` címen lépjen be:
+a Google csak ezt a visszatérési láncot engedi. A kivetítő (`/present/:gameId`)
+ugyanennek a böngészőnek egy másik lapja, amely a projektor képernyőjére húzható.
+
+WSL 2 NAT módban a Windows nem adja tovább a portot. Egyszer, illetve a WSL vagy a
+Windows újraindítása után rendszergazdai PowerShellben futtasd a szkript által
+kiírt parancsot (`scripts/wsl-lan-forward.ps1`). Ez a Windows hálózati címén
+továbbítja a portot a WSL felé, és csak privát hálózati profilra nyit tűzfalszabályt.
+Nyilvános profilú Wi-Fi-n a telefon nem éri el a gépet.
 
 ## Hiba és visszatérés
 

@@ -8,7 +8,8 @@ import { createAuthStore } from './store';
 const callback = readAuthCallback(new URL(window.location.href));
 // Remove codes and provider error details even if configuration is unavailable.
 if (callback) window.history.replaceState(window.history.state, '', window.location.pathname);
-const config = readSupabaseConfig(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+const config = readSupabaseConfig(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  { origin: window.location.origin, allowLanHttp: import.meta.env.DEV });
 
 function createRuntime() {
   if (config.status !== 'ready') return { status: config.status } as const;

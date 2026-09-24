@@ -53,6 +53,7 @@ test('host: váró megnyitása, QR és link, újratöltés után is látható', 
   await expect(page.getByText(`${origin}/join/${token}`)).toBeVisible();
   await expect(page.getByText('Váró · 120 másodperc/bor', { exact: false })).toBeVisible();
   await expect(page.getByText('Még senki nem lépett be.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Kivetítő nézet' })).toHaveAttribute('href', `/present/${gameId}`);
   expect((await qr.boundingBox())!.width).toBeGreaterThanOrEqual(200);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
@@ -62,6 +63,45 @@ test('host: váró megnyitása, QR és link, újratöltés után is látható', 
   await expect(page.getByRole('heading', { name: 'Résztvevők (1)' })).toBeVisible();
   await expect(page.getByRole('listitem').filter({ hasText: 'Anna' })).toBeVisible();
   expect(calls.issue).toBe(1);
+  expect(unexpected).toEqual([]);
+});
+
+test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async ({ page }) => {
+  const requested: string[] = [];
+  const unexpected = await mockSupabase(page, async (route, url) => {
+    requested.push(url.pathname);
+    if (url.pathname === '/auth/v1/user') await route.fulfill({ json: authUser });
+    else if (url.pathname === '/rest/v1/rpc/list_host_games') {
+      await route.fulfill({ json: [{ id: gameId, title: 'Péntesti kóstoló', status: 'lobby', round_seconds: 120,
+        reveal_every: 2, created_at: '2026-09-24T08:00:00Z' }] });
+    } else if (url.pathname === '/rest/v1/participants') {
+      await route.fulfill({ json: [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z' }] });
+    } else return false;
+    return true;
+  });
+  await page.addInitScript(({ session, key, invite }) => {
+    if (!localStorage.getItem('sb-auth-auth-token')) localStorage.setItem('sb-auth-auth-token', JSON.stringify(session));
+    if (!sessionStorage.getItem('invite-seeded')) {
+      localStorage.setItem(key, JSON.stringify(invite));
+      sessionStorage.setItem('invite-seeded', '1');
+    }
+  }, { session: authSession(), key: `vakkostolo:invite:${gameId}`,
+    invite: { token, expiresAt: new Date(Date.now() + 3600_000).toISOString() } });
+
+  await page.goto(`/present/${gameId}`);
+  await expect(page.getByRole('heading', { name: 'Péntesti kóstoló' })).toBeVisible();
+  const qr = page.getByRole('img', { name: 'QR-kód a kóstolóba való belépéshez' });
+  await expect(qr).toBeVisible();
+  await expect(page.getByText(`${new URL(page.url()).origin}/join/${token}`)).toBeVisible();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Anna' })).toBeVisible();
+  await expect(page.getByText(/Titkos bor|Ft|% vol|Kijelentkezés/)).toHaveCount(0);
+  expect(requested).not.toContain('/rest/v1/rpc/get_host_game');
+  expect((await qr.boundingBox())!.width).toBeGreaterThanOrEqual(200);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  await page.evaluate((key) => localStorage.removeItem(key), `vakkostolo:invite:${gameId}`);
+  await page.reload();
+  await expect(page.getByText('nincs érvényes meghívó', { exact: false })).toBeVisible();
   expect(unexpected).toEqual([]);
 });
 

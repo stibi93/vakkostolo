@@ -28,8 +28,10 @@ npm run dev
 
 A terminálban kiírt helyi címet nyisd meg, majd válaszd a „Próbakóstoló megnyitása”
 linket. A `/demo` közvetlenül is megnyitható. A demo nem kér kulcsot.
-Telefonos LAN-próbához: `npm run dev -- --host 0.0.0.0` és a gép helyi IP-címe.
-Ez még nem szinkronizálja az eszközök játékát. A fejlesztői szervert ne tedd ki az internetre.
+Telefonos próbához ugyanazon a hálózaton: `npm run dev:lan` (helyi Supabase-szel).
+A meghívó link és QR-kód ekkor a gép hálózati címére mutat, a Supabase-kérések a
+Vite-on keresztül mennek; WSL alatt egyszeri porttovábbítás kell (részletek: `docs/auth.md`).
+Ez még nem szinkronizálja a kóstolás menetét. A fejlesztői szervert ne tedd ki az internetre.
 
 ```sh
 npm run check
