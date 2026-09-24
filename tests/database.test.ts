@@ -13,9 +13,10 @@ const otherRound = '20000000-0000-0000-0000-000000000002';
 const participant = '30000000-0000-0000-0000-000000000001';
 const db = new PGlite();
 
-async function asUser(uid: string, role = 'authenticated') {
+async function asUser(uid: string, role = 'authenticated', aal = 'aal2') {
   await db.exec('reset role');
   await db.query("select set_config('request.jwt.claim.sub', $1, false)", [uid]);
+  await db.query("select set_config('request.jwt.claim.aal', $1, false)", [aal]);
   // role is a test constant, never user input.
   await db.exec(`set role ${role}`);
 }
@@ -25,7 +26,7 @@ beforeAll(async () => { await loadDatabase(db); });
 beforeEach(async () => {
   await db.exec(`reset role;
     truncate auth.users cascade;
-    insert into auth.users(id) values ('${host}'), ('${guest}'), ('${other}'), ('${outsider}');
+    insert into auth.users(id) values ('${host}'), ('${guest}'), ('${other}'), ('${outsider}'); update auth.users set raw_app_meta_data = '{"vakkostolo_role":"superadmin"}' where not is_anonymous;
     insert into public.games(id, host_id, title, status) values
       ('${game}', '${host}', 'Teszt', 'tasting'), ('${otherGame}', '${outsider}', 'Másik', 'tasting');
     insert into public.participants(id, game_id, user_id, nickname) values

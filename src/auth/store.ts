@@ -3,10 +3,13 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
 import type { AuthCallback } from './callback';
 
 type AuthApi = Pick<SupabaseClient['auth'], 'getSession' | 'getUser' | 'onAuthStateChange' |
-  'exchangeCodeForSession' | 'signInWithOAuth' | 'signOut'>;
+  'exchangeCodeForSession' | 'signInWithOAuth' | 'signInWithPassword' | 'signOut'>;
+export type AssuranceLevel = 'aal1' | 'aal2';
 export interface AuthState {
   status: 'loading' | 'ready' | 'error';
   user: User | null;
+  /** From the access token, for the UI only; host RPCs check aal2 on the server. */
+  aal?: AssuranceLevel | null;
   pending: 'sign-in' | 'sign-out' | null;
   message: string | null;
 }
@@ -15,6 +18,16 @@ const connectionMessage = 'Nem sikerült ellenőrizni a belépést. Ellenőrizd 
 const callbackMessage = 'A belépés nem fejeződött be, vagy a hivatkozás lejárt. Indíts új belépést ugyanebben a böngészőben.';
 const sessionEndedMessage = 'A belépésed lejárt vagy megszűnt. Lépj be újra.';
 const revalidateAfterMs = 30_000;
+
+export function readAssuranceLevel(accessToken: string): AssuranceLevel | null {
+  try {
+    const payload: unknown = JSON.parse(atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const aal = typeof payload === 'object' && payload !== null && 'aal' in payload ? payload.aal : null;
+    return aal === 'aal1' || aal === 'aal2' ? aal : null;
+  } catch {
+    return null;
+  }
+}
 
 async function withTimeout<T>(request: Promise<T>): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -62,7 +75,8 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
       if (request !== revision) return;
       if (verified.error || !verified.data.user) throw verified.error;
       verifiedAt = Date.now();
-      publish({ status: 'ready', user: verified.data.user, pending: null, message: null });
+      publish({ status: 'ready', user: verified.data.user, aal: readAssuranceLevel(data.session.access_token),
+        pending: null, message: null });
     } catch {
       if (request === revision) publish({ status: 'error', user: null, pending: null, message: connectionMessage });
     }
@@ -87,7 +101,8 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
       if (request !== revision) return;
       if (verified.error || !verified.data.user) throw verified.error;
       verifiedAt = Date.now();
-      publish({ status: 'ready', user: verified.data.user, pending: null, message: null });
+      publish({ status: 'ready', user: verified.data.user, aal: readAssuranceLevel(data.session.access_token),
+        pending: null, message: null });
     } catch (error) {
       if (request !== revision) return;
       if (isAuthApiError(error) && (error.status === 401 || error.status === 403)) {
@@ -134,8 +149,9 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
     return started;
   }
 
-  async function signIn() {
-    if (state.pending || state.status === 'loading' || state.user) return;
+  /** Players only; the host area uses the superadmin password below. */
+  async function signInWithGoogle() {
+    if (state.pending || state.status === 'loading' || (state.user && !state.user.is_anonymous)) return;
     ++revision;
     publish({ ...state, pending: 'sign-in', message: null });
     try {
@@ -146,6 +162,24 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
       redirect(data.url);
     } catch {
       publish({ ...state, pending: null, message: 'Nem sikerült elindítani a Google-belépést. Próbáld újra.' });
+    }
+  }
+
+  async function signInWithPassword(email: string, password: string) {
+    if (state.pending || state.status === 'loading' || state.user) return;
+    ++revision;
+    publish({ ...state, pending: 'sign-in', message: null });
+    try {
+      const { error } = await withTimeout(auth.signInWithPassword({ email, password }));
+      if (error) throw error;
+      await refresh();
+    } catch (error) {
+      const message = isAuthApiError(error) && error.status === 429
+        ? 'Túl sok belépési kísérlet. Várj néhány percet, majd próbáld újra.'
+        : isAuthApiError(error) && error.status === 400
+          ? 'Hibás felhasználónév vagy jelszó.'
+          : 'A belépés nem sikerült. Ellenőrizd a kapcsolatot, majd próbáld újra.';
+      publish({ status: 'ready', user: null, pending: null, message });
     }
   }
 
@@ -172,7 +206,10 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
     start,
     refresh: () => !booting && !state.pending ? refresh() : Promise.resolve(),
     revalidate: () => revalidate(false),
-    signIn,
+    /** After a second factor is verified: the new aal2 token must replace the rendered state. */
+    reload: () => revalidate(true),
+    signInWithGoogle,
+    signInWithPassword,
     signOut,
     dispose() { ++revision; clearTimeout(refreshTimer); unsubscribe?.(); listeners.clear(); },
   };

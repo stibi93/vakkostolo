@@ -1,12 +1,17 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import type { FormEvent } from 'react';
 import { Link, Navigate, useLocation } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { HostWorkspace } from '../games/HostWorkspace';
 import type { LiveApi } from '../live/model';
 import type { GamesApi } from '../games/model';
 import type { InvitesApi } from '../invites/model';
+import { MfaGate } from './MfaGate';
+import type { MfaApi } from './mfa';
+import { readReturnPath } from './return-path';
 import { authRuntime } from './runtime';
 import type { createAuthStore } from './store';
+import { isSuperadmin, superadminEmail, usernameError, usernameFromEmail } from './superadmin-account';
 
 export function HostArea() {
   return (
@@ -14,8 +19,8 @@ export function HostArea() {
       <section className="auth-panel" aria-labelledby="host-title">
         <p className="eyebrow">ONLINE BELÉPÉS</p>
         <h1 id="host-title">Játékmester</h1>
-        {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} games={authRuntime.games}
-          invites={authRuntime.invites} lobby={authRuntime.lobby} /> : <>
+        {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} mfa={authRuntime.mfa}
+          games={authRuntime.games} invites={authRuntime.invites} lobby={authRuntime.lobby} /> : <>
           <h2>A belépés még nem elérhető.</h2>
           <p>{authRuntime.status === 'missing'
             ? 'Az online kapcsolat még nincs beállítva. Addig a próbakóstolóban végigjárhatod a játék menetét.'
@@ -27,8 +32,10 @@ export function HostArea() {
   );
 }
 
-function HostSession({ store, games, invites, lobby }: {
-  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi; lobby: LiveApi;
+type Store = ReturnType<typeof createAuthStore>;
+
+function HostSession({ store, mfa, games, invites, lobby }: {
+  store: Store; mfa: MfaApi; games: GamesApi; invites: InvitesApi; lobby: LiveApi;
 }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const location = useLocation();
@@ -48,9 +55,14 @@ function HostSession({ store, games, invites, lobby }: {
   }, [store]);
 
   if (state.status === 'loading') return <p role="status">Belépés ellenőrzése…</p>;
-  if (location.pathname.replace(/\/+$/, '') === '/auth/callback' && state.status === 'ready') {
-    return <Navigate to="/host" replace />;
+  if (location.pathname.replace(/\/+$/, '') === '/auth/callback') {
+    // Google sign-in belongs to players: send them back to their invite, even after a failed callback.
+    const playerReturn = readReturnPath(window.sessionStorage);
+    if (playerReturn) return <Navigate to={playerReturn} replace />;
+    if (state.status === 'ready') return <Navigate to="/host" replace />;
   }
+  const signOut = <div className="actions"><button className="button-secondary" disabled={!!state.pending}
+    onClick={() => void store.signOut()}>{state.pending === 'sign-out' ? 'Kijelentkezés…' : 'Kijelentkezés'}</button></div>;
 
   return <>
     {state.message && <p className="auth-message" role="alert">{state.message}</p>}
@@ -58,28 +70,58 @@ function HostSession({ store, games, invites, lobby }: {
       <h2>Nem sikerült ellenőrizni a belépést.</h2>
       <div className="actions">
         <button className="button-primary" disabled={!!state.pending} onClick={() => void store.refresh()}>Újrapróbálás</button>
-        <button className="button-secondary" disabled={!!state.pending} onClick={() => void store.signIn()}>Új Google-belépés</button>
         <button className="button-secondary" disabled={!!state.pending} onClick={() => void store.signOut()}>Kijelentkezés</button>
       </div>
-    </> : state.user ? <>
-      {state.user.is_anonymous === false ? <>
-        <h2>Játékmesteri fiók</h2>
-        <p>Bejelentkezve{state.user.email ? `: ${state.user.email}` : '.'}</p>
-        <HostWorkspace key={state.user.id} api={games} invites={invites} lobby={lobby} />
-      </> : <>
+    </> : !state.user ? <PasswordSignIn store={store} pending={state.pending === 'sign-in'} />
+      : state.user.is_anonymous !== false ? <>
         <h2>Most vendégként vagy belépve.</h2>
-        <p>Játékmesterként tartós fiókra van szükséged. Előbb jelentkezz ki, majd lépj be Google-fiókkal.</p>
+        <p>A játékmesteri felülethez előbb jelentkezz ki, majd lépj be a superadmin felhasználóval.</p>
         <p>A kijelentkezéssel a böngészőben tárolt vendégbelépés megszűnik.</p>
+        {signOut}
+      </> : !isSuperadmin(state.user) ? <>
+        <h2>Ez játékosfiók.</h2>
+        <p>Játékosként vagy belépve{state.user.email ? ` (${state.user.email})` : ''}. Kóstolót csak a superadmin
+          felhasználó vezethet. Jelentkezz ki, majd lépj be a superadmin felhasználónévvel és jelszóval.</p>
+        {signOut}
+      </> : <>
+        <h2>Játékmesteri fiók</h2>
+        <p>Bejelentkezve: {usernameFromEmail(state.user.email) ?? state.user.email}</p>
+        <MfaGate key={state.user.id} mfa={mfa} aal={state.aal ?? null} onVerified={() => store.reload()}>
+          <HostWorkspace key={state.user.id} api={games} invites={invites} lobby={lobby} />
+        </MfaGate>
+        {signOut}
       </>}
-      <div className="actions"><button className="button-secondary" disabled={!!state.pending}
-        onClick={() => void store.signOut()}>{state.pending === 'sign-out' ? 'Kijelentkezés…' : 'Kijelentkezés'}</button></div>
-    </> : <>
-      <h2>Játékmesteri belépés</h2>
-      <p>Lépj be Google-fiókkal. A játékosoknak később elég lesz a meghívód és egy becenév.</p>
-      <button className="button-primary" disabled={!!state.pending} onClick={() => void store.signIn()}>
-        {state.pending === 'sign-in' ? 'Átirányítás a Google-belépéshez…' : 'Belépés Google-fiókkal'}
-      </button>
-      <p className="small-note">A közös online játék még készül. A belépés már a beállított online fiókhoz kapcsolódik.</p>
-    </>}
+  </>;
+}
+
+function PasswordSignIn({ store, pending }: { store: Store; pending: boolean }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [problem, setProblem] = useState<string | null>(null);
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const invalid = usernameError(username) ?? (password ? null : 'Add meg a jelszót.');
+    setProblem(invalid);
+    if (invalid) return;
+    const secret = password;
+    setPassword('');
+    await store.signInWithPassword(superadminEmail(username), secret);
+  }
+  return <>
+    <h2>Játékmesteri belépés</h2>
+    <p>A kóstolót a superadmin felhasználó vezeti. A játékosok a meghívó QR-kódjával lépnek be,
+      nekik nem kell ez az oldal.</p>
+    <form className="host-sign-in" onSubmit={(event) => void submit(event)} noValidate>
+      <label htmlFor="host-username">Felhasználónév</label>
+      <input id="host-username" name="username" value={username} onChange={(event) => setUsername(event.target.value)}
+        autoComplete="username" autoCapitalize="none" spellCheck={false} required />
+      <label htmlFor="host-password">Jelszó</label>
+      <input id="host-password" name="password" type="password" value={password}
+        onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+      {problem && <p role="alert" className="auth-message">{problem}</p>}
+      <button className="button-primary" type="submit" disabled={pending}>{pending ? 'Belépés…' : 'Belépés'}</button>
+    </form>
+    <p className="small-note">Elfelejtett jelszó vagy elveszett hitelesítő app esetén a gépen, ahol a Supabase
+      titkos kulcsa elérhető: <code>npm run superadmin -- reset-password &lt;név&gt;</code> vagy <code>reset-mfa</code>.</p>
   </>;
 }

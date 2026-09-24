@@ -45,3 +45,10 @@
   .auth-panel { padding: 24px 20px; }
   .auth-panel h2 { font-size: 26px; }
 }
+.host-sign-in { display: grid; gap: 10px; max-width: 420px; margin: 20px 0; }
+.host-sign-in input { min-height: 48px; font-size: 18px; }
+.host-sign-in button { min-height: 48px; margin-top: 6px; }
+.mfa-panel { margin: 24px 0; }
+.mfa-steps { line-height: 1.7; color: var(--muted); padding-left: 20px; }
+.mfa-qr { display: block; width: 220px; height: 220px; background: #fff; border: 1px solid var(--line); margin: 12px 0; }
+.mfa-secret code { overflow-wrap: anywhere; font-size: 14px; }

@@ -153,3 +153,13 @@ Supabase-projektben a CLI migrációs folyamata alkalmazható a `supabase/migrat
 könyvtárra. Távoli push előtt tesztprojekt és mentés; éles migrációhoz külön
 üzemeltetési lépés kell. A teljes helyi Supabase stackhez Docker szükséges,
 az alap domain/DB tesztekhez nem.
+
+## Játékmesteri jog — `202609240006_superadmin_host.sql`, `202609240007_block_public_password_signup.sql`
+
+A `private.require_permanent_user()` (minden host-RPC közös kapuja) a nem anonim Auth-sor
+mellett `raw_app_meta_data->>'vakkostolo_role' = 'superadmin'`-t és `auth.jwt()->>'aal' = 'aal2'`-t
+kér (`HOST_ROLE_REQUIRED`, `MFA_REQUIRED`). A szerepet csak a titkos kulcs (Admin API) állíthatja;
+a `user_metadata` nem számít. Játékos (Google vagy anonim) továbbra is beléphet bármely kóstolóba.
+A `private.before_user_created(event jsonb)` Auth hook elutasítja a nyilvános e-mail/jelszavas
+regisztrációt; csak a `supabase_auth_admin` futtathatja. Részletek: [belépés](auth.md).
+

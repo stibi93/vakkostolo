@@ -8,9 +8,9 @@ közösen felfedett eredmények. Munkanév, szabadon változtatható.
 Alkalmazásváz kezdőlappal (`/`) és külön megnyitható, egy böngészőlapon működő
 UX-demóval (`/demo`). Ismeretlen útvonalon visszalépési lehetőség jelenik meg.
 A demo a játékmester, játékos és prezentáció nézetét mutatja. Nem többeszközös
-játék, a tippeket nem menti szerverre. A külön `/host` oldalon Supabase Google
-belépés, munkamenet-visszaállítás és kijelentkezés készült; a használatához
-tesztprojekt-konfiguráció szükséges. Az éles backendhez adatmodell,
+játék, a tippeket nem menti szerverre. A külön `/host` oldalra csak a superadmin
+lép be felhasználónévvel, jelszóval és hitelesítő app kódjával (`npm run superadmin -- create <név>`);
+a játékosok meghívóval, anonim vagy opcionálisan Google-fiókkal lépnek be. Az éles backendhez adatmodell,
 SQL-migráció, hozzáférési szabályok, válaszbeküldő függvény és tesztek készültek.
 A bejelentkezett host létrehozhat 1–12 boros kóstolót, megnézheti saját mentett
 játékait és azok boradatait. A szerver ellenőrzi a hostot, az adatokat és az
@@ -55,8 +55,8 @@ A képernyőképek a Gitből kizárt
 `test-results/` mappába kerülnek. Ez emulált mobilméret, nem valódi iOS/Android-eszközteszt.
 
 `dist/` a publikálható statikus build. A `.env.example` alapján létrehozott
-`.env.local` publikus Supabase-beállításait a `/host` használja. A Google providert
-és a callbackcímeket is be kell állítani: [belépési útmutató](docs/auth.md).
+`.env.local` publikus Supabase-beállításait a `/host` és a `/join` használja. A superadmin
+kezelése, a hook, az MFA és a játékosi Google provider: [belépési útmutató](docs/auth.md).
 A demo ettől független, helyi próba marad. Valódi Google/Supabase-integrációs
 teszt és többeszközös játékpróba még nem történt.
 

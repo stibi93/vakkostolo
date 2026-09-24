@@ -15,6 +15,9 @@ async function startedStore() {
     getUser: vi.fn<Auth['getUser']>().mockResolvedValue({ data: { user: authUser }, error: null }),
     exchangeCodeForSession: vi.fn<Auth['exchangeCodeForSession']>(),
     signInWithOAuth: vi.fn<Auth['signInWithOAuth']>(),
+    signInWithPassword: vi.fn<Auth['signInWithPassword']>().mockResolvedValue({
+      data: { session: authSession(), user: authUser }, error: null,
+    } as Awaited<ReturnType<Auth['signInWithPassword']>>),
     signOut: vi.fn<Auth['signOut']>().mockResolvedValue({ error: null }),
     onAuthStateChange: vi.fn<Auth['onAuthStateChange']>().mockImplementation((callback) => {
       notify = callback;

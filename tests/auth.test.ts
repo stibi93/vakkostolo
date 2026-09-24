@@ -1,9 +1,9 @@
-import { AuthError } from '@supabase/supabase-js';
+import { AuthApiError, AuthError } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readPublicAppOrigin, readSupabaseConfig } from '../src/lib/config';
 import { readAuthCallback } from '../src/auth/callback';
-import { createAuthStore } from '../src/auth/store';
+import { createAuthStore, readAssuranceLevel } from '../src/auth/store';
 import { authSession, authUser } from './fixtures/auth';
 
 type Auth = SupabaseClient['auth'];
@@ -19,6 +19,9 @@ function setup(callback: Parameters<typeof createAuthStore>[1] = null) {
     signInWithOAuth: vi.fn<Auth['signInWithOAuth']>().mockResolvedValue({
       data: { provider: 'google', url: 'https://auth.example.test/auth/v1/authorize' }, error: null,
     }),
+    signInWithPassword: vi.fn<Auth['signInWithPassword']>().mockResolvedValue({
+      data: { session: authSession(), user: authUser }, error: null,
+    } as Awaited<ReturnType<Auth['signInWithPassword']>>),
     signOut: vi.fn<Auth['signOut']>().mockResolvedValue({ error: null }),
     onAuthStateChange: vi.fn<Auth['onAuthStateChange']>().mockImplementation((callback) => {
       notify = callback;
@@ -85,7 +88,7 @@ describe('munkamenet és OAuth', () => {
     const { auth, store } = setup();
     auth.getUser.mockResolvedValue({ data: { user: { ...authUser, is_anonymous: true } }, error: null });
     await store.start();
-    expect(auth.getUser).toHaveBeenCalledWith('synthetic-access-token');
+    expect(auth.getUser).toHaveBeenCalledWith(authSession().access_token);
     expect(store.getSnapshot().user?.is_anonymous).toBe(true);
   });
   it('kijelentkezett állapotban nem kér felhasználói adatot', async () => {
@@ -148,15 +151,43 @@ describe('munkamenet és OAuth', () => {
     await loading;
     expect(store.getSnapshot()).toMatchObject({ status: 'ready', user: null });
   });
-  it('a Google-belépés rögzített callbacket használ és nem indítható duplán', async () => {
+  it('a (játékosi) Google-belépés rögzített callbacket használ és nem indítható duplán', async () => {
     const { auth, store, redirect } = setup();
     auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
     await store.start();
-    await Promise.all([store.signIn(), store.signIn()]);
+    await Promise.all([store.signInWithGoogle(), store.signInWithGoogle()]);
     expect(auth.signInWithOAuth).toHaveBeenCalledExactlyOnceWith({
       provider: 'google', options: { redirectTo: 'https://app.example.test/auth/callback', skipBrowserRedirect: true },
     });
     expect(redirect).toHaveBeenCalledExactlyOnceWith('https://auth.example.test/auth/v1/authorize');
+  });
+  it('superadmin jelszavas belépés: szerverrel igazolt felhasználó és aal a tokenből', async () => {
+    const { auth, store } = setup();
+    auth.getSession.mockResolvedValueOnce({ data: { session: null }, error: null });
+    await store.start();
+    auth.getSession.mockResolvedValue({ data: { session: authSession(authUser, 'aal1') }, error: null });
+    await Promise.all([store.signInWithPassword('admin@superadmin.vakkostolo.invalid', 'Titkos-Jelszo-2026'),
+      store.signInWithPassword('admin@superadmin.vakkostolo.invalid', 'Titkos-Jelszo-2026')]);
+    expect(auth.signInWithPassword).toHaveBeenCalledExactlyOnceWith({
+      email: 'admin@superadmin.vakkostolo.invalid', password: 'Titkos-Jelszo-2026' });
+    expect(store.getSnapshot()).toMatchObject({ status: 'ready', user: { id: authUser.id }, aal: 'aal1', pending: null });
+  });
+  it('hibás jelszónál és túl sok próbálkozásnál magyar üzenet, munkamenet nélkül', async () => {
+    const { auth, store } = setup();
+    auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
+    await store.start();
+    for (const [status, text] of [[400, 'Hibás felhasználónév vagy jelszó.'], [429, 'Túl sok belépési kísérlet']] as const) {
+      auth.signInWithPassword.mockResolvedValueOnce({ data: { user: null, session: null },
+        error: new AuthApiError('fixture', status, 'invalid_credentials') } as Awaited<ReturnType<Auth['signInWithPassword']>>);
+      await store.signInWithPassword('admin@superadmin.vakkostolo.invalid', 'rossz');
+      expect(store.getSnapshot()).toMatchObject({ status: 'ready', user: null, pending: null });
+      expect(store.getSnapshot().message).toContain(text);
+    }
+  });
+  it('az aal szintet csak érvényes JWT-alakú tokenből olvassa', () => {
+    expect(readAssuranceLevel(authSession(authUser, 'aal2').access_token)).toBe('aal2');
+    expect(readAssuranceLevel(authSession(authUser, 'aal1').access_token)).toBe('aal1');
+    for (const token of ['synthetic', 'a.b.c', `x.${btoa('{"aal":"aal9"}')}.y`]) expect(readAssuranceLevel(token)).toBeNull();
   });
   it('callback közben érkező kijelentkezést sem ír felül a késői kódbeváltás', async () => {
     const { auth, store, notify } = setup({ code: 'fixture-code', failed: false });

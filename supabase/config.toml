@@ -35,10 +35,35 @@ additional_redirect_urls = ["http://127.0.0.1:5173/auth/callback", "http://local
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = true
+# Only the superadmin uses a password; it is created with scripts/superadmin.mjs.
+minimum_password_length = 14
+password_requirements = "lower_upper_letters_digits"
 
 [auth.rate_limit]
 # Shared Wi-Fi means many guests share one IP; verify this again for a real event.
 anonymous_users = 60
+# Password and TOTP guessing limits per IP (per 5 minutes).
+sign_in_sign_ups = 30
+token_verifications = 30
+
+[auth.email]
+# Must stay enabled: the superadmin signs in with a password. Public password sign-ups are
+# rejected by the before_user_created hook below (players join anonymously or with Google).
+enable_signup = true
+enable_confirmations = false
+secure_password_change = true
+
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/private/before_user_created"
+
+[auth.mfa]
+max_enrolled_factors = 10
+
+# Superadmin sessions must reach aal2 before any host RPC succeeds.
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
 
 # Values come from the Git-ignored supabase/.env; see docs/auth.md.
 [auth.external.google]

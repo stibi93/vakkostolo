@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
+import { clearReturnPath, rememberReturnPath } from '../auth/return-path';
 import { authRuntime } from '../auth/runtime';
+import type { createAuthStore } from '../auth/store';
 import { inviteErrorMessage } from './api';
 import { isInviteToken, nicknameError } from './model';
 import type { InvitePreview, InvitesApi, Membership } from './model';
@@ -20,7 +22,7 @@ export function JoinPage() {
       </> : !isInviteToken(token) ? <>
         <h1 id="join-title">Ez a meghívó nem érvényes.</h1>
         <p>Ellenőrizd, hogy a teljes linket nyitottad-e meg, vagy olvasd be újra a QR-kódot.</p>
-      </> : <GuestJoin key={token} api={authRuntime.invites} token={token} />}
+      </> : <GuestJoin key={token} api={authRuntime.invites} store={authRuntime.store} token={token} />}
     </section>
   </PageFrame>;
 }
@@ -28,12 +30,28 @@ export function JoinPage() {
 type JoinState = { status: 'checking' } | { status: 'form'; preview: InvitePreview } | { status: 'joined'; membership: Membership } |
   { status: 'error'; message: string };
 
-function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
+/** Short display name from a Google profile, to prefill the nickname. */
+function googleNickname(metadata: Record<string, unknown> | undefined): string {
+  const name = [metadata?.given_name, metadata?.full_name, metadata?.name].find((value) => typeof value === 'string');
+  const first = typeof name === 'string' ? name.trim().split(/\s+/)[0] ?? '' : '';
+  return nicknameError(first) ? '' : first;
+}
+
+function GuestJoin({ api, store, token }: { api: InvitesApi; store: ReturnType<typeof createAuthStore>; token: string }) {
+  const auth = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const googleUser = auth.user && auth.user.is_anonymous === false ? auth.user : null;
   const [state, setState] = useState<JoinState>({ status: 'checking' });
   const [attempt, setAttempt] = useState(0);
   const [nickname, setNickname] = useState('');
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  useEffect(() => {
+    clearReturnPath(window.sessionStorage);
+    void store.start();
+  }, [store]);
+  const [edited, setEdited] = useState(false);
+  const googleName = googleUser ? googleNickname(googleUser.user_metadata) : '';
+  const nicknameValue = edited ? nickname : nickname || googleName;
   useEffect(() => {
     let active = true;
     api.resume(token).then(async (membership) => {
@@ -45,12 +63,12 @@ function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const problem = nicknameError(nickname);
+    const problem = nicknameError(nicknameValue);
     if (problem) { setMessage(problem); return; }
     setPending(true);
     setMessage(null);
     try {
-      setState({ status: 'joined', membership: await api.join(token, nickname) });
+      setState({ status: 'joined', membership: await api.join(token, nicknameValue) });
     } catch (error) {
       setMessage(inviteErrorMessage(error));
     } finally {
@@ -78,10 +96,19 @@ function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
       ezt látja a játékmester és a többi játékos. Regisztráció nem kell.</p>
     <form className="join-form" onSubmit={(event) => void submit(event)} noValidate>
       <label htmlFor="nickname">Becenév</label>
-      <input id="nickname" name="nickname" value={nickname} onChange={(event) => setNickname(event.target.value)}
+      <input id="nickname" name="nickname" value={nicknameValue} onChange={(event) => { setEdited(true); setNickname(event.target.value); }}
         autoComplete="nickname" enterKeyHint="go" maxLength={60} required aria-describedby={message ? 'join-error' : undefined} />
       {message && <p id="join-error" role="alert" className="auth-message">{message}</p>}
       <button className="button-primary" type="submit" disabled={pending}>{pending ? 'Belépés…' : 'Belépés a váróba'}</button>
     </form>
+    {googleUser ? <p className="small-note">Google-fiókkal vagy belépve{googleUser.email ? ` (${googleUser.email})` : ''}.
+      Ezzel a fiókkal másik eszközről is visszatérhetsz ebbe a kóstolóba.</p>
+      : <div className="join-google">
+        <p>Nem kötelező: ha Google-fiókkal lépsz be, másik telefonról vagy böngészőből is visszatérhetsz ide.</p>
+        <button className="button-secondary" type="button" disabled={auth.status === 'loading' || !!auth.pending}
+          onClick={() => { rememberReturnPath(window.sessionStorage, `/join/${token}`); void store.signInWithGoogle(); }}>
+          {auth.pending === 'sign-in' ? 'Átirányítás a Google-belépéshez…' : 'Belépés Google-fiókkal'}</button>
+        {auth.message && <p role="alert" className="auth-message">{auth.message}</p>}
+      </div>}
   </>;
 }

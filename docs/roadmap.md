@@ -12,6 +12,7 @@ várakozás nincs bennük. AI-támogatott fejlesztés mellett is szükséges ell
 | 3. Élő játék | host szerkesztő, RPC állapotgép, Realtime, időzítés, értékelő | 14–22 | tervezett |
 | 4. Felfedés és eredmények | blokkos felfedés, szerverpontozás, kivetítő, ranglista | 10–16 | tervezett |
 | 5. Pilot és kiadás | jogosultsági integráció, eszközök, hálózati hibák, deploy, mentés | 10–16 | tervezett |
+| 6. Eredmény e-mailben | kóstoló végén a Google-fiókos (vagy e-mailt megadó) játékos kérheti az eredményét; külön hozzájárulás, e-mail-szolgáltató | 3–5 | tervezett |
 | 6. Opcionális AI a termékben | anonim eredmény-összefoglaló, értékelés, költségkorlát | 6–10 | MVP után |
 
 MVP összesen 53–83 óra tervezési keret; 20% tartalékkal kb. 64–100 óra.

@@ -141,6 +141,6 @@ test('ablakváltás nem törli az űrlapot, kijelentkezés után a titkos adatok
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
   await expect(page.getByLabel('Kóstoló címe')).toHaveValue('Őszi kóstoló');
   await page.getByRole('button', { name: 'Kijelentkezés', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Belépés Google-fiókkal' })).toBeVisible();
+  await expect(page.getByLabel('Felhasználónév')).toBeVisible();
   await expect(page.getByLabel('Bor neve és évjárata')).toHaveCount(0);
 });

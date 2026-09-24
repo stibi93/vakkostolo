@@ -10,9 +10,10 @@ const second = '00000000-0000-0000-0000-000000000004';
 let game: string, token: string, participant: string;
 interface Snapshot { game: { id: string; status: string; version: number }; role: string; self_participant_id: string | null;
   server_now: string; participants: { id: string; nickname: string; joined_at: string; seat: number }[] }
-async function asUser(id: string, role = 'authenticated') {
+async function asUser(id: string, role = 'authenticated', aal = 'aal2') {
   await db.exec('reset role');
   await db.query("select set_config('request.jwt.claim.sub',$1,false)", [id]);
+  await db.query("select set_config('request.jwt.claim.aal', $1, false)", [aal]);
   await db.exec(`set role ${role}`);
 }
 async function snapshot(id = game) { return (await db.query<{ data: Snapshot }>(
@@ -20,7 +21,7 @@ async function snapshot(id = game) { return (await db.query<{ data: Snapshot }>(
 beforeAll(async () => { await loadDatabase(db); });
 beforeEach(async () => {
   await db.exec(`reset role; truncate auth.users cascade;
-    insert into auth.users(id,is_anonymous) values ('${host}',false),('${guest}',true),('${other}',false),('${second}',true);`);
+    insert into auth.users(id,is_anonymous) values ('${host}',false),('${guest}',true),('${other}',false),('${second}',true); update auth.users set raw_app_meta_data = '{"vakkostolo_role":"superadmin"}' where not is_anonymous;`);
   await asUser(host);
   game = (await db.query<{ id: string }>(`select public.create_game(gen_random_uuid(),'Közös kóstoló',120,2,
     '[{"name":"Rejtett bor","price_huf":9876,"alcohol_tenths":142}]') as id`)).rows[0].id;

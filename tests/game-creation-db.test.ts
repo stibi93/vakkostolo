@@ -9,9 +9,10 @@ const guest = '00000000-0000-0000-0000-000000000003';
 const request = '10000000-0000-0000-0000-000000000001';
 const wines = [{ name: '  Mintabor 2024  ', price_huf: 4500, alcohol_tenths: 125 },
   { name: 'Második mintabor', price_huf: 5900, alcohol_tenths: 140 }];
-async function asUser(id: string, role = 'authenticated') {
+async function asUser(id: string, role = 'authenticated', aal = 'aal2') {
   await db.exec('reset role');
   await db.query("select set_config('request.jwt.claim.sub', $1, false)", [id]);
+  await db.query("select set_config('request.jwt.claim.aal', $1, false)", [aal]);
   await db.exec(`set role ${role}`);
 }
 async function create(overrides: { id?: string | null; title?: string | null; seconds?: number | null;
@@ -24,7 +25,7 @@ async function create(overrides: { id?: string | null; title?: string | null; se
 beforeAll(async () => { await loadDatabase(db); });
 beforeEach(async () => {
   await db.exec(`reset role; truncate auth.users cascade;
-    insert into auth.users (id,is_anonymous) values ('${host}',false),('${other}',false),('${guest}',true);`);
+    insert into auth.users (id,is_anonymous) values ('${host}',false),('${other}',false),('${guest}',true); update auth.users set raw_app_meta_data = '{"vakkostolo_role":"superadmin"}' where not is_anonymous;`);
   await asUser(host);
 });
 afterAll(async () => { await db.close(); });

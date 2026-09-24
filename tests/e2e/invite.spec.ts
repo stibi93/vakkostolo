@@ -127,6 +127,8 @@ test('kezdőlapról meghívólink, becenév, valódi váró és megmaradó tags�
       await route.fulfill({ json: { title: 'Péntesti kóstoló', joinable: true } });
     } else if (url.pathname === '/rest/v1/rpc/get_game_snapshot') {
       await route.fulfill({ json: lobbyResponse(gameId, [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z', seat: 1 }], 'player', membership.participant_id) });
+    } else if (url.pathname === '/auth/v1/user') {
+      await route.fulfill({ json: guestUser });
     } else if (url.pathname === '/auth/v1/signup') {
       calls.signups++;
       await route.fulfill({ json: authSession(guestUser) });
@@ -190,6 +192,7 @@ test('vendég: érvénytelen, lezárt vagy közben lecserélt meghívó', async 
   const unexpected = await mockSupabase(page, async (route, url) => {
     if (url.pathname === '/rest/v1/rpc/preview_invite') await route.fulfill(preview);
     else if (url.pathname === '/auth/v1/signup') await route.fulfill({ json: authSession(guestUser) });
+    else if (url.pathname === '/auth/v1/user') await route.fulfill({ json: guestUser });
     else if (url.pathname === '/rest/v1/rpc/join_game') await route.fulfill(postgrestError('INVITE_INVALID'));
     else return false;
     return true;
