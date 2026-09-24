@@ -5,13 +5,16 @@
 - `main` `59f86c7`: 0009 migráció (`ratings.price_bucket` 1–8, új `submit_rating`
   `p_price_bucket`-tel, `RATING_INVALID`, pontozás v2 alapértékként). Közös
   `src/rating/RatingFields` az élő körben és a demóban; 12,0 helyőrző fókuszkor kitöltve.
-- Ellenőrzés: check 247/247; teljes e2e 77/78, a kiesett „két vendég automatikusan
-  értékel” teszt terhelésfüggő (három oldal, 30 s határ); a rebase előtti `main`-en is
-  kiesik párhuzamos ismétlésnél, egyedül 6/6 sikeres 6–9 s alatt. Helyi Supabase-en 0009
-  alkalmazva, `test:live:local`, `test:lobby:local`, `test:presence:local` sikeres
-  (a két első a superadmin-váltás óta bukott, most `scripts/local-superadmin.mjs`-t használ).
-- Következő: a terhelésérzékeny élő e2e stabilizálása (pl. nagyobb timeout vagy kevesebb
-  worker a live.spec-ben), valódi telefonos próba a léptetőre és a számbillentyűzetre.
+- Integráció utáni friss ellenőrzés: `npm run check` 247/247, teljes E2E 78/78
+  három workerrel. A három böngészős „két vendég automatikusan értékel” teszt teljes
+  időkerete 60 s lett a korábbi terhelésfüggő 30 s túllépés miatt; az assertionök
+  határideje változatlan. Az új futásban asztalon 14 s, mobilon 17 s alatt sikeres.
+- Helyi Supabase-en 0009 alkalmazva; friss `test:live:local` sikeres, beleértve
+  a szerverhatáridőt és hozzáférésvédelmet; saját szintetikus adatok kitakarítva.
+  Korábbi `test:lobby:local`, `test:presence:local` sikeres. Renderelt mobil/asztali
+  értékelőlap átnézve: `test-results/rating-integration/`. Hosztolt deploy nem történt.
+- Az integráció kész; következő kézi ellenőrzés a valódi telefonos léptető és
+  számbillentyűzet. Következő termékegység továbbra is az élő körvezérlés.
   Részletek: `memory/sessions/2026-09-24-rating-cards.md`.
 
 ## Egységes háttér minden oldalon kész — 2026-09-24

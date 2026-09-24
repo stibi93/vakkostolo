@@ -68,6 +68,8 @@ async function fill(page: Page, price = '4 001–6 000 Ft') {
   await page.getByRole('radio', { name: 'Tetszés: 8 a 10-ből' }).check();
 }
 test('host indít, két vendég automatikusan értékel; mentés, módosítás, újratöltés', async ({ page, browser }, info) => {
+  // Three browser contexts share the full-suite load; keep assertion deadlines unchanged.
+  test.setTimeout(60_000);
   const f = fixture(); await f.attach(page, 0);
   const context1 = await browser.newContext({ ...info.project.use }), context2 = await browser.newContext({ ...info.project.use });
   try {

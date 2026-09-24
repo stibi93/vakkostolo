@@ -13,8 +13,13 @@
   `test:live:local` és `test:lobby:local` a superadmin-váltás óta ezért bukott.
 
 ## Ellenőrzés
-- check 247/247, e2e 74/74; képernyőképek mobil/asztali nézetben átnézve.
+- Integrált main friss ellenőrzése: check 247/247, teljes E2E 78/78 (3 worker);
+  mentett értékelőlap mobil/asztali képe átnézve: `test-results/rating-integration/`.
+- A három böngészős élőkör-teszt 30 s teljes időkerete korábban terhelés alatt
+  elfogyott. Csak ennél a tesztnél 60 s lett, az assertionök határideje változatlan;
+  az új teljes futásban asztalon 14 s, mobilon 17 s alatt sikeres.
 - 0009 alkalmazva a helyi DB-re; `test:live:local`, `test:lobby:local`, `test:presence:local` sikeres.
+- Integráció után a `test:live:local` ismét sikeres, saját tesztadatok kitakarítva.
 
 ## Korlát
 - Fizikai telefonos próba (érintéses léptetés, numerikus billentyűzet) még nincs.
