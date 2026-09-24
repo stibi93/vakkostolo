@@ -1,5 +1,25 @@
 # Aktuális munkamenet
 
+## Első online kör elkészült — 2026-09-24
+
+- Mainbe integrálva, külön commitokban: szerveroldali indítás és privát snapshot
+  (`f3d10e8`), játékoslap és mentés (`c224350`), azonos Auth-munkamenet
+  visszatérésekor piszkozatmegőrzés (`901e755`). A meghívó-előnézet is megmaradt.
+- Host indítás, élő átmenet a váróból, szerveridős számláló, saját ár/alkohol/tetszés
+  mentése és módosítása, újratöltés utáni visszaállítás kész. Késői belépő nem adhat
+  tippet; rejtett boradat és más válasza nem kerül a játékoshoz.
+- Végső `npm run check`: 199/199, típusok/lint/build sikeres. Integrált teljes
+  Playwright 66/66; az utolsó Auth-javítás után érintett próbák 30/30.
+  Mobil és asztali renderelt állapotok ellenőrizve. Valódi helyi Supabase-próba
+  sikeres: párhuzamos hostindítás, Realtime, saját válasz, késői belépő és lejárat.
+- A 005 migráció helyben alkalmazva, új változás új migrációba kerüljön.
+  Google OAuth, hosztolt projekt és fizikai telefon ellenőrzése még hátravan.
+  Részletek: `docs/live-round.md`, `memory/live-round-handoff.md`.
+- Következő egység: szerveroldali korai körzárás, hosszabbítás és következő kör,
+  a felfedési blokkok szabályainak betartásával. Most csak az első kör indítható.
+- A párhuzamos kezdőlapi háttér/JPEG munka megmaradt a közös munkafában, nincs
+  ebbe a fejlesztésbe commitolva. Az alábbi korábbi átadások történeti állapotok.
+
 ## Kész változások rögzítése — 2026-09-24
 
 - Felhasználói kérésre a közös munkapéldány kész változásai a main ágon

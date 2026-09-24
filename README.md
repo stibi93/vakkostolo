@@ -14,7 +14,8 @@ tesztprojekt-konfiguráció szükséges. Az éles backendhez adatmodell,
 SQL-migráció, hozzáférési szabályok, válaszbeküldő függvény és tesztek készültek.
 A bejelentkezett host létrehozhat 1–12 boros kóstolót, megnézheti saját mentett
 játékait és azok boradatait. A szerver ellenőrzi a hostot, az adatokat és az
-ismételt mentést. Meghívó, QR, anonim belépés és élő közös váró is elérhető; a kör indítása még nincs.
+ismételt mentést. Meghívó, QR, anonim belépés, élő közös váró és az első online kör is elérhető,
+saját tippek mentésével. A további körvezérlés és felfedés még készül.
 A váró és a valódi helyi Supabase-próba leírása: [közös váró](docs/lobby.md).
 A hiányzó éles funkciókat a [megvalósítási terv](docs/roadmap.md) sorolja fel.
 

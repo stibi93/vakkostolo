@@ -1,5 +1,21 @@
 # Tartós projektmemória
 
+## Élő kör indítása és saját válasz — 2026-09-24
+
+- A start_round verzióellenőrzést, játék→kör sorzárat és privát kérésnaplót használ.
+  Indok: két hostlap versengése vagy elveszett hálózati válasz ne indítson új kört
+  és ne tolja ki a határidőt. Azonos request ID és verzió ugyanazt adja vissza.
+- A joined_at clock_timestamp() a játékzár megszerzése után keletkezik.
+  Indok: az indítás mögött váró belépés ne kapjon tévesen korai jogosultságot.
+- A get_game_snapshot a váró adatait körállapottal és kizárólag a hívó saját
+  válaszával bővíti. A publication a rounds táblával bővült; borok, tippek és
+  meghívók továbbra sem publikálhatók. Ez a korábbi váróleírás kiegészítése.
+- A kijelzett határidő szerveridőből és monoton kliensórából származik;
+  a beküldésről mindig a szerver dönt. A piszkozat nem mentett válasz.
+- Azonos Auth-felhasználó visszatérése frissít, nem bontja el a piszkozatot.
+  Fiókváltás, kijelentkezés és tagságvesztés eltávolítja a korábbi játékoslapot.
+  Indok: háttérből visszatérve adatmegőrzés, identitásváltáskor adatelkülönítés.
+
 ## Közös váró adathatára — 2026-09-24
 
 - A host, vendég és kivetítő azonos `get_lobby_snapshot` RPC-t olvas;

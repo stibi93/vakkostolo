@@ -21,7 +21,7 @@ export function HomePage() {
     </section>
     <section className="entry-next" aria-labelledby="next-title">
       <div><p className="eyebrow">ONLINE KÓSTOLÓ ELŐKÉSZÍTÉSE</p><h2 id="next-title">Játékmesterként</h2>
-        <p>A közös online kóstoló még készül. Már létrehozhatod a kóstolót és meghívhatod a résztvevőket; az online körök indítása később lesz elérhető.</p>
+        <p>A közös online kóstoló még készül. Létrehozhatod a kóstolót, meghívhatod a résztvevőket, és elindíthatod az első kört. A további körvezérlés és az eredmények még készülnek.</p>
       </div>
       <Link className="button-secondary" to="/host">Játékmesteri belépés</Link>
     </section>
