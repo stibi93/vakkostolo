@@ -25,7 +25,7 @@ function mockGame() {
         if (path === '/auth/v1/signup') return route.fulfill({ json: authSession(user) });
         if (path === '/rest/v1/rpc/get_host_game') return route.fulfill({ json: {
           id: gameId, title: 'Péntesti kóstoló', status, round_seconds: 120, reveal_every: 2,
-          created_at: new Date().toISOString(), wines: [{ position: 1, name: 'Titkos pincészet', price_huf: 4567, alcohol_tenths: 137 }],
+          created_at: new Date().toISOString(), wines: [{ round_id: '20000000-0000-0000-0000-000000000001', photo_updated_at: null, photo_locked: false, position: 1, name: 'Titkos pincészet', price_huf: 4567, alcohol_tenths: 137 }],
         } });
         if (path === '/rest/v1/rpc/preview_invite') {
           return route.fulfill(route.request().postDataJSON().p_token === token

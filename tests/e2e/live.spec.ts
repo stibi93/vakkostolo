@@ -27,7 +27,7 @@ function fixture() {
         if (path === '/auth/v1/logout') return route.fulfill({ status: 204 });
         if (path === '/rest/v1/rpc/get_host_game') return route.fulfill({ json: {
           id: gameId, title: 'Élő kóstoló', status: state.started ? 'tasting' : 'lobby', round_seconds: 120, reveal_every: 2,
-          created_at: new Date().toISOString(), wines: [{ position: 1, name: 'Rejtett pincészet', price_huf: 9876, alcohol_tenths: 142 }],
+          created_at: new Date().toISOString(), wines: [{ round_id: '20000000-0000-0000-0000-000000000001', photo_updated_at: null, photo_locked: false, position: 1, name: 'Rejtett pincészet', price_huf: 9876, alcohol_tenths: 142 }],
         } });
         if (path === '/rest/v1/rpc/get_game_snapshot') {
           if (state.failRead) return route.fulfill({ status: 503, json: { message: 'unavailable' } });

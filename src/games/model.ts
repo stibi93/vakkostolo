@@ -5,11 +5,17 @@ export interface CreateGameInput { title: string; roundSeconds: number; revealEv
 export interface HostGameSummary {
   id: string; title: string; status: GameStatus; roundSeconds: number; revealEvery: number; createdAt: string;
 }
-export interface HostGame extends HostGameSummary { wines: (WineInput & { position: number })[] }
+export interface HostWine extends WineInput {
+  position: number; roundId: string; photoUpdatedAt: string | null; photoLocked: boolean;
+}
+export interface HostGame extends HostGameSummary { wines: HostWine[] }
 export interface GamesApi {
   create(input: CreateGameInput, requestId: string): Promise<string>;
   list(): Promise<HostGameSummary[]>;
   get(id: string): Promise<HostGame>;
+  uploadPhoto(gameId: string, roundId: string, photo: Blob): Promise<void>;
+  removePhoto(gameId: string, roundId: string): Promise<void>;
+  photoUrl(gameId: string, roundId: string): Promise<string>;
 }
 export const gameStatusLabels: Record<GameStatus, string> = {
   draft: 'Előkészítés', lobby: 'Váró', tasting: 'Kóstolás', intermission: 'Szünet', reveal: 'Felfedés', finished: 'Befejezve',

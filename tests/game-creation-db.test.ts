@@ -38,8 +38,10 @@ describe('create_game: szerveroldali létrehozás', () => {
     expect((await db.query('select position,status,closes_at from public.rounds order by position')).rows)
       .toEqual([{ position: 1, status: 'pending', closes_at: null }, { position: 2, status: 'pending', closes_at: null }]);
     const snapshot = (await db.query<{ data: { id: string; wines: unknown[] } }>('select public.get_host_game($1) as data', [id])).rows[0].data;
+    const roundIds = (await db.query<{ id: string }>('select id from public.rounds order by position')).rows.map((row) => row.id);
     expect(snapshot.id).toBe(id);
-    expect(snapshot.wines).toEqual(wines.map((wine, i) => ({ ...wine, name: wine.name.trim(), position: i+1 })));
+    expect(snapshot.wines).toEqual(wines.map((wine, i) => ({ ...wine, name: wine.name.trim(), position: i+1,
+      round_id: roundIds[i], photo_updated_at: null, photo_locked: false })));
     expect((await db.query('select event_type,request_id from public.game_events')).rows)
       .toEqual([{ event_type: 'game_created', request_id: request }]);
     expect((await db.query('select * from public.game_invites')).rows).toEqual([]);

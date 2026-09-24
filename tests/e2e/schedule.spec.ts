@@ -21,7 +21,7 @@ function fixture(active = false) {
       const path = new URL(route.request().url()).pathname;
       if (path === '/auth/v1/user') return route.fulfill({json:user});
       if (path === '/rest/v1/rpc/get_host_game') return route.fulfill({json:{id:game,title:'Őszi menet',status:state.status,
-        round_seconds:120,reveal_every:2,created_at:new Date().toISOString(),wines:state.steps.filter(s=>s.kind==='wine').map((s,i)=>({position:i+1,name:s.title,price_huf:s.price_huf,alcohol_tenths:s.alcohol_tenths}))}});
+        round_seconds:120,reveal_every:2,created_at:new Date().toISOString(),wines:state.steps.filter(s=>s.kind==='wine').map((s,i)=>({round_id:s.id,photo_updated_at:null,photo_locked:s.status==='revealed',position:i+1,name:s.title,price_huf:s.price_huf,alcohol_tenths:s.alcohol_tenths}))}});
       if (path === '/rest/v1/rpc/get_game_snapshot') return route.fulfill({json:{
         ...lobbyResponse(game,[{id:member,nickname:'Anna',seat:1,joined_at:new Date(Date.now()-60000).toISOString()}],player?'player':'host',player?member:null),
         game:{id:game,title:'Őszi menet',status:state.status,version:state.version},server_now:new Date().toISOString(),own_rating:null,

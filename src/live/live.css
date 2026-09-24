@@ -20,3 +20,4 @@
 .live-round-player .live-round-heading h3 { font-size: 21px; }
 .live-round-player .live-timer { font: 500 21px/1.2 'IBM Plex Mono', monospace; color: var(--accent); }
 .live-round-player :is(input, button, legend) { scroll-margin-top: 80px; }
+.live-revealed-photo { max-width: 220px; margin: 16px 0; }

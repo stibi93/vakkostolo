@@ -20,6 +20,7 @@ export interface LiveApi extends SnapshotApi<GameSnapshot> {
   /** Optional so offline fakes can omit it; without it the roster shows no online state. */
   presence?: PresenceApi;
   schedule?: ScheduleApi;
+  photoUrl?(gameId: string, roundId: string): Promise<string>;
 }
 /** Monotonic elapsed time; changing the phone's wall clock cannot extend the round. */
 export function secondsLeft(snapshot: GameSnapshot, now = performance.now()): number {

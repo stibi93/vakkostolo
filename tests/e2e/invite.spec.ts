@@ -33,7 +33,7 @@ test('host: váró megnyitása, QR és link, újratöltés után is látható', 
     else if (url.pathname === '/rest/v1/rpc/get_host_game') {
       await route.fulfill({ json: { id: gameId, title: 'Péntesti kóstoló', status: calls.issue ? 'lobby' : 'draft',
         round_seconds: 120, reveal_every: 2, created_at: '2026-09-24T08:00:00Z',
-        wines: [{ position: 1, name: 'Titkos bor', price_huf: 4500, alcohol_tenths: 125 }] } });
+        wines: [{ round_id: '20000000-0000-0000-0000-000000000001', photo_updated_at: null, photo_locked: false, position: 1, name: 'Titkos bor', price_huf: 4500, alcohol_tenths: 125 }] } });
     } else if (url.pathname === '/rest/v1/rpc/issue_invite') {
       calls.issue++;
       await route.fulfill({ json: { token, expires_at: new Date(Date.now() + 12 * 3600_000).toISOString(), status: 'lobby' } });

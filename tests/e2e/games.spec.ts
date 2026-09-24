@@ -38,7 +38,7 @@ async function setup(page: Page) {
       expect(body).not.toHaveProperty('status');
       if (!state.game) state.game = { id: gameId, title: body.p_title, status: 'draft',
         round_seconds: body.p_round_seconds, reveal_every: body.p_reveal_every, created_at: new Date().toISOString(),
-        wines: body.p_wines.map((wine, i) => ({ ...wine, position: i+1 })) };
+        wines: body.p_wines.map((wine, i) => ({ ...wine, position: i+1, round_id: `20000000-0000-0000-0000-${String(i+1).padStart(12, '0')}`, photo_updated_at: null, photo_locked: false })) };
       if (state.loseFirstResponse && state.calls.length === 1) return route.abort('failed');
       return route.fulfill({ json: gameId });
     }

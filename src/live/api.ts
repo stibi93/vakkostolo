@@ -1,3 +1,4 @@
+import { createGamesApi } from '../games/api';
 import { createScheduleApi } from '../schedule/api';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
@@ -87,6 +88,7 @@ export function createLiveApi(client: SupabaseClient<Database>): LiveApi {
     watch: createLobbyApi(client).watch,
     presence: createPresenceApi(client),
     schedule: createScheduleApi(client),
+    photoUrl: createGamesApi(client).photoUrl,
     async get(gameId) {
       if (!isUuid(gameId)) throw new LiveError('A kóstoló címe érvénytelen.', true);
       const began = performance.now();

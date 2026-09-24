@@ -17,7 +17,11 @@
 .saved-wine-list { list-style: none; padding: 0; }
 .saved-wine-list li { padding: 20px 0; border-bottom: 1px solid var(--line); }
 .saved-wine-list h3 { font-size: 22px; letter-spacing: -.5px; }
+.host-wine-photo, .wine-photo-pick { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px 20px; align-items: start; margin-top: 16px; }
+.host-wine-photo .upload-control, .wine-photo-pick .upload-control { max-width: 260px; }
+.host-wine-photo .small-note, .wine-photo-pick .small-note { margin: 10px 0 0; }
 @media (max-width: 600px) {
+  .host-wine-photo, .wine-photo-pick { grid-template-columns: 88px minmax(0, 1fr); gap: 12px; }
   .game-section form > .button-primary { width: 100%; }
   .game-settings { grid-template-columns: 1fr; gap: 20px; }
   .wine-fields { padding: 16px 12px; }

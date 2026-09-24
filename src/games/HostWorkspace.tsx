@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
 import { ScheduleEditor } from '../schedule/ScheduleEditor';
 import { CreateGameForm } from './CreateGameForm';
+import { WinePhotoField } from './WinePhotoField';
 import { gameErrorMessage } from './api';
 import { gameStatusLabels } from './model';
 import type { GameStatus } from '../domain/game';
@@ -22,7 +23,8 @@ function useGameQuery<T>(load: () => Promise<T>) {
       (error: unknown) => { if (active) setState({ status: 'error', message: gameErrorMessage(error) }); });
     return () => { active = false; };
   }, [load, attempt]);
-  return { state, refresh: () => setAttempt(value => value+1), retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
+  const refresh = useCallback(() => setAttempt(value => value+1), []);
+  return { state, refresh, retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
 }
 
 export function HostWorkspace({ api, invites, lobby }: { api: GamesApi; invites: InvitesApi; lobby: LiveApi }) {
@@ -52,9 +54,12 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
   const { state, retry, refresh } = useGameQuery(load);
   const [statusOverride, setStatusOverride] = useState<GameStatus | null>(null);
   const location = useLocation();
+  useEffect(() => { if (statusOverride !== null) refresh(); }, [statusOverride, refresh]);
   return <section className="game-section" aria-labelledby="saved-game-title">
     <Link className="button-secondary" to="/host">Saját kóstolóim</Link>
     {location.state?.created === true && <p role="status">A kóstoló létrejött.</p>}
+    {typeof location.state?.photoFailures === 'number' && location.state.photoFailures > 0 &&
+      <p role="alert" className="auth-message">{location.state.photoFailures} fotó feltöltése nem sikerült. Az érintett boroknál lent újra hozzáadhatod.</p>}
     {state.status === 'loading' && <h2 id="saved-game-title" role="status">A kóstoló betöltése…</h2>}
     {state.status === 'error' && <><h2 id="saved-game-title">A kóstoló nem tölthető be.</h2>
       <p role="alert" className="auth-message">{state.message}</p><button className="button-primary" onClick={retry}>Újrapróbálás</button></>}
@@ -63,13 +68,15 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
       <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds} másodperc/bor · Felfedés {state.data.revealEvery} boronként</p>
       <LiveGamePanel showTitle={false} api={lobby} gameId={gameId} onStatusChange={setStatusOverride} />
       {lobby.schedule && <ScheduleEditor api={lobby.schedule} gameId={gameId} onSaved={refresh} />}
-      <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok nem láthatók a játékosoknak felfedés előtt.</p>
-      <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.position}>
+      <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok és fotók nem láthatók a játékosoknak felfedés előtt.</p>
+      <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.roundId}>
         <h3>{wine.position}. {wine.name}</h3>
         <p>{wine.priceHuf.toLocaleString('hu-HU')} Ft · {(wine.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p>
+        <WinePhotoField key={wine.photoUpdatedAt ?? 'no-photo'} api={api} gameId={gameId} wine={wine} />
       </li>)}</ol>
       <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
         onStatusChange={setStatusOverride} />
+
     </>}
   </section>;
 }

@@ -1,5 +1,27 @@
 # Aktuális munkamenet
 
+## Kóstolómenet és borfotók integrálva — 2026-09-24
+
+- Menet külön commitban: `0060363`. A fotós worktree változásai a főágba
+  integrálva: létrehozáskori képválasztás, mentett bor fotófeltöltése/cseréje/törlése,
+  privát Storage, felfedéshez kötött megjelenítés. A sorszám helyett roundId a
+  borlista kulcsa; átrendezéskor a fotó a bornál marad. Host státuszváltás után
+  friss boradatok és fotózárolás; üres Storage-törlés nem kap sikerjelzést.
+- 0010 és 0011 helyi Supabase-en együtt alkalmazva. Valódi `test:schedule:local`
+  és `test:photos:local` sikeres. Egy korábbi fotópróba takarítása hibázott;
+  a saját maradványok külön eltávolítva, a végső teljes próba takarítása sikeres.
+- Elkülönített integrációs változaton check 276/276, teljes E2E 82/82; a végső
+  kiegészítések után 30 érintett próba és a 4 fotós mobil/asztali próba sikeres.
+  A felfedési teszt StrictMode alatti dupla effektusa miatt a teszt pontos
+  kérésszáma helyett a felfedés előtti nulla képkérést és a megjelenést ellenőrzi.
+- Renderelt fotókezelés és felfedett borfotó átnézve mobilon/asztalon:
+  `/tmp/vakkostolo-integration-20260924/test-results/photos-final/`.
+- A párhuzamos eredményfejlesztés (`memory/results-handoff.md`, 0012, src/results)
+  módosításai megőrizve, nem részei a fotós commitnak. A 0011-es felfedési fotó
+  csak akkor látszik, ha nincs új results-panel; nincs kétszeres megjelenítés.
+- Következő: az eredményagent munkájának befejezése és közös ellenőrzése;
+  valódi telefonos próbakóstoló. Hosztolt migráció/deploy nem történt.
+
 ## Szerkeszthető kóstolómenet és élő vezérlés kész — 2026-09-24
 
 - Host → Borok és szünetek → Menet szerkesztése: mentett draft és futó kóstoló

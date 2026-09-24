@@ -3,6 +3,7 @@ import type { Database } from '../lib/database.types';
 import type { GameStatus } from '../domain/game';
 import { gameStatusLabels, isUuid, validateGameInput } from './model';
 import type { GamesApi, HostGame, HostGameSummary } from './model';
+import { maxWinePhotoBytes, winePhotoBucket, winePhotoPath } from './winePhoto';
 
 export class GameServiceError extends Error {}
 const invalidResponse = () => new GameServiceError('A szerver válasza nem értelmezhető. Próbáld újra.');
@@ -30,8 +31,12 @@ export function parseHostGame(value: unknown): HostGame {
   if (!Array.isArray(row.wines) || row.wines.length < 1 || row.wines.length > 12) throw invalidResponse();
   return { ...parseHostSummary(row), wines: row.wines.map((value, index) => {
     const wine = record(value);
+    const photoUpdatedAt = wine.photo_updated_at ?? null;
+    if (!isUuid(wine.round_id) || typeof wine.photo_locked !== 'boolean' ||
+      (photoUpdatedAt !== null && (typeof photoUpdatedAt !== 'string' || !Number.isFinite(Date.parse(photoUpdatedAt))))) throw invalidResponse();
     return { position: integer(wine.position, index+1, index+1), name: text(wine.name, 200),
-      priceHuf: integer(wine.price_huf, 1, 1_000_000), alcoholTenths: integer(wine.alcohol_tenths, 0, 250) };
+      priceHuf: integer(wine.price_huf, 1, 1_000_000), alcoholTenths: integer(wine.alcohol_tenths, 0, 250),
+      roundId: wine.round_id, photoUpdatedAt, photoLocked: wine.photo_locked };
   }) };
 }
 function fromServer(error: { message: string; code?: string }): GameServiceError {
@@ -46,6 +51,18 @@ function fromServer(error: { message: string; code?: string }): GameServiceError
   return new GameServiceError((Object.hasOwn(messages, error.message) ? messages[error.message] : undefined) ?? (error.code === 'PGRST202'
     ? 'A játéklétrehozás még nem érhető el ezen a szerveren.'
     : 'A szerver nem igazolta vissza a műveletet. Ellenőrizd a kapcsolatot, majd próbáld újra.'));
+}
+function fromStorage(error: unknown): GameServiceError {
+  const status = error && typeof error === 'object' && 'statusCode' in error ? String(error.statusCode) : '';
+  const message = error instanceof Error ? error.message : '';
+  if (status === '413' || /maximum allowed size|too large/i.test(message)) return new GameServiceError('A kép túl nagy (legfeljebb 2 MB).');
+  if (status === '403' || /row-level security|unauthorized/i.test(message))
+    return new GameServiceError('A fotó ennél a bornál nem módosítható: a bor már felfedve, vagy lejárt a belépésed.');
+  return new GameServiceError('A fotó mentését a szerver nem igazolta vissza. Ellenőrizd a kapcsolatot, majd próbáld újra.');
+}
+function photoPath(gameId: string, roundId: string) {
+  if (!isUuid(gameId) || !isUuid(roundId)) throw new GameServiceError('A bor azonosítója hibás. Töltsd újra az oldalt.');
+  return winePhotoPath(gameId, roundId);
 }
 export function gameErrorMessage(error: unknown): string {
   return error instanceof GameServiceError ? error.message : 'Nem sikerült kapcsolódni a szerverhez. Próbáld újra.';
@@ -78,6 +95,23 @@ export function createGamesApi(client: SupabaseClient<Database>): GamesApi {
       const game = parseHostGame(data);
       if (game.id !== id) throw invalidResponse();
       return game;
+    },
+    async uploadPhoto(gameId, roundId, photo) {
+      const path = photoPath(gameId, roundId);
+      if (photo.type !== 'image/jpeg' || photo.size > maxWinePhotoBytes) throw new GameServiceError('A kép túl nagy (legfeljebb 2 MB).');
+      const { error } = await client.storage.from(winePhotoBucket).upload(path, photo, { upsert: true, contentType: 'image/jpeg', cacheControl: '60' });
+      if (error) throw fromStorage(error);
+    },
+    async removePhoto(gameId, roundId) {
+      const path = photoPath(gameId, roundId);
+      const { data, error } = await client.storage.from(winePhotoBucket).remove([path]);
+      if (error) throw fromStorage(error);
+      if (!data?.some(file => file.name === path)) throw new GameServiceError('A szerver nem igazolta vissza a fotó törlését. Töltsd újra az oldalt.');
+    },
+    async photoUrl(gameId, roundId) {
+      const { data, error } = await client.storage.from(winePhotoBucket).createSignedUrl(photoPath(gameId, roundId), 3600);
+      if (error || !data?.signedUrl) throw new GameServiceError('A fotó most nem tölthető be.');
+      return data.signedUrl;
     },
   };
 }

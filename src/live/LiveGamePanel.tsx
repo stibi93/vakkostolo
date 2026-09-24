@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { RevealedWinePhoto } from './RevealedWinePhoto';
 import { HostControls } from '../schedule/HostControls';
 import { newRequestId } from '../schedule/model';
 import type { FormEvent } from 'react';
@@ -74,6 +75,7 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
     {!!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
       <summary>Felfedett borok ({snapshot.revealed.length})</summary><ol className="live-revealed">
         {snapshot.revealed.map(w => <li key={w.id}><h3>{String(w.position).padStart(2,'0')}. {w.name}</h3>
+          <RevealedWinePhoto api={api} gameId={snapshot.game.id} wine={w} />
           <p>{w.priceHuf.toLocaleString('hu-HU')} Ft · {(w.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p></li>)}
       </ol></details>}
   </>;
