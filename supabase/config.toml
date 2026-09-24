@@ -39,3 +39,10 @@ enable_anonymous_sign_ins = true
 [auth.rate_limit]
 # Shared Wi-Fi means many guests share one IP; verify this again for a real event.
 anonymous_users = 60
+
+# Values come from the Git-ignored supabase/.env; see docs/auth.md.
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = false

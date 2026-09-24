@@ -38,8 +38,9 @@ A konfiguráció nélküli kezdőlap és demo továbbra is működik; a hostolda
 tájékoztat, nem kínál működőnek látszó belépést.
 
 Helyi Supabase stacknél az alkalmazás callbackjei a `supabase/config.toml`-ban
-szerepelnek. A Google provider nincs automatikusan bekapcsolva: a saját klienshez
-az alábbi konfiguráció szükséges, környezeti titokhivatkozásokkal:
+szerepelnek. A Google provider be van kapcsolva; a saját OAuth-kliens azonosítóját
+és titkát a Gitből kizárt `supabase/.env` adja (`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`,
+`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET`). A `config.toml` csak hivatkozik rájuk:
 
 ```toml
 [auth.external.google]
