@@ -27,14 +27,16 @@ function HostSession({ store }: { store: ReturnType<typeof createAuthStore> }) {
   const location = useLocation();
   useEffect(() => {
     void store.start();
-    const refresh = () => { void store.refresh(); };
-    window.addEventListener('online', refresh);
-    window.addEventListener('focus', refresh);
-    window.addEventListener('pageshow', refresh);
+    const revalidate = () => { if (document.visibilityState === 'visible') void store.revalidate(); };
+    window.addEventListener('online', revalidate);
+    window.addEventListener('focus', revalidate);
+    window.addEventListener('pageshow', revalidate);
+    document.addEventListener('visibilitychange', revalidate);
     return () => {
-      window.removeEventListener('online', refresh);
-      window.removeEventListener('focus', refresh);
-      window.removeEventListener('pageshow', refresh);
+      window.removeEventListener('online', revalidate);
+      window.removeEventListener('focus', revalidate);
+      window.removeEventListener('pageshow', revalidate);
+      document.removeEventListener('visibilitychange', revalidate);
     };
   }, [store]);
 

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseConfig } from './config';
+import { createTimeoutFetch } from './fetch';
 
 /** Created once by the Auth runtime; the demo never imports this module. */
 export function createSupabaseClient({ url, key }: SupabaseConfig) {
@@ -11,11 +12,6 @@ export function createSupabaseClient({ url, key }: SupabaseConfig) {
       // The callback is exchanged explicitly once, including under StrictMode.
       detectSessionInUrl: false,
     },
-    global: {
-      fetch: (input, init) => fetch(input, {
-        ...init,
-        signal: AbortSignal.any([AbortSignal.timeout(10_000), ...(init?.signal ? [init.signal] : [])]),
-      }),
-    },
+    global: { fetch: createTimeoutFetch(10_000) },
   });
 }

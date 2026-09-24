@@ -1,3 +1,4 @@
+import { isAuthApiError } from '@supabase/supabase-js';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import type { AuthCallback } from './callback';
 
@@ -12,6 +13,8 @@ export interface AuthState {
 
 const connectionMessage = 'Nem sikerült ellenőrizni a belépést. Ellenőrizd a kapcsolatot, majd próbáld újra.';
 const callbackMessage = 'A belépés nem fejeződött be, vagy a hivatkozás lejárt. Indíts új belépést ugyanebben a böngészőben.';
+const sessionEndedMessage = 'A belépésed lejárt vagy megszűnt. Lépj be újra.';
+const revalidateAfterMs = 30_000;
 
 async function withTimeout<T>(request: Promise<T>): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -35,6 +38,7 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
   let booting = true;
   let unsubscribe: (() => void) | undefined;
   let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+  let verifiedAt = 0;
 
   function publish(next: AuthState) {
     state = next;
@@ -49,6 +53,7 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
       if (request !== revision) return;
       if (error) throw error;
       if (!data.session) {
+        verifiedAt = Date.now();
         publish({ status: 'ready', user: null, pending: null, message: null });
         return;
       }
@@ -56,9 +61,39 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
       const verified = await withTimeout(auth.getUser(data.session.access_token));
       if (request !== revision) return;
       if (verified.error || !verified.data.user) throw verified.error;
+      verifiedAt = Date.now();
       publish({ status: 'ready', user: verified.data.user, pending: null, message: null });
     } catch {
       if (request === revision) publish({ status: 'error', user: null, pending: null, message: connectionMessage });
+    }
+  }
+
+  /** Background check: keeps the rendered host UI (and unsaved input) unless the session truly ended. */
+  async function revalidate(force: boolean) {
+    if (booting || state.pending || state.status === 'loading') return;
+    if (state.status === 'error') return refresh();
+    if (!force && Date.now() - verifiedAt < revalidateAfterMs) return;
+    const request = ++revision;
+    try {
+      const { data, error } = await withTimeout(auth.getSession());
+      if (request !== revision) return;
+      if (error) throw error;
+      if (!data.session) {
+        verifiedAt = Date.now();
+        if (state.user) publish({ status: 'ready', user: null, pending: null, message: sessionEndedMessage });
+        return;
+      }
+      const verified = await withTimeout(auth.getUser(data.session.access_token));
+      if (request !== revision) return;
+      if (verified.error || !verified.data.user) throw verified.error;
+      verifiedAt = Date.now();
+      publish({ status: 'ready', user: verified.data.user, pending: null, message: null });
+    } catch (error) {
+      if (request !== revision) return;
+      if (isAuthApiError(error) && (error.status === 401 || error.status === 403)) {
+        publish({ status: 'ready', user: null, pending: null, message: sessionEndedMessage });
+      }
+      // Network failures keep the last verified user; the next focus or online event retries.
     }
   }
 
@@ -72,10 +107,8 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
         publish({ status: 'ready', user: null, pending: null, message: null });
       } else if (!booting && state.pending !== 'sign-out') {
         // Do not call Auth methods while the SDK's event callback holds its lock.
-        ++revision;
-        publish({ status: 'loading', user: null, pending: null, message: null });
         clearTimeout(refreshTimer);
-        refreshTimer = setTimeout(() => { void refresh(); }, 0);
+        refreshTimer = setTimeout(() => { void (state.status === 'loading' ? refresh() : revalidate(true)); }, 0);
       }
     });
     unsubscribe = () => data.subscription.unsubscribe();
@@ -138,6 +171,7 @@ export function createAuthStore(auth: AuthApi, callback: AuthCallback | null, re
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     start,
     refresh: () => !booting && !state.pending ? refresh() : Promise.resolve(),
+    revalidate: () => revalidate(false),
     signIn,
     signOut,
     dispose() { ++revision; clearTimeout(refreshTimer); unsubscribe?.(); listeners.clear(); },
