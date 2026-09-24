@@ -5,9 +5,6 @@
 .harvest-light { position: absolute; width: 76%; height: 76%; top: 5%; left: 15%; border-radius: 50%; background: var(--paper); opacity: .65; }
 .harvest-vine { position: absolute; top: 2%; left: 3%; width: 46%; transform-origin: 12% 12%; }
 .harvest-vine svg { width: 100%; height: auto; display: block; }
-.harvest-motion-toggle { position: absolute; bottom: 12px; right: 16px; display: flex; align-items: center; gap: 8px; border: 0; background: var(--blue); color: var(--ink); padding: 10px 12px; min-height: 44px; font-size: 11px; }
-.harvest-motion-toggle > span { font-size: 16px; }
-.harvest-motion-toggle:hover:not(:disabled) { background: var(--paper); }
 @media (prefers-reduced-motion: no-preference) {
   .harvest-vine { animation: harvest-vine-sway 12s ease-in-out infinite alternate; animation-play-state: paused; }
   .harvest-light { animation: harvest-light-drift 24s ease-in-out infinite alternate; animation-play-state: paused; }
@@ -18,5 +15,4 @@
 @media (max-width: 700px) {
   .harvest-artwork { border-left: 0; border-top: 1px solid var(--ink); padding: 8px 0 48px; }
   .harvest-scene { max-width: 460px; margin: 0 auto; }
-  .harvest-motion-toggle { right: 8px; bottom: 6px; }
 }

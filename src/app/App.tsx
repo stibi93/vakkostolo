@@ -5,6 +5,7 @@ import { HomePage } from './HomePage';
 import './app.css';
 
 const DemoApp = lazy(() => import('../demo/DemoApp').then((module) => ({ default: module.DemoApp })));
+const OrganizerPage = lazy(() => import('./OrganizerPage').then((module) => ({ default: module.OrganizerPage })));
 const HostArea = lazy(() => import('../auth/HostArea').then((module) => ({ default: module.HostArea })));
 const ProjectorPage = lazy(() => import('../invites/ProjectorPage').then((module) => ({ default: module.ProjectorPage })));
 const JoinPage = lazy(() => import('../invites/JoinPage').then((module) => ({ default: module.JoinPage })));
@@ -16,6 +17,7 @@ export function App() {
     <Suspense fallback={<PageFrame><p role="status">Az oldal betöltése…</p></PageFrame>}>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/jatekmester" element={<OrganizerPage />} />
         <Route path="/demo" element={<DemoApp />} />
         <Route path="/host" element={<HostArea />} />
         <Route path="/host/:gameId" element={<HostArea />} />

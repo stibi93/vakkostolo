@@ -1,30 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
+import type { AmbientMotion } from './useAmbientMotion';
 import './harvest.css';
 
 /** Original decorative SVG still life; never represents a wine in the game. */
-export function HarvestArtwork() {
+export function HarvestArtwork({ motion }: { motion: AmbientMotion }) {
   const stage = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
-  const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [visible, setVisible] = useState(false);
-  const [foreground, setForeground] = useState(() => !document.hidden);
 
   useEffect(() => {
-    const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    const onPreference = () => setReduced(preference.matches);
-    const onVisibility = () => setForeground(!document.hidden);
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
     if (stage.current) observer.observe(stage.current);
-    preference.addEventListener('change', onPreference);
-    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       observer.disconnect();
-      preference.removeEventListener('change', onPreference);
-      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 
-  const running = !paused && !reduced && visible && foreground;
+  const running = motion.running && visible;
   return <div ref={stage} className={`harvest-artwork${running ? ' harvest-running' : ''}`}>
     <div className="harvest-scene" aria-hidden="true">
       <div className="harvest-light" />
@@ -73,9 +64,5 @@ export function HarvestArtwork() {
         </svg>
       </div>
     </div>
-    <button className="harvest-motion-toggle" aria-pressed={paused || reduced} disabled={reduced} onClick={() => setPaused(value => !value)}>
-      <span aria-hidden="true">{paused || reduced ? '▷' : 'Ⅱ'}</span>
-      {reduced ? 'Mozgás kikapcsolva' : paused ? 'Háttérmozgás indítása' : 'Háttérmozgás szüneteltetése'}
-    </button>
   </div>;
 }

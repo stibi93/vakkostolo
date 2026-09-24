@@ -64,6 +64,21 @@ Kizárólag CSS `transform` animáció, JavaScript képkockahurok, videó, blur 
 jelenlegi fázisban szüneteltet; újraindításkor onnan folytatja. Képernyőn kívül
 IntersectionObserver, háttérlapon Page Visibility állítja le a mozgást.
 A rendszer csökkentett mozgás beállítását induláskor és változáskor is követjük.
+A teljes kezdőlap mögött további két, halvány szőlőlevél-árnyékréteg mozog.
+A `HomeAtmosphere` csak ezen az útvonalon él, a `useAmbientMotion` közös
+állapota kezeli a rajzot és a hátteret. A fejléc közös kapcsolójával minden mozgás
+megállítható; rejtett böngészőlapon és reduced-motion esetén mind leáll.
+A fix hátteret görgetés közben is látni; a rajz továbbra is külön szünetel,
+ha kikerül a képernyőről. A háttér nincs interakcióban a tartalommal, nem kap
+fókuszt, és nem olvassa fel a képernyőolvasó.
+
+A játékmesteri rész mellett AI-val készített szőlőfürtös hangulatkép jelenik meg:
+`public/images/harvest-grapes.jpg`, 1536 × 1024 px, kb. 222 KiB progresszív JPEG.
+A kompozíció és méret az eredeti generált PNG-é, csak a webes kódolás tömörített.
+Lazy loading és megadott képarány; betöltési hibánál a kép kimarad, a belépés
+használható marad. Forrás és végleges prompt: `public/images/IMAGE-SOURCES.md`.
+Nem egy konkrét borászat vagy a kóstoló titkos borának fényképe.
+
 Kóstolás és adatbevitel közben nincs háttéranimáció.
 
 ## Szöveg és ellenőrzés

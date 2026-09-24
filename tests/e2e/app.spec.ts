@@ -54,12 +54,14 @@ test('kezdőlapi háttérmozgás megállítható és követi a csökkentett mozg
   await page.keyboard.press('Enter');
   await expect(page.getByRole('button', { name: 'Háttérmozgás indítása' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.harvest-artwork')).not.toHaveClass(/harvest-running/);
+  await expect(page.locator('.home-atmosphere')).not.toHaveClass(/home-motion-running/);
   await expect.poll(() => page.locator('.harvest-vine').evaluate(element => getComputedStyle(element).animationPlayState)).toBe('paused');
   await page.getByRole('button', { name: 'Háttérmozgás indítása' }).click();
   await expect(page.locator('.harvest-artwork')).toHaveClass(/harvest-running/);
+  await expect(page.locator('.home-atmosphere')).toHaveClass(/home-motion-running/);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.getByRole('button', { name: 'Mozgás kikapcsolva' })).toBeDisabled();
-  expect(await page.locator('.harvest-artwork').evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0);
+  expect(await page.locator('.home-atmosphere').evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0);
   await expect(page.locator('.harvest-artwork')).not.toHaveClass(/harvest-running/);
 });
 
@@ -75,4 +77,19 @@ test('a szüreti háttér képernyőn kívül megáll, visszatéréskor folytat�
   await expect.poll(() => page.locator('.harvest-vine').evaluate(element => getComputedStyle(element).animationPlayState)).toBe('paused');
   await artwork.scrollIntoViewIfNeeded();
   await expect(artwork).toHaveClass(/harvest-running/);
+});
+
+test('a kezdőlapi fotó betöltődik, képhibánál is használható a belépés', async ({ page }) => {
+  await page.goto('/');
+  const photo = page.locator('.home-harvest-photo img');
+  await photo.scrollIntoViewIfNeeded();
+  await expect.poll(() => photo.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(1536);
+  await page.route('**/images/harvest-grapes.jpg', route => route.abort());
+  await page.reload();
+  await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).scrollIntoViewIfNeeded();
+  await expect(photo).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).click();
+  await expect(page).toHaveURL(/\/host$/);
+  await expect(page.locator('.home-ambient')).toHaveCount(0);
 });

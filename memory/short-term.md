@@ -20,6 +20,34 @@
 - A párhuzamos kezdőlapi háttér/JPEG munka megmaradt a közös munkafában, nincs
   ebbe a fejlesztésbe commitolva. Az alábbi korábbi átadások történeti állapotok.
 
+## Teljes kezdőlapi háttér és JPEG — 2026-09-24
+
+- Felhasználói kérésre két halvány szőlőlevél-árnyék mozog a teljes kezdőlap
+  mögött. A jóváhagyott rajz megmaradt. HomeAtmosphere + home-atmosphere.css,
+  közös useAmbientMotion; PageFrame opcionális headerAction kapta a kapcsolót.
+  A fejlécben nem takarja a tartalmat, minden kezdőlapi mozgást együtt állít.
+- A háttér fix és nem interaktív; CSS-transform animációk, nincs framehurok,
+  videó vagy új függőség. Háttérlapon/reduced-motion esetén mind szünetel;
+  a rajz képernyőn kívül külön leáll. Más útvonalon nincs levélháttér.
+- Beépített image_gen-nel generált szőlőfürtös kép a játékmesteri rész mellett:
+  `public/images/harvest-grapes.jpg`, 1536×1024, kb. 222 KiB. Az eredeti PNG
+  kompozíciója változatlan, csak progresszív JPEG-kódolás. Lazy loading,
+  stabil képarány; képhibánál kihagyott fotó, használható belépés.
+  Eredet és végleges prompt: `public/images/IMAGE-SOURCES.md`.
+- Végső `npm run check`: 169/169, típusok/lint/build sikeres. Érintett
+  böngészős próbák 12/12, képhibával és közös animációkapcsolóval is.
+  360/768/1440 px renderelt képek átnézve, nincs túlcsordulás.
+  Kimenet: `test-results/atmosphere-review/`, `atmosphere-final-e2e/`.
+- Production Chromium 3–3 s minta 360/1440 px-en: 4 animáció, 0 layout,
+  0 paint, 0 ms script; kb. 106/112 ms főszálmunka. Rövid helyi mérés,
+  nem fizikai eszközteszt. Szintetikus Page Visibility jelre mind leáll,
+  pause után változatlan transzformáció, reduced-motion alatt 0 animáció.
+- Kész, nincs commit/deploy. A live-round agent saját jegyzete/kódja megmaradt.
+  Portütközés elkerülésére a design 4235–4238 szerverei már leálltak;
+  a végső mérés külön 4245-ön futott, ez is leállítva.
+- Nincs hátralévő kezdőlapi teendő; a következő termékfeladat továbbra is
+  az élő kör, külön munkamenetben. Az alábbi kezdőlapi jegyzetek történetiek.
+
 ## Kész változások rögzítése — 2026-09-24
 
 - Felhasználói kérésre a közös munkapéldány kész változásai a main ágon

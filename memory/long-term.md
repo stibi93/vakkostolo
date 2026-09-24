@@ -95,6 +95,12 @@
   kis méret, skálázhatóság, külső képletöltés nélkül. Két transform-réteg
   mozog; pause, reduced-motion, IntersectionObserver és Page Visibility
   szabályozza. A részleteket a `docs/design.md` rögzíti; a játékfelület statikus.
+- A felhasználó külön kérte a teljes kezdőlap egyszínű hátterének megtörését.
+  Két halvány, mozgó levélárnyék és egy JPEG szőlőfürtös hangulatkép került be.
+  A rajz és háttér egy közös fejlécbeli kapcsolóról állítható; a játékoldalak
+  nem kapják meg a dekorációt. Indok: a kezdőlapon lehet hangulat, adatbevitel
+  közben a stabil felület fontosabb. A JPEG AI-illusztráció, nem konkrét
+  borászat dokumentációja; az eredet/prompt a public/images/IMAGE-SOURCES.md-ben.
 - A termék neve 2026-09-24-től **Vakkóstoló**, minden felületen azonos írásmóddal,
   dekoratív pont nélkül. A technikai projektazonosító `vakkostolo`.
 

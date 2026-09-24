@@ -50,3 +50,14 @@ Végleges rögzítés, 2026-09-24: felhasználói kérésre a prototípus `20120
 a teljes alkalmazásarculat és a szüreti bővítés az ezt követő feat(ui) commit.
 Friss közös check: 169 teszt, típusok, lint, build sikeres. Az átadás régebbi
 „nincs commit” állítása ezzel elavult; a feature-worktree-t ne másold vissza.
+
+Kezdőlapi háttér + JPEG bővítés 2026-09-24: HomeAtmosphere,
+useAmbientMotion, HomePage és PageFrame opcionális fejlécművelet módosul.
+A frissen megjelent live-round portfoglalást látva a saját 4235/4236
+szervereket leállítottam; a 4237/4238 tesztek is véget értek. A végső
+production mérés 4245-ön fut. Játék- és lobbyfájlokat nem módosítok.
+
+A teljes háttér + JPEG feladat kész és ellenőrizve. Check 169/169, app E2E
+12/12, három szélesség átnézve; performance.json az atmosphere-review alatt.
+A 4245-ös saját preview leállítva. Új asset és prompt: public/images/.
+A kész közös állapot tartalmazza a fejlécbeli közös mozgáskapcsolót.
