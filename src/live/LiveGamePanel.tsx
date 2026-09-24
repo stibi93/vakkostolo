@@ -5,6 +5,7 @@ import { validateRating } from '../domain/game';
 import { parseAlcohol } from '../games/model';
 import { lobbyErrorMessage } from '../lobby/api';
 import { LobbyView } from '../lobby/LobbyPanel';
+import { usePresence } from '../lobby/usePresence';
 import { useSnapshot } from '../lobby/useSnapshot';
 import type { GameSnapshot, LiveApi, SavedRating } from './model';
 import { secondsLeft } from './model';
@@ -15,8 +16,9 @@ export function LiveGamePanel({ api, gameId, showTitle = true, presentation = fa
 }) {
   const { state, refresh } = useSnapshot(api, gameId);
   const snapshot = state.snapshot;
+  const presence = usePresence(api.presence, gameId, snapshot);
   useEffect(() => { if (snapshot) onStatusChange?.(snapshot.game.status); }, [snapshot, onStatusChange]);
-  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!snapshot?.round}>
+  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!snapshot?.round} presence={presence}>
     {snapshot && <RoundPanel key={`${snapshot.role}:${snapshot.selfParticipantId ?? 'host'}:${snapshot.round?.id ?? 'lobby'}`}
       api={api} snapshot={snapshot} refresh={refresh} presentation={presentation}
       available={!state.stale && state.connection !== 'offline'} />}

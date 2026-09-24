@@ -1,15 +1,59 @@
 .lobby-panel { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
 .lobby-panel h2, .lobby-panel h3 { overflow-wrap: anywhere; }
-.lobby-panel h3 { margin-top: 24px; font-size: 24px; }
-.lobby-connection { font-size: 14px; }
-.lobby-participants { list-style: none; padding: 0; margin: 16px 0; }
-.lobby-participants li { display: flex; gap: 16px; align-items: baseline; border-bottom: 1px solid var(--line); padding: 16px 0; }
-.lobby-participants li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.lobby-seat { flex-shrink: 0; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); }
-.lobby-self { color: var(--accent); white-space: nowrap; }
-.lobby-panel .button-secondary { margin-top: 12px; }
-@media (max-width: 600px) { .lobby-panel > .button-secondary { width: 100%; } }
+.lobby-head h2 { margin-top: 0; }
+.lobby-stage { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: 0 0 16px; color: var(--ink); font-size: 17px; }
+.lobby-stage-label { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--sheet); background: var(--accent); padding: 4px 10px; border-radius: 2px; }
+.lobby-membership { display: flex; align-items: center; gap: 16px; margin: 0 0 16px; padding: 14px 16px; background: var(--blue); color: var(--ink); }
+.lobby-membership-seat { flex-shrink: 0; font-family: var(--display); font-weight: 700; font-size: 34px; line-height: 1; color: var(--accent);
+  font-variant-numeric: tabular-nums; padding-right: 16px; border-right: 1px solid var(--control-border); }
+.lobby-connection { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 0; }
+.lobby-connection::before { content: ''; flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--control-border); }
+.lobby-connection-live::before { background: #2f7d4f; }
+.lobby-connection-offline::before { background: var(--error); }
+.lobby-retry { margin-top: 12px; }
 
-.projector-view .lobby-panel { margin-top: 0; padding-top: 0; border-top: 0; }
-.projector-view .lobby-panel h3 { font-size: clamp(24px, 2.4vw, 36px); }
-.projector-view .lobby-participants { font-size: clamp(18px, 1.6vw, 26px); }
+.lobby-roster { margin-top: 24px; }
+.lobby-roster-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.lobby-roster-head h3 { margin: 0; font-size: 24px; }
+.lobby-online-count { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; color: var(--ink); }
+.lobby-pulse { width: 10px; height: 10px; border-radius: 50%; background: #2f7d4f; box-shadow: 0 0 0 0 #2f7d4f66; }
+.lobby-online-count.is-empty { color: var(--muted); }
+.lobby-online-count.is-empty .lobby-pulse { background: var(--control-border); animation: none; }
+
+/* Numbered label tiles: seat number on the band, nickname on the label. */
+.lobby-participants { list-style: none; padding: 0; margin: 16px 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.lobby-participants li { position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 6px; min-width: 0; padding: 12px 14px 12px;
+  background: var(--sheet); border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 2px;
+  transition: opacity .3s ease, border-color .3s ease; }
+.lobby-seat { font-family: var(--display); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; line-height: 1; color: var(--accent); }
+.lobby-name { min-width: 0; overflow-wrap: anywhere; color: var(--ink); font-weight: 600; }
+.lobby-self { color: var(--accent); white-space: nowrap; }
+.lobby-presence { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.lobby-presence::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--control-border); box-sizing: border-box; }
+.lobby-participants li.is-online .lobby-presence { color: #235f3b; font-weight: 600; }
+.lobby-participants li.is-online .lobby-presence::before { background: #2f7d4f; border-color: #2f7d4f; }
+.lobby-participants li.is-away { border-style: dashed; border-top-style: solid; border-top-color: var(--line); background: transparent; }
+.lobby-participants li.is-away .lobby-seat, .lobby-participants li.is-away .lobby-name { color: var(--muted); }
+.lobby-empty { padding: 18px; border: 1px dashed var(--control-border); text-align: center; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lobby-pulse { animation: lobby-pulse 2.4s ease-out infinite; }
+  .lobby-participants li.is-online { animation: lobby-arrive .45s ease-out; }
+  @keyframes lobby-pulse { 70% { box-shadow: 0 0 0 8px #2f7d4f00; } 100% { box-shadow: 0 0 0 0 #2f7d4f00; } }
+  @keyframes lobby-arrive { from { transform: translateY(6px); opacity: .4; } }
+}
+@media (max-width: 600px) {
+  .lobby-retry { width: 100%; }
+  .lobby-participants { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+}
+
+.projector-view .lobby-panel { margin-top: 0; padding: clamp(20px, 2.4vw, 36px); border: 1px solid var(--line); border-top: 6px solid var(--accent);
+  background: color-mix(in srgb, var(--sheet) 92%, transparent); }
+.projector-view .lobby-stage { font-size: clamp(18px, 1.6vw, 26px); }
+.projector-view .lobby-roster-head h3 { font-size: clamp(26px, 2.6vw, 40px); }
+.projector-view .lobby-online-count { font-size: clamp(16px, 1.4vw, 22px); }
+.projector-view .lobby-participants { grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 13vw, 220px), 1fr)); }
+.projector-view .lobby-seat { font-size: clamp(24px, 2.2vw, 36px); }
+.projector-view .lobby-name { font-size: clamp(18px, 1.6vw, 26px); }
+.projector-view .lobby-presence { font-size: clamp(12px, 1vw, 16px); }

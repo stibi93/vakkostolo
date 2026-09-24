@@ -6,6 +6,8 @@ import { gameErrorMessage } from '../games/api';
 import type { GamesApi } from '../games/model';
 import { LiveGamePanel } from '../live/LiveGamePanel';
 import type { LiveApi } from '../live/model';
+import { HomeAtmosphere, HomeMotionToggle } from '../ui/HomeAtmosphere';
+import { useAmbientMotion } from '../ui/useAmbientMotion';
 import { QrCode } from './QrCode';
 import { inviteUrl, publicAppOrigin, readStoredInvite } from './model';
 import type { Invite } from './model';
@@ -14,13 +16,15 @@ import './invites.css';
 /** Projector view: title, QR, link and nicknames only; wine data is never requested here. */
 export function ProjectorPage() {
   const { gameId = '' } = useParams();
-  return <div className="projector-shell">
+  const motion = useAmbientMotion();
+  return <div className="projector-shell"><HomeAtmosphere motion={motion}>
+    <div className="projector-toolbar"><HomeMotionToggle motion={motion} /></div>
     <main className="projector-main">
       {authRuntime.status === 'ready'
         ? <ProjectorSession store={authRuntime.store} games={authRuntime.games} lobby={authRuntime.lobby} gameId={gameId} />
         : <ProjectorNotice text="Az online kapcsolat nincs beállítva, ezért a kivetítő nem érhető el." />}
     </main>
-  </div>;
+  </HomeAtmosphere></div>;
 }
 
 function ProjectorNotice({ text }: { text: string }) {
@@ -80,8 +84,10 @@ function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: LiveA
       <p className="eyebrow">VAKKÓSTOLÓ · KÓSTOLÓ</p>
       <h1 id="projector-title">{title.value}</h1>
       <p className="projector-lead">Olvasd be a QR-kódot a telefonod kamerájával, és adj meg egy becenevet.</p>
-      <QrCode value={url} label="QR-kód a kóstolóba való belépéshez" />
-      <p className="projector-link"><code>{url}</code></p>
+      <figure className="projector-qr-card">
+        <QrCode value={url} label="QR-kód a kóstolóba való belépéshez" />
+        <figcaption className="projector-link"><span>Vagy nyisd meg:</span><code>{url}</code></figcaption>
+      </figure>
     </div>
     <LiveGamePanel presentation api={lobby} gameId={gameId} showTitle={false} />
   </section>;

@@ -42,7 +42,31 @@ Fókusz, láthatóvá válás, `pageshow`, hálózati visszatérés, Auth-friss�
 Realtime-újracsatlakozás is lekérdez. Párhuzamos események egy újabb kérésbe
 összevonódnak. Kijelentkezés/fiókváltás és lecsatolás után késői válasz nem térhet
 vissza. Hálózati hibánál a régi lista elavultként jelölt; jogosultságvesztéskor
-eltűnik. Az offline jelzés letiltja a kézi frissítést. Offline játék nincs.
+eltűnik. Kézi frissítőgomb nincs; hibánál „Újrapróbálás” jelenik meg. Offline játék nincs.
+
+## Élő jelenlét (ki van bent most)
+
+Privát Realtime Presence csatorna: `game:<játék-uuid>:presence` (`202609240008_lobby_presence.sql`).
+A `realtime.messages` RLS-szabályai szerint csak a kóstoló tagja jelezheti magát (INSERT),
+és csak a játékmester és a tagok láthatják (SELECT); kívülálló, idegen játék, más
+csatornanév és broadcast tiltott. A játékos csak a saját résztvevő-azonosítóját küldi
+(`{ participant_id }`); becenév a jelenlétben nem utazik, a felület a snapshotból párosít.
+A játékmesteri oldal és a kivetítő csak figyel. Oldalbezáráskor, navigáláskor vagy
+kapcsolatvesztéskor a szerver eltávolítja a jelenlétet; újracsatlakozáskor a kliens újra jelez.
+
+A jelenlét csak kijelzés: tagságot, pontozást, határidőt nem befolyásol. Egy tag elvileg
+más tag azonosítójával is jelezhet (a tartalmat a Realtime nem ellenőrzi); ez csak a
+„bent van” jelzést téveszthetné meg. Ha a csatorna nem érhető el, a lista a belépett
+résztvevőket mutatja jelenlét nélkül. `src/lobby/presence.ts` egy csatornát tart
+játékonként és fülenként (StrictMode-újracsatolás, bontás közbeni visszatérés).
+
+## Megjelenés
+
+A kivetítő és a játékos várója a kezdőlap háttérmozgását (`HomeAtmosphere`) használja,
+szüneteltető gombbal és `prefers-reduced-motion` esetén állóképpel. A QR átlátszatlan fehér
+kártyán, csendes zónával áll, a háttér nem fut át rajta. A játékosnál kör közben a háttér áll.
+A résztvevők számozott címkecsempék: bent lévő tömör, távollévő szaggatott keretű, szöveges
+állapotjelzéssel (nem csak színnel).
 
 ## Ellenőrzés
 
@@ -50,6 +74,9 @@ eltűnik. Az offline jelzés letiltja a kézi frissítést. Offline játék ninc
 - Playwright: host + két külön böngészőkörnyezetű vendég, azonos becenevek,
   websocket esemény, újratöltés, offline/HTTP-hiba, visszatérés, polling,
   idegen játék és hozzáférésvesztés. Valódi SDK, szintetikus HTTP/websocket.
+- `npm run test:presence:local`: valódi helyi Realtime Presence: kívülálló elutasítva,
+  host nem jelezhet játékosként, belépés/kilépés/kapcsolatbontás/visszatérés élőben; saját
+  szintetikus adatait törli.
 - `npm run test:lobby:local`: opt-in valódi helyi Supabase Auth/REST/RLS/Realtime
   próba. Futó helyi stack, alkalmazott migrációk és Supabase CLI kell hozzá.
   Négy saját szintetikus fiókot hoz létre; a végén csak ezeket és a kapcsolódó

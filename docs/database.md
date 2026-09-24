@@ -163,3 +163,9 @@ a `user_metadata` nem számít. Játékos (Google vagy anonim) továbbra is bel�
 A `private.before_user_created(event jsonb)` Auth hook elutasítja a nyilvános e-mail/jelszavas
 regisztrációt; csak a `supabase_auth_admin` futtathatja. Részletek: [belépés](auth.md).
 
+## Váró jelenlét — `202609240008_lobby_presence.sql`
+
+`private.presence_game_id(topic)` csak a pontos `game:<uuid>:presence` csatornanévből ad
+játékazonosítót. `realtime.messages` szabályok: `lobby_presence_read` (host vagy tag, csak
+`presence`), `lobby_presence_track` (csak tag). Részletek: [közös váró](lobby.md).
+

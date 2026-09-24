@@ -87,9 +87,20 @@ test('host és két külön vendég élő listája, azonos becenevek, esemény �
     await expect(one.getByText('Titkos pincészet')).toHaveCount(0);
     await one.screenshot({ path: info.outputPath('guest-lobby.png'), fullPage: true });
     await page.screenshot({ path: info.outputPath('host-lobby.png'), fullPage: true });
+    await expect(page.getByText('2 bent van most')).toBeVisible();
+    await expect(page.locator('.lobby-participants li.is-online')).toHaveCount(2);
+    await expect.poll(() => game.hub.watchers(gameId)).toBe(3);
     await one.reload();
     await expect(one.getByRole('heading', { name: 'Résztvevők (2)' })).toBeVisible();
     await expect(one.getByLabel('Becenév')).toHaveCount(0);
+    await expect(page.getByText('2 bent van most')).toBeVisible();
+    await two.goto('/');
+    await expect.poll(() => game.hub.watchers(gameId)).toBe(2);
+    await expect(page.getByText('1 bent van most')).toBeVisible();
+    await expect(page.locator('.lobby-participants li.is-away')).toHaveCount(1);
+    await expect(one.locator('.lobby-participants li.is-away')).toContainText('nincs bent');
+    await expect(page.getByRole('heading', { name: 'Résztvevők (2)' })).toBeVisible();
+    await page.screenshot({ path: info.outputPath('host-lobby-away.png'), fullPage: true });
     game.changeStatus('tasting');
     await expect(one.getByText('A kóstoló már folyamatban van.')).toBeVisible();
   } finally { await oneContext.close(); await twoContext.close(); }
@@ -99,14 +110,14 @@ test('offline, HTTP-hiba, billentyűzetes újrapróbálás és hozzáférésvesz
   const game = mockGame(); const state = await game.connect(page, 1); await join(page);
   await page.evaluate(() => window.dispatchEvent(new Event('offline')));
   await expect(page.getByRole('status')).toContainText('Nincs hálózati kapcsolat.');
-  await expect(page.getByRole('button', { name: 'Váró frissítése' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Újrapróbálás' })).toHaveCount(0);
   state.fail = true;
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect(page.getByRole('alert')).toContainText('nem frissíthető');
   await expect(page.getByRole('heading', { name: 'Résztvevők (1)' })).toBeVisible();
   await page.screenshot({ path: info.outputPath('stale-lobby.png'), fullPage: true });
   state.fail = false;
-  await page.getByRole('button', { name: 'Váró frissítése' }).focus(); await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Újrapróbálás' }).focus(); await page.keyboard.press('Enter');
   await expect(page.getByRole('alert')).toHaveCount(0);
   state.denied = true; game.hub.change(gameId);
   await expect(page.getByRole('alert')).toContainText('jelenlegi belépéseddel');

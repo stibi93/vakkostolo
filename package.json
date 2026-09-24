@@ -22,6 +22,7 @@
     "db:types": "node scripts/generate-db-types.mjs",
     "db:types:check": "node scripts/generate-db-types.mjs --check",
     "test:lobby:local": "node scripts/test-lobby-local.mjs",
+    "test:presence:local": "node scripts/test-presence-local.mjs",
     "test:live:local": "node scripts/test-live-local.mjs"
   },
   "dependencies": {

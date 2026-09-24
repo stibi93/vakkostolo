@@ -114,7 +114,7 @@ test('offline és elveszett mentési válasz: piszkozat megmarad, szerverállapo
   await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveValue('4500');
   f.state.failRead = true; await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect(page.getByRole('alert')).toBeVisible(); await expect(page.getByRole('button', { name: 'Tipp beküldése' })).toBeDisabled();
-  f.state.failRead = false; await page.getByRole('button', { name: 'Kóstoló frissítése' }).click();
+  f.state.failRead = false; await page.getByRole('button', { name: 'Újrapróbálás' }).click();
   f.state.failSubmit = true; await page.getByRole('button', { name: 'Tipp beküldése' }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.getByText('A szerver által mentett tipped')).toHaveCount(0);
@@ -135,7 +135,7 @@ test('szerver elutasítja a lejárt módosítást és a kliensóra sem nyújtja 
   await page.getByRole('button', { name: 'Tipp beküldése' }).click();
   await expect(page.getByRole('alert')).toContainText('Lejárt az idő'); expect(f.saved.size).toBe(0);
   await expect(page.getByRole('button', { name: 'Tipp beküldése' })).toBeDisabled();
-  f.state.expired = false; await page.getByRole('button', { name: 'Kóstoló frissítése' }).click();
+  f.state.expired = false; f.hub.change(gameId, 'rounds');
   await expect(page.getByRole('button', { name: 'Tipp beküldése' })).toBeEnabled();
   await page.clock.fastForward(121_000);
   // The 15s poll can resync with the independent server; make expiry authoritative too.

@@ -3,6 +3,7 @@ import type { Database } from '../lib/database.types';
 import { validateRating } from '../domain/game';
 import { isUuid } from '../games/model';
 import { createLobbyApi, LobbyError, parseLobbySnapshot } from '../lobby/api';
+import { createPresenceApi } from '../lobby/presence';
 import type { GameSnapshot, LiveApi, SavedRating } from './model';
 
 export class LiveError extends LobbyError {}
@@ -64,6 +65,7 @@ function fromServer(error: { message: string; code?: string }, status?: number):
 export function createLiveApi(client: SupabaseClient<Database>): LiveApi {
   return {
     watch: createLobbyApi(client).watch,
+    presence: createPresenceApi(client),
     async get(gameId) {
       if (!isUuid(gameId)) throw new LiveError('A kóstoló címe érvénytelen.', true);
       const began = performance.now();
