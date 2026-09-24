@@ -1,5 +1,13 @@
 # Aktuális munkamenet
 
+## Váró élő jelenléttel és kezdőlapi háttérrel kész — 2026-09-24
+
+- Kivetítőn és játékosváróban kezdőlapi háttérmozgás; QR átlátszatlan fehér kártyán.
+  Résztvevők számozott címkecsempéken, „bent van / nincs bent” élő jelzéssel.
+- Privát Realtime Presence (0008 migráció), kézi frissítőgomb megszűnt (hibánál Újrapróbálás).
+- check 239/239, e2e 72/72, `npm run test:presence:local` 8/8 valódi helyi Realtime-mal.
+- Hiányzik: fizikai telefonos próba (képernyőzár, háttérbe tett böngésző).
+
 ## Superadmin játékmester-belépés kész — 2026-09-24
 
 - /host: felhasználónév + jelszó + TOTP (hitelesítő app). Jog: `app_metadata`
