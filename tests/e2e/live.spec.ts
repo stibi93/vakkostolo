@@ -5,7 +5,7 @@ import { lobbyResponse, realtimeHub } from './support/lobby';
 const gameId = '10000000-0000-0000-0000-000000000001';
 const roundId = '20000000-0000-0000-0000-000000000001';
 const member = (index: number) => `30000000-0000-0000-0000-${String(index).padStart(12, '0')}`;
-interface RatingRow { round_id: string; price_huf: number; alcohol_tenths: number; liking: number; submitted_at: string }
+interface RatingRow { round_id: string; price_bucket: number; alcohol_tenths: number; liking: number; submitted_at: string }
 function fixture() {
   const hub = realtimeHub();
   const saved = new Map<number, RatingRow>();
@@ -51,7 +51,7 @@ function fixture() {
           const input = route.request().postDataJSON(); state.submitCalls.push(input);
           if (state.expired) return route.fulfill({ status: 400, json: { message: 'DEADLINE_PASSED' } });
           if (state.failSubmit) return route.abort('failed');
-          saved.set(index, { round_id: roundId, price_huf: input.p_price_huf, alcohol_tenths: input.p_alcohol_tenths,
+          saved.set(index, { round_id: roundId, price_bucket: input.p_price_bucket, alcohol_tenths: input.p_alcohol_tenths,
             liking: input.p_liking, submitted_at: new Date().toISOString() });
           if (state.loseSubmit) return route.abort('failed');
           return route.fulfill({ json: saved.get(index) });
@@ -61,10 +61,11 @@ function fixture() {
     },
   };
 }
-async function fill(page: Page, price = '4500') {
-  await page.getByLabel('Becsült palackár (Ft)').fill(price);
+const bucket = (page: Page, label = '4 001–6 000 Ft') => page.getByRole('radio', { name: label, exact: true });
+async function fill(page: Page, price = '4 001–6 000 Ft') {
+  await bucket(page, price).check();
   await page.getByLabel('Becsült alkoholfok (% vol)').fill('13,5');
-  await page.getByLabel('Tetszés (1–10)').selectOption('8');
+  await page.getByRole('radio', { name: 'Tetszés: 8 a 10-ből' }).check();
 }
 test('host indít, két vendég automatikusan értékel; mentés, módosítás, újratöltés', async ({ page, browser }, info) => {
   const f = fixture(); await f.attach(page, 0);
@@ -85,14 +86,14 @@ test('host indít, két vendég automatikusan értékel; mentés, módosítás, 
     await fill(one); await one.getByLabel('Becsült alkoholfok (% vol)').press('Enter');
     await expect(one.getByText('A szerver által mentett tipped')).toBeVisible();
     await expect(two.getByText('A szerver által mentett tipped')).toHaveCount(0);
-    await fill(one, '6000'); f.hub.change(gameId, 'rounds');
+    await fill(one, '6 001–8 000 Ft'); f.hub.change(gameId, 'rounds');
     await one.evaluate(() => { document.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('focus')); });
-    await expect(one.getByLabel('Becsült palackár (Ft)')).toHaveValue('6000');
+    await expect(bucket(one, '6 001–8 000 Ft')).toBeChecked();
     await one.getByRole('button', { name: 'Tipp módosítása' }).click();
-    await expect.poll(() => f.saved.get(1)?.price_huf).toBe(6000);
-    await one.reload(); await expect(one.getByLabel('Becsült palackár (Ft)')).toHaveValue('6000');
+    await expect.poll(() => f.saved.get(1)?.price_bucket).toBe(6);
+    await one.reload(); await expect(bucket(one, '6 001–8 000 Ft')).toBeChecked();
     expect(f.saved.size).toBe(1); expect(f.state.startCalls).toHaveLength(1);
-    await fill(two, '7000'); await two.getByRole('button', { name: 'Tipp beküldése' }).click();
+    await fill(two, '8 001–10 000 Ft'); await two.getByRole('button', { name: 'Tipp beküldése' }).click();
     await expect(two.getByText('A szerver által mentett tipped')).toBeVisible(); expect(f.saved.size).toBe(2);
     await one.screenshot({ path: info.outputPath('live-player-saved.png'), fullPage: true });
     await page.screenshot({ path: info.outputPath('live-host.png'), fullPage: true });
@@ -111,23 +112,23 @@ test('offline és elveszett mentési válasz: piszkozat megmarad, szerverállapo
   const f = fixture(); f.begin(); await f.attach(page, 1); await page.goto(`/play/${gameId}`); await fill(page);
   await page.evaluate(() => window.dispatchEvent(new Event('offline')));
   await expect(page.getByRole('button', { name: 'Tipp beküldése' })).toBeDisabled();
-  await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveValue('4500');
+  await expect(bucket(page)).toBeChecked();
   f.state.failRead = true; await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect(page.getByRole('alert')).toBeVisible(); await expect(page.getByRole('button', { name: 'Tipp beküldése' })).toBeDisabled();
   f.state.failRead = false; await page.getByRole('button', { name: 'Újrapróbálás' }).click();
   f.state.failSubmit = true; await page.getByRole('button', { name: 'Tipp beküldése' }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.getByText('A szerver által mentett tipped')).toHaveCount(0);
-  await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveValue('4500');
+  await expect(bucket(page)).toBeChecked();
   f.state.failSubmit = false; f.state.loseSubmit = true;
   await page.getByRole('button', { name: 'Tipp beküldése' }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.getByText('A szerver által mentett tipped')).toBeVisible();
   await page.screenshot({ path: info.outputPath('live-recovered.png'), fullPage: true });
-  await page.reload(); await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveValue('4500');
+  await page.reload(); await expect(bucket(page)).toBeChecked();
   f.state.deny = true; f.hub.change(gameId, 'games');
   await expect(page.getByText('A szerver által mentett tipped')).toHaveCount(0);
-  await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveCount(0);
+  await expect(bucket(page)).toHaveCount(0);
 });
 test('szerver elutasítja a lejárt módosítást és a kliensóra sem nyújtja a határidőt', async ({ page }, info) => {
   const f = fixture(); f.begin(); await f.attach(page, 1); await page.clock.install({ time: new Date('2020-01-01') });
@@ -156,15 +157,45 @@ test('jogvesztés után a függő beküldés válasza nem hozza vissza a játék
   const f = fixture(); f.begin(); await f.attach(page, 1);
   let reply: (() => Promise<void>) | undefined;
   await page.route('**/rest/v1/rpc/submit_rating', async route => {
-    reply = () => route.fulfill({ json: { round_id: roundId, price_huf: 4500, alcohol_tenths: 135, liking: 8, submitted_at: new Date().toISOString() } });
+    reply = () => route.fulfill({ json: { round_id: roundId, price_bucket: 5, alcohol_tenths: 135, liking: 8, submitted_at: new Date().toISOString() } });
   });
   await page.goto(`/play/${gameId}`); await fill(page);
   await page.getByRole('button', { name: 'Tipp beküldése' }).click();
   await expect.poll(() => !!reply).toBe(true);
   f.state.deny = true; f.hub.change(gameId, 'games');
   await expect(page.getByRole('alert')).toContainText('jelenlegi belépéseddel');
-  await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveCount(0);
+  await expect(bucket(page)).toHaveCount(0);
   await reply!();
   await expect(page.getByText('A szerver által mentett tipped')).toHaveCount(0);
-  await expect(page.getByLabel('Becsült palackár (Ft)')).toHaveCount(0);
+  await expect(bucket(page)).toHaveCount(0);
+});
+test('tippelőlap: árkategória-kártyák, fél fokos alkoholléptető 12%-os helyőrzővel, 1–10 tetszéskártyák', async ({ page }, info) => {
+  const f = fixture(); f.begin(); await f.attach(page, 1); await page.goto(`/play/${gameId}`);
+  const alcohol = page.getByLabel('Becsült alkoholfok (% vol)');
+  await expect(page.getByRole('group', { name: 'Becsült ár' }).getByRole('radio')).toHaveCount(8);
+  for (const label of ['< 1 000 Ft', '1 001–2 000 Ft', '4 001–6 000 Ft', '10 000+ Ft']) await expect(bucket(page, label)).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Tetszés' }).getByRole('radio')).toHaveCount(10);
+  await expect(alcohol).toHaveValue(''); await expect(alcohol).toHaveAttribute('placeholder', '12,0');
+  await page.screenshot({ path: info.outputPath('rating-empty.png'), fullPage: true });
+  await alcohol.click(); await expect(alcohol).toHaveValue('12,0');
+  await page.keyboard.type('13,5'); await expect(alcohol).toHaveValue('13,5');
+  await alcohol.fill('12,0');
+  await page.getByRole('button', { name: 'Alkoholfok növelése fél fokkal' }).click(); await expect(alcohol).toHaveValue('12,5');
+  await page.getByRole('button', { name: 'Alkoholfok csökkentése fél fokkal' }).click();
+  await page.getByRole('button', { name: 'Alkoholfok csökkentése fél fokkal' }).click(); await expect(alcohol).toHaveValue('11,5');
+  await alcohol.fill('13,7'); await page.getByRole('button', { name: 'Alkoholfok növelése fél fokkal' }).click();
+  await expect(alcohol).toHaveValue('14,0');
+  await bucket(page, '2 001–3 000 Ft').focus(); await page.keyboard.press('ArrowRight');
+  await expect(bucket(page, '3 001–4 000 Ft')).toBeChecked();
+  await page.getByRole('radio', { name: 'Tetszés: 3 a 10-ből' }).check();
+  await page.getByRole('button', { name: 'Tipp beküldése' }).click();
+  await expect(page.getByText('A szerver által mentett tipped')).toBeVisible();
+  await expect(page.locator('.live-saved')).toContainText('3 001–4 000 Ft · 14,0% vol · Tetszés: 3/10');
+  expect(f.saved.get(1)).toMatchObject({ price_bucket: 4, alcohol_tenths: 140, liking: 3 });
+  await page.getByRole('radio', { name: 'Tetszés: 9 a 10-ből' }).check();
+  await page.getByRole('button', { name: 'Tipp módosítása' }).click();
+  await expect.poll(() => f.saved.get(1)?.liking).toBe(9);
+  await expect(page.getByRole('radio', { name: 'Tetszés: 9 a 10-ből' })).toBeChecked();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: info.outputPath('rating-saved.png'), fullPage: true });
 });

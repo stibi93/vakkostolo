@@ -30,7 +30,8 @@ mezőkkel. Egy olvasási pillanatképen ellenőriz és ad vissza adatot.
 - `round`: az utolsó elindított kör `id`, `position`, `status`, `opened_at`,
   `closes_at`, `eligible`, `can_submit` mezői; indulás előtt null.
 - `own_rating`: kizárólag a hívó saját, ehhez a körhöz tartozó `round_id`,
-  `price_huf`, `alcohol_tenths`, `liking`, `submitted_at` értékei, vagy null.
+  `price_bucket`, `alcohol_tenths`, `liking`, `submitted_at` értékei, vagy null
+  (a 0009 migráció óta árkategória, nem forintösszeg).
   A host/kivetítő mindig null értéket kap. Nincs rejtett boradat, borfotó,
   másik válasz, pontszám vagy beküldési számláló.
 - A `server_now` és a kör határideje adja a kliens számlálójának alapját.
@@ -52,8 +53,11 @@ indít; 15 másodperces tartaléklekérés és visszatéréskori frissítés meg
 
 ## Felület és hibák
 
-- Üres, kötelező ár/alkohol/tetszés; vesszős tizedes alkohol is elfogadott.
-  A tetszés nem ad versenypontot. Saját mentett válasz újratöltéskor visszatér.
+- Kötelező árkategória (8 kártya), alkoholfok és tetszés (1–10 kártya). Az alkohol
+  mező `12,0` helyőrzőt mutat; belekattintva kitöltődik és kijelölődik, így gépelés
+  felülírja. A −/+ gomb a következő fél fokra lép (0–25%), vesszős tizedes is
+  elfogadott. A tetszés nem ad versenypontot. Saját mentett válasz újratöltéskor
+  visszatér, és a határidőig bármelyik érték módosítható.
 - A piszkozatot a háttérfrissítés nem írja felül. Csak sikeres szerverválasz vagy
   újraolvasott saját rating jelenhet meg mentettként. A piszkozat nem tartós:
   újratöltéskor elvész. Nincs offline beküldés vagy automatikus újraküldés.

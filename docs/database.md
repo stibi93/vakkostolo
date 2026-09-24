@@ -19,8 +19,9 @@ A `private.is_host` és `private.is_member` segédek elkerülik az egymást reku
 hívó RLS policyket. A `private` séma ne szerepeljen a Data API exposed schemas listáján.
 
 Az összetett idegen kulcsok garantálják, hogy a válasz résztvevője és köre ugyanahhoz
-a játékhoz tartozzon. Egy játékos/kör kombináció egyedi. Ár integer HUF, alkohol
-egész tized-százalékpont (0–250), tetszés 1–10. A beviteli felső árhatár 1 000 000 Ft.
+a játékhoz tartozzon. Egy játékos/kör kombináció egyedi. A valós bor ára integer HUF
+(felső határ 1 000 000 Ft), a tipp ára 1–8 árkategória (0009 óta), alkohol
+egész tized-százalékpont (0–250), tetszés 1–10.
 Boradat nem változhat játékindítás után; ezt a következő host-RPC-k fogják ellenőrizni,
 a mostani alap közvetlen felhasználói írást egyáltalán nem enged.
 
@@ -55,14 +56,15 @@ Idegen és nem létező ID egyaránt `GAME_NOT_FOUND`. Ez host-DTO, játékosnak
 adható. Mindhárom RPC csak `authenticated` szereppel hívható, rögzített üres
 `search_path` mellett. Az anonim Auth-fiókot a belső ellenőrzés utasítja el.
 
-`submit_rating(p_round_id uuid, p_price_huf integer, p_alcohol_tenths integer,
-p_liking integer) → ratings`
+`submit_rating(p_round_id uuid, p_price_bucket integer, p_alcohol_tenths integer,
+p_liking integer) → ratings` (a 0009 migráció óta; előtte `p_price_huf`)
 
 Csak bejelentkezett játékost fogad. A tagságot az Auth UID-ből határozza meg,
 nem fogad másik játékos ID-t. Ellenőrzi az aktív játékot és nyitott kört,
 sorzár után a szerveridőt. Beszúr vagy felülír, a korlátokat a DB is ellenőrzi.
 Hibakódok: `AUTH_REQUIRED`, `ROUND_NOT_FOUND`, `ROUND_NOT_OPEN`,
-`DEADLINE_PASSED`, `NOT_A_PARTICIPANT`, `ROUND_NOT_ELIGIBLE`; hibás értéknél constraint violation.
+`DEADLINE_PASSED`, `NOT_A_PARTICIPANT`, `ROUND_NOT_ELIGIBLE`, `RATING_INVALID`
+(hiányzó vagy tartományon kívüli árkategória, alkohol vagy tetszés).
 A kör megnyitása után csatlakozott résztvevő csak a következő körben értékelhet.
 A körzár megakadályozza, hogy host-zárással egyszerre kicsússzon egy beküldés.
 
@@ -169,3 +171,12 @@ regisztrációt; csak a `supabase_auth_admin` futtathatja. Részletek: [belépé
 játékazonosítót. `realtime.messages` szabályok: `lobby_presence_read` (host vagy tag, csak
 `presence`), `lobby_presence_track` (csak tag). Részletek: [közös váró](lobby.md).
 
+## Árkategóriás tipp — `202609240009_rating_price_buckets.sql`
+
+A `ratings.price_bucket` (1–8) tárolja a tippet; a régi `price_huf` nullázható, és a
+`ratings_price_guess_present` korlát szerint legalább az egyik kitöltött. Az új
+`submit_rating` csak `price_bucket`-et ír (`price_huf = null`). A
+`private.price_bucket(integer)` a valós árat sorolja kategóriába (felső határ
+inkluzív: 1000, 2000, 3000, 4000, 6000, 8000, 10 000 Ft, fölötte 8); kliens nem
+hívhatja. A `games.scoring_version` 1 vagy 2 lehet, alapértéke 2. A
+`get_game_snapshot` `own_rating` mezője `price_bucket`-et ad `price_huf` helyett.

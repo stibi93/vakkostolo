@@ -118,30 +118,33 @@ export type Database = {
           game_id: string;
           round_id: string;
           participant_id: string;
-          price_huf: number;
+          price_huf: number | null;
           alcohol_tenths: number;
           liking: number;
           submitted_at: string;
+          price_bucket: number | null;
         };
         Insert: {
           id?: string;
           game_id: string;
           round_id: string;
           participant_id: string;
-          price_huf: number;
+          price_huf?: number | null;
           alcohol_tenths: number;
           liking: number;
           submitted_at?: string;
+          price_bucket?: number | null;
         };
         Update: {
           id?: string;
           game_id?: string;
           round_id?: string;
           participant_id?: string;
-          price_huf?: number;
+          price_huf?: number | null;
           alcohol_tenths?: number;
           liking?: number;
           submitted_at?: string;
+          price_bucket?: number | null;
         };
         Relationships: [];
       };
@@ -235,7 +238,7 @@ export type Database = {
       list_host_games: { Args: Record<never, never>; Returns: Json };
       preview_invite: { Args: { p_token: string }; Returns: Json };
       start_round: { Args: { p_game_id: string; p_expected_version: number; p_request_id: string }; Returns: string };
-      submit_rating: { Args: { p_round_id: string; p_price_huf: number; p_alcohol_tenths: number; p_liking: number }; Returns: Database['public']['Tables']['ratings']['Row'] };
+      submit_rating: { Args: { p_round_id: string; p_price_bucket: number; p_alcohol_tenths: number; p_liking: number }; Returns: Database['public']['Tables']['ratings']['Row'] };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

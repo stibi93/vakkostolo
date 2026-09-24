@@ -7,6 +7,7 @@ import { URL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { createClient } from '@supabase/supabase-js';
+import { signInLocalSuperadmin } from './local-superadmin.mjs';
 
 let config;
 try { config = JSON.parse(execFileSync('supabase', ['status', '-o', 'json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })); }
@@ -34,10 +35,8 @@ async function watch(client, gameId, count) {
 }
 try {
   const [host, one, two, outsider] = clients;
-  const email = `lobby-${randomUUID()}@example.test`, password = randomUUID();
-  const hostUser = data(await admin.auth.admin.createUser({ email, password, email_confirm: true }), 'Teszt-host').user;
+  const hostUser = await signInLocalSuperadmin(admin, host, 'lobby');
   ids.push(hostUser.id);
-  data(await host.auth.signInWithPassword({ email, password }), 'Host Auth');
   for (const client of [one, two, outsider]) ids.push(data(await client.auth.signInAnonymously(), 'Anonim Auth').user.id);
   const game = data(await host.rpc('create_game', { p_request_id: randomUUID(), p_title: 'Automatikus helyi várópróba',
     p_round_seconds: 120, p_reveal_every: 2, p_wines: [{ name: 'Rejtett tesztbor', price_huf: 5432, alcohol_tenths: 131 }] }), 'Játék');

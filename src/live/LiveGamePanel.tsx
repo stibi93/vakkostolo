@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { GameStatus, Rating } from '../domain/game';
-import { validateRating } from '../domain/game';
-import { parseAlcohol } from '../games/model';
+import { priceBucketLabel, validateRating } from '../domain/game';
 import { lobbyErrorMessage } from '../lobby/api';
 import { LobbyView } from '../lobby/LobbyPanel';
 import { usePresence } from '../lobby/usePresence';
 import { useSnapshot } from '../lobby/useSnapshot';
+import { RatingFields } from '../rating/RatingFields';
+import { draftFromRating, formatAlcohol, ratingFromDraft } from '../rating/draft';
+import type { RatingDraft } from '../rating/draft';
 import type { GameSnapshot, LiveApi, SavedRating } from './model';
 import { secondsLeft } from './model';
 import './live.css';
@@ -77,13 +79,10 @@ function StartRound({ api, snapshot, refresh, available }: {
     {error && <p className="auth-message" role="alert">{error}</p>}
   </div>;
 }
-type Fields = { price: string; alcohol: string; liking: string };
-const fields = (rating: Rating | null): Fields => rating ? { price: String(rating.priceHuf),
-  alcohol: String(rating.alcoholTenths / 10).replace('.', ','), liking: String(rating.liking) } : { price: '', alcohol: '', liking: '' };
 function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; enabled: boolean;
 }) {
-  const [draft, setDraft] = useState<Fields | null>(null);
+  const [draft, setDraft] = useState<RatingDraft | null>(null);
   const [ack, setAck] = useState<SavedRating | null>(null);
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -91,14 +90,12 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => { if (errors.length) errorBox.current?.focus(); }, [errors]);
   const saved = ack && (!snapshot.ownRating || Date.parse(ack.submittedAt) >= Date.parse(snapshot.ownRating.submittedAt)) ? ack : snapshot.ownRating;
-  const value = draft ?? fields(saved);
+  const value = draft ?? draftFromRating(saved);
   const round = snapshot.round!;
-  function change(name: keyof Fields, text: string) { setDraft({ ...value, [name]: text }); }
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy.current || !enabled || secondsLeft(snapshot) <= 0) return;
-    const rating: Rating = { priceHuf: /^\d+$/.test(value.price.trim()) ? Number(value.price) : NaN,
-      alcoholTenths: parseAlcohol(value.alcohol), liking: value.liking ? Number(value.liking) : NaN };
+    const rating: Rating = ratingFromDraft(value);
     const invalid = validateRating(rating); setErrors(invalid); if (invalid.length) return;
     busy.current = true; setPending(true);
     try {
@@ -110,17 +107,12 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   return <>
     {!round.eligible && <p className="auth-message">Ehhez a körhöz későn érkeztél. A következő tételtől adhatsz tippet.</p>}
     {saved && <div className="live-saved" role="status"><strong>A szerver által mentett tipped</strong>
-      <p>{saved.priceHuf.toLocaleString('hu-HU')} Ft · {(saved.alcoholTenths / 10).toLocaleString('hu-HU')}% vol · Tetszés: {saved.liking}/10</p>
+      <p>{priceBucketLabel(saved.priceBucket)} · {formatAlcohol(saved.alcoholTenths)}% vol · Tetszés: {saved.liking}/10</p>
     </div>}
     {round.eligible && <form onSubmit={(event) => void submit(event)} noValidate className="live-rating-form">
       <fieldset disabled={!enabled || pending}>
         <legend>A te tipped</legend>
-        <label>Becsült palackár (Ft)<input inputMode="numeric" value={value.price} onChange={e => change('price', e.target.value)} required /></label>
-        <label>Becsült alkoholfok (% vol)<input inputMode="decimal" value={value.alcohol} onChange={e => change('alcohol', e.target.value)} required /></label>
-        <label>Tetszés (1–10)<select value={value.liking} onChange={e => change('liking', e.target.value)} required>
-          <option value="">Válassz értéket</option>{Array.from({ length: 10 }, (_, i) => <option key={i+1} value={i+1}>{i+1}</option>)}
-        </select></label>
-        <p className="small-note">1: egyáltalán nem ízlik · 10: nagyon ízlik. A tetszés nem ad versenypontot.</p>
+        <RatingFields value={value} onChange={setDraft} />
         <button className="button-primary" type="submit">{pending ? 'Beküldés…' : saved ? 'Tipp módosítása' : 'Tipp beküldése'}</button>
       </fieldset>
       {draft && <p className="small-note">A mezőkben lévő módosítás még nincs visszaigazolva. Újratöltéskor a piszkozat elvész.</p>}

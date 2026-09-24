@@ -1,0 +1,47 @@
+.rating-fields { display: grid; gap: 28px; margin-bottom: 24px; }
+.rating-group { padding: 0; margin: 0; border: 0; min-width: 0; }
+.rating-group > legend { padding: 0; margin-bottom: 12px; font: 600 18px/1.3 var(--display); color: var(--ink); }
+.rating-group .small-note { margin-top: 10px; }
+
+/* Radio cards: the native input stays focusable and announced; the card is its visual. */
+.rating-choice { position: relative; display: block; margin: 0; cursor: pointer; }
+.rating-choice input[type='radio'] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.rating-choice span { display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 100%; min-height: 48px;
+  padding: 10px 8px; text-align: center; color: var(--ink); background: var(--sheet); border: 1px solid var(--control-border); border-radius: 2px;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease; }
+.rating-choice:hover span { border-color: var(--accent); }
+.rating-choice input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--paper); box-shadow: inset 0 4px 0 var(--ink); }
+.rating-choice input:focus-visible + span { outline: 3px solid var(--ink); outline-offset: 2px; }
+fieldset:disabled .rating-choice, fieldset:disabled .rating-choice input { cursor: not-allowed; }
+fieldset:disabled .rating-choice:hover span { border-color: var(--control-border); }
+
+.rating-price-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+.rating-price span { font: 600 15px/1.25 var(--display); font-variant-numeric: tabular-nums; }
+
+/* Liking: numbered label cards 01–10. */
+.rating-liking-grid { display: grid; gap: 8px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.rating-liking span { min-height: 68px; padding: 0; border-top: 4px solid var(--accent);
+  font: 700 clamp(22px, 6vw, 30px)/1 var(--display); font-variant-numeric: tabular-nums; color: var(--accent); }
+.rating-liking input:checked + span { color: var(--paper); box-shadow: none; border-top-color: var(--ink); }
+.rating-scale-ends { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+
+.rating-stepper { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; gap: 8px; align-items: stretch; max-width: 360px; }
+.rating-step { display: grid; place-items: center; gap: 0; min-height: 56px; padding: 4px; font: 600 26px/1 var(--display);
+  color: var(--accent); background: var(--sheet); border: 1px solid var(--accent); border-radius: 2px; cursor: pointer; }
+.rating-step small { font: 600 11px/1 Arial, sans-serif; color: var(--muted); }
+.rating-step:hover:not(:disabled) { background: var(--accent-soft); }
+.rating-step:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.rating-alcohol { position: relative; display: block; margin: 0; }
+.rating-fields .rating-alcohol input { box-sizing: border-box; width: 100%; height: 100%; min-height: 56px; margin: 0;
+  padding: 8px 56px 8px 12px; font: 600 26px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
+.rating-alcohol input::placeholder { color: var(--muted); opacity: .75; }
+.rating-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rating-choice input:checked + span { transform: translateY(-2px); }
+}
+@media (max-width: 600px) { .rating-liking span { aspect-ratio: 4 / 5; min-height: 56px; } }
+@media (max-width: 360px) {
+  .rating-price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rating-stepper { grid-template-columns: 56px minmax(0, 1fr) 56px; }
+}

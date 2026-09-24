@@ -18,9 +18,9 @@ function timestamp(value: unknown): string {
 }
 export function parseSavedRating(value: unknown, roundId: string): SavedRating {
   const r = record(value);
-  if (r.round_id !== roundId || !isUuid(r.round_id) || typeof r.price_huf !== 'number' ||
+  if (r.round_id !== roundId || !isUuid(r.round_id) || typeof r.price_bucket !== 'number' ||
     typeof r.alcohol_tenths !== 'number' || typeof r.liking !== 'number') return invalid();
-  const rating = { priceHuf: r.price_huf, alcoholTenths: r.alcohol_tenths, liking: r.liking };
+  const rating = { priceBucket: r.price_bucket, alcoholTenths: r.alcohol_tenths, liking: r.liking };
   if (validateRating(rating).length) return invalid();
   return { ...rating, roundId, submittedAt: timestamp(r.submitted_at) };
 }
@@ -55,6 +55,7 @@ function fromServer(error: { message: string; code?: string }, status?: number):
     DEADLINE_PASSED: 'Lejárt az idő. Ezt a módosítást a szerver már nem fogadta el.',
     ROUND_NOT_OPEN: 'A kör már nem fogad tippeket.',
     ROUND_NOT_ELIGIBLE: 'Ehhez a körhöz későn érkeztél. A következő tételtől adhatsz tippet.',
+    RATING_INVALID: 'A tipp hiányos vagy érvénytelen. Ellenőrizd az árkategóriát, az alkoholfokot és a tetszést.',
     WINES_INCOMPLETE: 'A boradatok hiányosak, ezért a kóstoló nem indítható.',
   };
   return new LiveError(accessLost && !Object.hasOwn(messages, error.message)
@@ -89,7 +90,7 @@ export function createLiveApi(client: SupabaseClient<Database>): LiveApi {
       const errors = validateRating(rating);
       if (errors.length) throw new LiveError(errors.join(' '));
       const { data, error, status } = await client.rpc('submit_rating', {
-        p_round_id: roundId, p_price_huf: rating.priceHuf, p_alcohol_tenths: rating.alcoholTenths, p_liking: rating.liking,
+        p_round_id: roundId, p_price_bucket: rating.priceBucket, p_alcohol_tenths: rating.alcoholTenths, p_liking: rating.liking,
       });
       if (error) throw fromServer(error, status);
       return parseSavedRating(data, roundId);

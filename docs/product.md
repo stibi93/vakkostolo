@@ -47,7 +47,10 @@ host böngészője tárolja, ezért más böngészőben a kivetítő nem tudja m
    15 másodperces pótló lekérés és visszacsatlakozás. Újratöltéshez a már belépett
    vendégnek nem kell újra a meghívó. A lista nem online jelenlétjelzés.
 4. A játékmester elindítja az első tételt. Mindenki az aktív értékelőt látja:
-   becsült palackár, becsült alkoholfok, tetszési index. Mindhárom kötelező.
+   becsült palackár (árkategória-kártyák), becsült alkoholfok (fél fokos léptető
+   vagy beírás, 12,0 helyőrzővel), tetszési index (1–10 kártyák). Mindhárom kötelező.
+   Árkategóriák: < 1 000, 1 001–2 000, 2 001–3 000, 3 001–4 000, 4 001–6 000,
+   6 001–8 000, 8 001–10 000 és 10 000+ Ft (felső határ a kategóriába tartozik).
 5. A beküldés szerver-visszaigazolást ad. A játékos a kör lejártáig módosíthat.
    Nincs kötelező automatikus beküldés, és nincs hamis „mentve” hálózati hibánál.
    Az első kör indítása és ez a válaszadási folyamat elkészült; részletek:
@@ -77,7 +80,22 @@ Időkeret: 30–1800 másodperc, alapérték 120. Szünet két tétel között v
 futó kör megállítása nem MVP-funkció. Lejárt kör nem nyitható újra. Későn érkező
 játékos a következő tételtől csatlakozhat, a korábbi körök válasza hiányzó marad.
 
-## Pontozás v1 — javasolt, módosítható termékdöntés
+## Pontozás v2 — árkategóriás tipp (új játékok alapértéke)
+
+Legfeljebb 100 pont/bor, fele ár, fele alkohol. A játékos árkategóriát tippel;
+a valódi árat a szerver sorolja kategóriába.
+
+```text
+árpont = 50, ha a kategória egyezik; 25 a szomszédos kategóriánál; különben 0
+alkoholpont = 50 × max(0, 1 − abs(tipp − valódi %) / 3)
+összpont = round(árpont + alkoholpont)
+```
+
+Példa: 5000 Ft / 13,5% bornál (4 001–6 000 Ft) 6 001–8 000 Ft / 14,0% tipp → 67 pont.
+A `games.scoring_version` 2 az új játékoknál; a v1 csak a régebbi, forintos tippű
+játékok újraszámolására marad.
+
+## Pontozás v1 — forintos tipp (régi játékok)
 
 Legfeljebb 100 pont/bor, fele ár, fele alkohol. A mércét indulás előtt mutatjuk.
 

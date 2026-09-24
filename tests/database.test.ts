@@ -57,7 +57,7 @@ describe('adatbázis jogosultsági határok', () => {
   it('a signed-out szerep nem olvashat és RPC-t sem hívhat', async () => {
     await asUser('', 'anon');
     await expect(db.query('select * from public.games')).rejects.toThrow(/permission denied/);
-    await expect(db.query('select public.submit_rating($1,5000,135,8)', [round])).rejects.toThrow(/permission denied/);
+    await expect(db.query('select public.submit_rating($1,5,135,8)', [round])).rejects.toThrow(/permission denied/);
   });
   it('a közvetlen írás a host és a játékos számára is tiltott', async () => {
     for (const user of [host, guest]) {
@@ -69,7 +69,7 @@ describe('adatbázis jogosultsági határok', () => {
   });
   it('csak felfedés után ad ki pillanatképet és idegen válaszokat', async () => {
     await asUser(other);
-    await db.query('select public.submit_rating($1,6000,140,7)', [round]);
+    await db.query('select public.submit_rating($1,6,140,7)', [round]);
     await asUser(guest);
     expect((await db.query('select * from public.ratings')).rows).toHaveLength(0);
     await db.exec(`reset role;
@@ -91,32 +91,32 @@ describe('adatbázis jogosultsági határok', () => {
 describe('biztonságos válaszbeküldés', () => {
   it('újrabeküldés ugyanazt a választ frissíti', async () => {
     await asUser(guest);
-    await db.query('select public.submit_rating($1,5000,135,8)', [round]);
-    await db.query('select public.submit_rating($1,6000,140,7)', [round]);
-    const result = await db.query<{ price_huf: number }>('select price_huf from public.ratings');
-    expect(result.rows).toEqual([{ price_huf: 6000 }]);
+    await db.query('select public.submit_rating($1,5,135,8)', [round]);
+    await db.query('select public.submit_rating($1,6,140,7)', [round]);
+    const result = await db.query<{ price_bucket: number; price_huf: number | null }>('select price_bucket, price_huf from public.ratings');
+    expect(result.rows).toEqual([{ price_bucket: 6, price_huf: null }]);
   });
   it('idegen játékba nem küldhet és hiányzó UID nem fogadható el', async () => {
     await asUser(guest);
-    await expect(db.query('select public.submit_rating($1,5000,135,8)', [otherRound])).rejects.toThrow(/NOT_A_PARTICIPANT/);
+    await expect(db.query('select public.submit_rating($1,5,135,8)', [otherRound])).rejects.toThrow(/NOT_A_PARTICIPANT/);
     await asUser('');
-    await expect(db.query('select public.submit_rating($1,5000,135,8)', [round])).rejects.toThrow(/AUTH_REQUIRED/);
+    await expect(db.query('select public.submit_rating($1,5,135,8)', [round])).rejects.toThrow(/AUTH_REQUIRED/);
   });
   it('a szerver akkor is elutasítja a lejárt választ, ha a kör még open', async () => {
     await db.exec(`update public.rounds set closes_at = now() - interval '1 second' where id = '${round}'`);
     await asUser(guest);
-    await expect(db.query('select public.submit_rating($1,5000,135,8)', [round])).rejects.toThrow(/DEADLINE_PASSED/);
+    await expect(db.query('select public.submit_rating($1,5,135,8)', [round])).rejects.toThrow(/DEADLINE_PASSED/);
   });
   it('a host által korán lezárt kör nem fogad választ', async () => {
     await db.exec(`update public.rounds set status = 'closed' where id = '${round}'`);
     await asUser(guest);
-    await expect(db.query('select public.submit_rating($1,5000,135,8)', [round])).rejects.toThrow(/ROUND_NOT_OPEN/);
+    await expect(db.query('select public.submit_rating($1,5,135,8)', [round])).rejects.toThrow(/ROUND_NOT_OPEN/);
   });
   it('hibás értéket az adatbázis korlátja is elutasít', async () => {
     await asUser(guest);
-    await expect(db.query('select public.submit_rating($1,-1,135,8)', [round])).rejects.toThrow(/check constraint/);
-    await expect(db.query('select public.submit_rating($1,5000,251,8)', [round])).rejects.toThrow(/check constraint/);
-    await expect(db.query('select public.submit_rating($1,5000,135,0)', [round])).rejects.toThrow(/check constraint/);
+    await expect(db.query('select public.submit_rating($1,0,135,8)', [round])).rejects.toThrow(/RATING_INVALID/);
+    await expect(db.query('select public.submit_rating($1,5,251,8)', [round])).rejects.toThrow(/RATING_INVALID/);
+    await expect(db.query('select public.submit_rating($1,5,135,0)', [round])).rejects.toThrow(/RATING_INVALID/);
   });
   it('nem lehet egyszerre két nyitott kör', async () => {
     await expect(db.query("insert into public.rounds(game_id,position,status,opened_at,closes_at) values($1,2,'open',now(),now()+interval '2 minutes')", [game])).rejects.toThrow(/unique constraint/);

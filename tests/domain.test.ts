@@ -1,22 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { canSubmit, canTransition, remainingSeconds, revealableIndexes, scoreRating, validateRating } from '../src/domain/game';
+import { canSubmit, canTransition, priceBucketOf, priceBuckets, remainingSeconds, revealableIndexes, scoreRating, validateRating } from '../src/domain/game';
 import { summarizeWithoutAi } from '../src/ai/summary';
 
 const wine = { name: 'Tesztbor', priceHuf: 5000, alcoholTenths: 135 };
-const rating = { priceHuf: 6000, alcoholTenths: 140, liking: 7 };
+const rating = { priceBucket: 6, alcoholTenths: 140, liking: 7 };
 
-describe('pontozás és validáció', () => {
-  it('a dokumentált példát számolja, a tetszés nem változtat pontot', () => {
-    expect(scoreRating(rating, wine)).toBe(82);
-    expect(scoreRating({ ...rating, liking: 1 }, wine)).toBe(82);
-    expect(scoreRating({ ...wine, liking: 10 }, wine)).toBe(100);
+describe('árkategóriák', () => {
+  it('a felső határ a kategóriába tartozik, a 10 000 Ft feletti ár az utolsóba', () => {
+    expect([0, 1000, 1001, 2000, 2001, 4000, 4001, 6000, 6001, 8000, 8001, 10000, 10001, 1_000_000].map(priceBucketOf))
+      .toEqual([1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8]);
+    expect(priceBuckets.map((bucket) => bucket.label)).toEqual(['< 1 000 Ft', '1 001–2 000 Ft', '2 001–3 000 Ft',
+      '3 001–4 000 Ft', '4 001–6 000 Ft', '6 001–8 000 Ft', '8 001–10 000 Ft', '10 000+ Ft']);
+  });
+});
+
+describe('pontozás (2. verzió) és validáció', () => {
+  it('pontos kategória 50, szomszédos 25 árpont; a tetszés nem változtat pontot', () => {
+    expect(scoreRating({ ...rating, priceBucket: 5, alcoholTenths: 135 }, wine)).toBe(100);
+    expect(scoreRating(rating, wine)).toBe(67);
+    expect(scoreRating({ ...rating, liking: 1 }, wine)).toBe(67);
+    expect(scoreRating({ ...rating, priceBucket: 7, alcoholTenths: 135 }, wine)).toBe(50);
   });
   it('nagy hibánál is 0–100 közötti marad', () => {
-    expect(scoreRating({ priceHuf: 10000, alcoholTenths: 165, liking: 1 }, wine)).toBe(0);
-    expect(scoreRating({ priceHuf: 0, alcoholTenths: 0, liking: 1 }, wine)).toBe(0);
+    expect(scoreRating({ priceBucket: 8, alcoholTenths: 165, liking: 1 }, wine)).toBe(0);
+    expect(scoreRating({ priceBucket: 1, alcoholTenths: 0, liking: 1 }, wine)).toBe(0);
   });
-  it.each([NaN, Infinity, -1, 1_000_001, 0.5])('tiltott ár: %s', (priceHuf) => {
-    expect(validateRating({ ...rating, priceHuf })).not.toHaveLength(0);
+  it.each([NaN, Infinity, 0, 9, 1.5])('tiltott árkategória: %s', (priceBucket) => {
+    expect(validateRating({ ...rating, priceBucket })).not.toHaveLength(0);
   });
   it('tiltja az érvénytelen alkoholt és tetszést', () => {
     expect(validateRating({ ...rating, alcoholTenths: 251, liking: 0 })).toHaveLength(2);

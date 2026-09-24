@@ -6,6 +6,7 @@ import process from 'node:process';
 import { URL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { createClient } from '@supabase/supabase-js';
+import { signInLocalSuperadmin } from './local-superadmin.mjs';
 let config;
 try { config = JSON.parse(execFileSync('supabase', ['status', '-o', 'json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })); }
 catch { throw new Error('Indítsd el a helyi Supabase stacket, és alkalmazd a migrációkat.'); }
@@ -29,9 +30,8 @@ async function watch(client, game, count) {
 }
 try {
   const [host, peer, one, two, outsider] = clients;
-  const email = `round-${randomUUID()}@example.test`, password = randomUUID();
-  ids.push(data(await admin.auth.admin.createUser({ email, password, email_confirm: true }), 'Teszt-host').user.id);
-  const session = data(await host.auth.signInWithPassword({ email, password }), 'Host Auth').session;
+  const hostUser = await signInLocalSuperadmin(admin, host, 'round'), session = hostUser.session;
+  ids.push(hostUser.id);
   data(await peer.auth.setSession(session), 'Második hostkapcsolat');
   for (const client of [one, two, outsider]) ids.push(data(await client.auth.signInAnonymously(), 'Anonim Auth').user.id);
   const game = data(await host.rpc('create_game', { p_request_id: randomUUID(), p_title: 'Automatikus élőkör-próba',
@@ -55,19 +55,19 @@ try {
   ensure(data(await host.rpc('start_round', { p_game_id: game, p_expected_version: 1, p_request_id: requests[winner] }), 'Ismételt indítás') === round, 'Ismétlés másik kört ad');
   ensure(data(await one.rpc('get_game_snapshot', { p_game_id: game }), 'Változatlan határidő').round.closes_at === first.round.closes_at, 'Ismétlés újraindította az órát');
   data(await outsider.rpc('join_game', { p_token: invite.token, p_nickname: 'Késői' }), 'Késői belépés');
-  ensure((await outsider.rpc('submit_rating', { p_round_id: round, p_price_huf: 1000, p_alcohol_tenths: 100, p_liking: 1 })).error?.message === 'ROUND_NOT_ELIGIBLE', 'Késői beküldés nem tiltott');
-  const rate = price => ({ p_round_id: round, p_price_huf: price, p_alcohol_tenths: 135, p_liking: 8 });
-  for (const result of await Promise.all([one.rpc('submit_rating', rate(4000)), one.rpc('submit_rating', rate(5000))])) data(result, 'Párhuzamos tippek');
-  data(await one.rpc('submit_rating', rate(6000)), 'Végső módosítás');
+  ensure((await outsider.rpc('submit_rating', { p_round_id: round, p_price_bucket: 1, p_alcohol_tenths: 100, p_liking: 1 })).error?.message === 'ROUND_NOT_ELIGIBLE', 'Késői beküldés nem tiltott');
+  const rate = bucket => ({ p_round_id: round, p_price_bucket: bucket, p_alcohol_tenths: 135, p_liking: 8 });
+  for (const result of await Promise.all([one.rpc('submit_rating', rate(4)), one.rpc('submit_rating', rate(5))])) data(result, 'Párhuzamos tippek');
+  data(await one.rpc('submit_rating', rate(6)), 'Végső módosítás');
   ensure(data(await one.from('ratings').select('*'), 'Saját válasz').length === 1, 'Válasz duplikálódott');
   ensure(data(await two.from('ratings').select('*'), 'Idegen válaszok').length === 0, 'Másik vendég tippje kiszivárgott');
   ensure(data(await host.rpc('get_game_snapshot', { p_game_id: game }), 'Host snapshot').own_rating === null, 'Host kapott rejtett választ');
-  ensure(data(await one.rpc('get_game_snapshot', { p_game_id: game }), 'Visszatérés').own_rating.price_huf === 6000, 'Mentett válasz nem tért vissza');
+  ensure(data(await one.rpc('get_game_snapshot', { p_game_id: game }), 'Visszatérés').own_rating.price_bucket === 6, 'Mentett válasz nem tért vissza');
   process.stdout.write('Valódi hostversengés, Realtime, késői belépés és saját tipp sikeres; várakozás a 30 másodperces szerverhatáridőre.\n');
   await delay(Math.max(0, Date.parse(first.round.closes_at) - Date.now() + 150));
-  ensure((await one.rpc('submit_rating', rate(7000))).error?.message === 'DEADLINE_PASSED', 'Lejárt módosítás nem tiltott');
+  ensure((await one.rpc('submit_rating', rate(7))).error?.message === 'DEADLINE_PASSED', 'Lejárt módosítás nem tiltott');
   const expired = data(await one.rpc('get_game_snapshot', { p_game_id: game }), 'Lejárt snapshot');
-  ensure(!expired.round.can_submit && expired.own_rating.price_huf === 6000, 'Lejárt válasz vagy mentett állapot hibás');
+  ensure(!expired.round.can_submit && expired.own_rating.price_bucket === 6, 'Lejárt válasz vagy mentett állapot hibás');
   process.stdout.write('Helyi Supabase élőkör-próba sikeres, lejárt beküldés elutasítva.\n');
 } finally {
   for (const client of clients) { await client.removeAllChannels(); client.auth.stopAutoRefresh(); }

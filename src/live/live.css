@@ -4,14 +4,12 @@
 .live-round-heading h3 { margin: 0; font: 600 32px/1.1 var(--display); }
 .live-timer { font: 600 28px/1 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .live-rating-form fieldset { padding: 0; border: 0; margin: 0; min-width: 0; }
-.live-rating-form legend { font: 600 24px var(--display); margin-bottom: 16px; }
-.live-rating-form label { display: block; margin: 16px 0; font-size: 16px; }
-.live-rating-form input, .live-rating-form select { display: block; width: 100%; min-height: 48px; margin-top: 8px; font-size: 18px; }
+.live-rating-form > fieldset > legend { font: 600 24px var(--display); margin-bottom: 16px; }
 .live-rating-form .button-primary { width: 100%; }
 .live-saved { padding: 18px; border-left: 4px solid var(--accent); background: var(--blue); margin: 20px 0; }
 .live-saved p { margin: 8px 0 0; }
 .live-rating-form fieldset:disabled { opacity: .7; }
-@media (min-width: 760px) { .live-rating-form { max-width: 560px; } }
+@media (min-width: 760px) { .live-rating-form { max-width: 620px; } }
 
 .player-session .lobby-panel { margin-top: 0; padding-top: 0; border-top: 0; }
 .player-session .lobby-panel > h2 { font-family: var(--display); font-size: 30px; margin-top: 0; }

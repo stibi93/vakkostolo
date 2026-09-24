@@ -7,8 +7,9 @@ test('host → saját tipp → blokkos felfedés → végeredmény', async ({ pa
   await page.screenshot({ path: testInfo.outputPath('host.png'), fullPage: true });
   await page.getByRole('button', { name: 'Kóstoló indítása' }).click();
   await page.getByRole('button', { name: 'Játékos', exact: true }).click();
-  await page.getByLabel('Becsült palackár').fill('4900');
-  await page.getByLabel('Becsült alkoholfok').fill('12,5');
+  await page.getByRole('radio', { name: '4 001–6 000 Ft', exact: true }).check();
+  await page.getByLabel('Becsült alkoholfok (% vol)').fill('12,5');
+  await page.getByRole('radio', { name: 'Tetszés: 7 a 10-ből' }).check();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('player.png'), fullPage: true });
   await page.getByRole('button', { name: 'Tipp beküldése' }).click();

@@ -11,7 +11,7 @@ const request = '10000000-0000-0000-0000-000000000001';
 let game: string, token: string, round: string;
 interface Snapshot { game: { status: string; version: number }; server_now: string; role: string;
   round: null | { id: string; position: number; status: string; opened_at: string; closes_at: string; eligible: boolean; can_submit: boolean };
-  own_rating: null | { round_id: string; price_huf: number; alcohol_tenths: number; liking: number; submitted_at: string } }
+  own_rating: null | { round_id: string; price_bucket: number; alcohol_tenths: number; liking: number; submitted_at: string } }
 async function asUser(id: string, role = 'authenticated', aal = 'aal2') {
   await db.exec('reset role');
   await db.query("select set_config('request.jwt.claim.sub',$1,false)", [id]);
@@ -45,7 +45,7 @@ it('indítás az első kört nyitja szerveridővel; nincs titkos adat vagy mási
   const hostState = await snapshot();
   expect(hostState).toMatchObject({ game: { status: 'tasting', version: 2 }, round: { id: round, position: 1, status: 'open', eligible: false, can_submit: false }, own_rating: null });
   expect(Date.parse(hostState.round!.closes_at) - Date.parse(hostState.round!.opened_at)).toBe(120_000);
-  await asUser(other); await db.query('select public.submit_rating($1,123456,111,7)', [round]);
+  await asUser(other); await db.query('select public.submit_rating($1,8,111,7)', [round]);
   await asUser(guest);
   const player = await snapshot();
   expect(player.round).toMatchObject({ eligible: true, can_submit: true });
@@ -88,9 +88,9 @@ it('érvénytelen indítás atomikus, hiányzó bor és nem váró állapot tilt
 });
 it('saját válasz újraolvasható és egyetlen soron módosítható; másik résztvevőé rejtett', async () => {
   await start(); await asUser(guest);
-  await db.query('select public.submit_rating($1,5000,135,8)', [round]);
-  await db.query('select public.submit_rating($1,6000,140,9)', [round]);
-  expect((await snapshot()).own_rating).toMatchObject({ round_id: round, price_huf: 6000, alcohol_tenths: 140, liking: 9 });
+  await db.query('select public.submit_rating($1,5,135,8)', [round]);
+  await db.query('select public.submit_rating($1,6,140,9)', [round]);
+  expect((await snapshot()).own_rating).toMatchObject({ round_id: round, price_bucket: 6, alcohol_tenths: 140, liking: 9 });
   expect((await db.query('select * from public.ratings')).rows).toHaveLength(1);
   await asUser(other); expect((await snapshot()).own_rating).toBeNull();
   expect((await db.query('select * from public.ratings')).rows).toHaveLength(0);
@@ -98,15 +98,15 @@ it('saját válasz újraolvasható és egyetlen soron módosítható; másik ré
 it('későn belépő a nyitott körbe közvetlen RPC-vel sem küldhet', async () => {
   await start(); await asUser(late); await db.query('select public.join_game($1,$2)', [token, 'Késői']);
   expect((await snapshot()).round).toMatchObject({ eligible: false, can_submit: false });
-  await expect(db.query('select public.submit_rating($1,5000,135,8)', [round])).rejects.toThrow('ROUND_NOT_ELIGIBLE');
+  await expect(db.query('select public.submit_rating($1,5,135,8)', [round])).rejects.toThrow('ROUND_NOT_ELIGIBLE');
 });
 it('lejárt határidőnél open állapot és ismételt kérés mellett is tiltott a felülírás', async () => {
-  await start(); await asUser(guest); await db.query('select public.submit_rating($1,5000,135,8)', [round]);
+  await start(); await asUser(guest); await db.query('select public.submit_rating($1,5,135,8)', [round]);
   await db.exec('reset role');
   await db.query("update public.rounds set opened_at=clock_timestamp()-interval '2 minutes',closes_at=clock_timestamp()-interval '1 second' where id=$1", [round]);
   await asUser(guest); expect((await snapshot()).round?.can_submit).toBe(false);
-  await expect(db.query('select public.submit_rating($1,6000,140,9)', [round])).rejects.toThrow('DEADLINE_PASSED');
-  expect((await snapshot()).own_rating?.price_huf).toBe(5000);
+  await expect(db.query('select public.submit_rating($1,6,140,9)', [round])).rejects.toThrow('DEADLINE_PASSED');
+  expect((await snapshot()).own_rating?.price_bucket).toBe(5);
   await asUser(host); expect(await start()).toBe(round);
   expect((await snapshot()).round?.can_submit).toBe(false);
 });
@@ -116,4 +116,21 @@ it('Realtime csak publikus köradatot adhat; ratings és titkos táblák nincsen
   await start(); await asUser(late);
   expect((await db.query('select * from public.rounds')).rows).toHaveLength(0);
   await expect(db.query("update public.games set status='tasting' where id=$1", [game])).rejects.toThrow(/permission denied/);
+});
+it('árkategória: új játék 2-es pontozási verziót kap, a mentett tipp csak kategóriát tárol', async () => {
+  await db.exec('reset role');
+  expect((await db.query('select scoring_version from public.games where id=$1', [game])).rows).toEqual([{ scoring_version: 2 }]);
+  await expect(db.query('update public.games set scoring_version=3 where id=$1', [game])).rejects.toThrow(/check constraint/);
+  const buckets = await db.query<{ b: number }>(`select private.price_bucket(v) as b
+    from unnest(array[0,1000,1001,2000,2001,4000,4001,6000,6001,8000,8001,10000,10001]) v`);
+  expect(buckets.rows.map((row) => row.b)).toEqual([1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 7, 8]);
+  await asUser(host); await start(); await asUser(guest);
+  for (const bad of ['9,135,8', 'null,135,8', '5,null,8', '5,135,null', '5,135,11']) {
+    await expect(db.query(`select public.submit_rating($1,${bad})`, [round])).rejects.toThrow('RATING_INVALID');
+  }
+  await db.query('select public.submit_rating($1,8,120,3)', [round]);
+  const own = (await snapshot()).own_rating!;
+  expect(Object.keys(own).sort()).toEqual(['alcohol_tenths', 'liking', 'price_bucket', 'round_id', 'submitted_at']);
+  expect(own).toMatchObject({ price_bucket: 8, alcohol_tenths: 120, liking: 3 });
+  await expect(db.query('select private.price_bucket(1000)')).rejects.toThrow(/permission denied/);
 });
