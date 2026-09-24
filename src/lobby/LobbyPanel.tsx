@@ -5,6 +5,7 @@ import type { PresenceView } from './presence';
 import { useSnapshot } from './useSnapshot';
 import type { LobbyState } from './store';
 import './lobby.css';
+import { useAmbientMotion } from '../ui/useAmbientMotion';
 
 export function LobbyPanel({ api, gameId, showTitle = true }: { api: LobbyApi; gameId: string; showTitle?: boolean }) {
   const { state, refresh } = useSnapshot(api, gameId);
@@ -18,6 +19,9 @@ export function LobbyView({ state, refresh, showTitle = true, children, activeRo
   presence?: PresenceView | null;
 }) {
   const snapshot = state.snapshot;
+  const motion = useAmbientMotion();
+  const connectionState = state.connection === 'offline' ? 'offline'
+    : state.stale || state.error ? 'fallback' : !snapshot ? 'connecting' : state.connection;
   const self = snapshot?.participants.find((participant) => participant.id === snapshot.selfParticipantId);
   const live = presence?.status === 'live';
   const onlineCount = live ? snapshot?.participants.filter((p) => presence.online.has(p.id)).length ?? 0 : 0;
@@ -39,7 +43,7 @@ export function LobbyView({ state, refresh, showTitle = true, children, activeRo
           <strong>#{seatLabel(self.seat)}</strong>.</span>
       </p>}
     </header>}
-    <p className={`lobby-connection lobby-connection-${state.connection}`} role="status">
+    <p className={`lobby-connection lobby-connection-${connectionState}${motion.running ? ' connection-motion' : ''}`} role="status">
       {!snapshot && state.loading ? 'A váró betöltése…' : connection}
       {snapshot && state.stale && ' A lista a korábban betöltött állapotot mutatja.'}</p>
     {state.error && <p role="alert" className="auth-message">{state.error}</p>}

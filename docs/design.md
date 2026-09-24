@@ -81,8 +81,9 @@ A teljes kezdőlap mögött további két, halvány szőlőlevél-árnyékréteg
 jelez: 9 és 11 másodpercenként elúszik és elhalványul, eltolt indulással.
 Ezek csak `transform` és `opacity` tulajdonságot animálnak; legfeljebb hat
 réteg mozog egyszerre, a szövegek végig stabilak.
-A `HomeAtmosphere` csak ezen az útvonalon él, a `useAmbientMotion` közös
-állapota kezeli a rajzot és a hátteret. A fejléc közös kapcsolójával minden mozgás
+A `HomeAtmosphere` az App szintjén, minden útvonal mögött egyetlen példányban él.
+Az AppMotionContext közös állapota kezeli a rajzot és a hátteret; navigáláskor
+a szüneteltetés megmarad. A fejléc közös kapcsolójával a dekoratív mozgás
 megállítható; rejtett böngészőlapon és reduced-motion esetén mind leáll.
 A fix hátteret görgetés közben is látni; a rajz továbbra is külön szünetel,
 ha kikerül a képernyőről. A háttér nincs interakcióban a tartalommal, nem kap
@@ -105,13 +106,27 @@ felület útvonala továbbra is `/host`.
 
 A kezdőlap főművelete „Csatlakozás a játékhoz”, célja a `/join` belépési oldal.
 Az oldal a közös űrlaparculattal fogadja a meghívólinket, majd a meglévő
-meghívó-ellenőrzéshez és beceneves váróbelépéshez vezet. Nincs háttéranimáció
-az adatbevitel mögött. Hibás linknél a mező fókuszt és kapcsolt hibaüzenetet kap;
+meghívó-ellenőrzéshez és beceneves váróbelépéshez vezet. Hibás linknél a mező fókuszt és kapcsolt hibaüzenetet kap;
 online konfiguráció nélkül a felület egyértelműen jelzi a belépés hiányát.
 A kezdőlapi képes útmutató harmadik eleme is a valódi játékhoz csatlakozást
 magyarázza, nem a demót. A demó útvonala megmarad külön fejlesztői próbához.
 
-Kóstolás és adatbevitel közben nincs háttéranimáció.
+Felhasználói kérésre minden oldalon fut a közös háttér: a belépésnél, hostnál,
+játékosnál aktív körben is, demóban, kivetítőn, betöltéskor és a 404 oldalon.
+A mezők, QR-kódok és tartalmi panelek stabilak maradnak. Ez felülírja a korábbi,
+csak kezdőlapra és váróra korlátozott mozgási szabályt.
+
+A közös háttérben a levélárnyékok 11–13% fedettségűek,
+a szélvonalak legfeljebb 32%-ig erősödnek. A rétegek a képernyő közepére is
+benyúlnak; a váró panelje 72%, a kivetítő résztvevőpanelje 78% papírfedettségű.
+A QR és az értékelőfelület továbbra is átlátszatlan. Ugyanaz a négy háttérréteg
+mozog, új rajzolási ciklus vagy animációs függőség nélkül.
+
+Az „Élő kapcsolat” zöld pontja két másodperces opacity/transform pulzust kap,
+ha van betöltött, friss snapshot és élő Realtime-kapcsolat. Sikertelen frissítés,
+offline állapot, betöltés vagy kapcsolatvesztés esetén nem pulzál; reduced-motion
+és háttérbe tett böngészőlap esetén statikus. A pulzus a kapcsolat állapotát jelzi,
+nem egyes szerverüzenetek érkezését.
 
 ## Szöveg és ellenőrzés
 

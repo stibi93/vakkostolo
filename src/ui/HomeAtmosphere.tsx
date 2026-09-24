@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { AmbientMotion } from './useAmbientMotion';
 import './home-atmosphere.css';
 
-/** Only mounted on the homepage; two lightweight leaf-shadow layers behind the content. */
+/** One shared leaf-shadow and wind background for every application route. */
 export function HomeAtmosphere({ children, motion }: { children: ReactNode; motion: AmbientMotion }) {
   return <div className={`home-atmosphere${motion.running ? ' home-motion-running' : ''}`}>
     <div className="home-ambient" aria-hidden="true">

@@ -1,5 +1,24 @@
 # Tartós projektmemória
 
+## Háttéranimáció minden oldalon — 2026-09-24
+
+- A felhasználó minden oldalon a kezdőlapi hátteret kéri, az aktív játékot is
+  beleértve. Ez felülírja a korábbi, csak kezdőlap/váró/kivetítő korlátozást.
+- Egy HomeAtmosphere az App-ban; AppMotionContext osztja meg a pause állapotot
+  a PageFrame, demó, kivetítő és kezdőlapi rajz között. Navigálás megőrzi,
+  teljes újratöltés alaphelyzetbe állítja. Reduced-motion és rejtett lap leállítja.
+- Ne adj új oldalakhoz saját háttérpéldányt. Minden fejléc egy közös kapcsolót
+  mutat; QR és űrlapok fedett, stabil felületen maradnak.
+
+## Kontrasztosabb közös háttér és élő jelzés — 2026-09-24
+
+- Felhasználói kérésre a közös háttér nem csak a képernyő szélein fut: beljebb
+  hozott, 11–13%-os levélárnyékok és 32%-ig erősödő szélvonalak. A játékosváró
+  és kivetítő panelje enyhén áttetsző; a QR és értékelőlap fedett marad.
+- Az Élő kapcsolat pontja két másodperces, finom opacity/transform pulzust kap
+  friss snapshot és élő kapcsolat esetén. Hiba, offline, betöltés, reduced-motion
+  és rejtett lap esetén nincs pulzus. Ez kapcsolatállapot, nem üzenetenkénti jelzés.
+
 ## Kezdőlapról valódi játékba — 2026-09-24
 
 - A felhasználó a próbakóstoló helyett valódi játékosbelépést kér. A kezdőlap

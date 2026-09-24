@@ -1,15 +1,14 @@
 import { Link } from 'react-router';
 import { PageFrame } from './PageFrame';
 import { HarvestArtwork } from '../ui/HarvestArtwork';
-import { HomeAtmosphere, HomeMotionToggle } from '../ui/HomeAtmosphere';
-import { useAmbientMotion } from '../ui/useAmbientMotion';
+import { useAppMotion } from '../ui/useAppMotion';
 import { TastingInsights } from '../ui/TastingInsights';
 
 export function HomePage() {
-  const motion = useAmbientMotion();
-  return <HomeAtmosphere motion={motion}><PageFrame headerAction={<div className="home-header-actions">
-    <Link className="header-link" to="/jatekmester">Játékmestereknek</Link><HomeMotionToggle motion={motion} />
-  </div>}>
+  const motion = useAppMotion();
+  return <PageFrame headerAction={
+    <Link className="header-link" to="/jatekmester">Játékmestereknek</Link>
+  }>
     <section className="entry-poster" aria-labelledby="welcome-title">
       <div className="entry-intro">
         <p className="eyebrow">KÖZÖS BORKÓSTOLÓ · SAJÁT TIPPEK</p>
@@ -21,5 +20,5 @@ export function HomePage() {
       <HarvestArtwork motion={motion} />
     </section>
     <TastingInsights />
-  </PageFrame></HomeAtmosphere>;
+  </PageFrame>;
 }

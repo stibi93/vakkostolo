@@ -6,8 +6,8 @@ import { gameErrorMessage } from '../games/api';
 import type { GamesApi } from '../games/model';
 import { LiveGamePanel } from '../live/LiveGamePanel';
 import type { LiveApi } from '../live/model';
-import { HomeAtmosphere, HomeMotionToggle } from '../ui/HomeAtmosphere';
-import { useAmbientMotion } from '../ui/useAmbientMotion';
+import { HomeMotionToggle } from '../ui/HomeAtmosphere';
+import { useAppMotion } from '../ui/useAppMotion';
 import { QrCode } from './QrCode';
 import { inviteUrl, publicAppOrigin, readStoredInvite } from './model';
 import type { Invite } from './model';
@@ -16,15 +16,15 @@ import './invites.css';
 /** Projector view: title, QR, link and nicknames only; wine data is never requested here. */
 export function ProjectorPage() {
   const { gameId = '' } = useParams();
-  const motion = useAmbientMotion();
-  return <div className="projector-shell"><HomeAtmosphere motion={motion}>
+  const motion = useAppMotion();
+  return <div className="projector-shell">
     <div className="projector-toolbar"><HomeMotionToggle motion={motion} /></div>
     <main className="projector-main">
       {authRuntime.status === 'ready'
         ? <ProjectorSession store={authRuntime.store} games={authRuntime.games} lobby={authRuntime.lobby} gameId={gameId} />
         : <ProjectorNotice text="Az online kapcsolat nincs beállítva, ezért a kivetítő nem érhető el." />}
     </main>
-  </HomeAtmosphere></div>;
+  </div>;
 }
 
 function ProjectorNotice({ text }: { text: string }) {

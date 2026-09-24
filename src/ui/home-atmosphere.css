@@ -1,13 +1,13 @@
 .home-atmosphere { position: relative; isolation: isolate; min-height: 100svh; }
 .home-ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 0% 30%, #d9e6eb55, transparent 58%), radial-gradient(ellipse at 100% 85%, #eadce344, transparent 56%); }
-.ambient-leaves { position: absolute; width: min(860px, 80vw); aspect-ratio: 720 / 820; transform-origin: 15% 85%; }
+.ambient-leaves { position: absolute; width: min(1000px, 90vw); aspect-ratio: 720 / 820; transform-origin: 15% 85%; }
 .ambient-leaves svg { display: block; width: 100%; height: 100%; }
-.ambient-leaves-left { top: -210px; left: -260px; color: var(--accent); opacity: .07; transform: rotate(-18deg); }
-.ambient-leaves-right { right: -280px; bottom: -380px; color: var(--accent); opacity: .06; transform: rotate(150deg); transform-origin: 50% 50%; }
-.ambient-gust { position: absolute; width: min(560px, 85vw); aspect-ratio: 560 / 150; color: var(--accent); opacity: 0; }
+.ambient-leaves-left { top: -160px; left: -80px; color: var(--accent); opacity: .13; transform: rotate(-18deg); }
+.ambient-leaves-right { right: -100px; bottom: -300px; color: var(--accent); opacity: .11; transform: rotate(150deg); transform-origin: 50% 50%; }
+.ambient-gust { position: absolute; width: min(760px, 95vw); aspect-ratio: 560 / 150; color: var(--accent); opacity: 0; }
 .ambient-gust svg { width: 100%; height: 100%; display: block; }
-.ambient-gust-first { left: -100px; top: 30%; }
-.ambient-gust-second { right: -90px; top: 73%; }
+.ambient-gust-first { left: 12%; top: 38%; }
+.ambient-gust-second { right: 8%; top: 68%; }
 .home-motion-toggle { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); padding: 10px 12px; min-height: 44px; font-size: 11px; margin-left: auto; }
 .home-motion-toggle > span { font-size: 16px; }
 .home-motion-toggle:hover:not(:disabled) { background: var(--sheet); }
@@ -22,13 +22,15 @@
   @keyframes canopy-right { to { transform: translate(-26px, -22px) rotate(157deg); } }
   @keyframes wind-gust {
     0%, 10% { opacity: 0; transform: translate(-60px, 14px) rotate(-7deg); }
-    24%, 36% { opacity: .2; }
+    24%, 36% { opacity: .32; }
     60%, 100% { opacity: 0; transform: translate(170px, -20px) rotate(-3deg); }
   }
 }
 @media (max-width: 700px) {
   .ambient-leaves { width: 600px; }
-  .ambient-leaves-left { left: -285px; top: -185px; opacity: .06; }
-  .ambient-leaves-right { right: -340px; bottom: -285px; opacity: .05; }
+  .ambient-leaves-left { left: -180px; top: -145px; }
+  .ambient-leaves-right { right: -210px; bottom: -225px; }
+  .ambient-gust-first { left: -10%; }
+  .ambient-gust-second { right: -10%; }
   .home-motion-toggle { margin-left: 0; }
 }

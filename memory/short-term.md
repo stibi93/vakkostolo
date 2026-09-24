@@ -1,5 +1,41 @@
 # Aktuális munkamenet
 
+## Egységes háttér minden oldalon kész — 2026-09-24
+
+- App-szintű egyetlen HomeAtmosphere, AppMotionContext/useAppMotion közös
+  állapottal. PageFrame, demó és kivetítő fejléce kapott közös kapcsolót;
+  a kezdőlapi rajz ugyanazt használja. Navigáláskor megmarad a szüneteltetés.
+- A külön kezdőlapi/váró/kivetítő háttérpéldányok megszűntek. A háttér aktív
+  körben is fut, a felhasználó minden oldalra kért animációt. A kivetítő külső
+  háttere átlátszó, a QR és az űrlapok fedettek. Betöltés és 404 is közös hátteret kap.
+- Check 239/239, típusok/lint/build sikeres. App/demo/invite/lobby E2E 38/38;
+  11 útvonalon egy háttér/egy kapcsoló, pause, navigációs megőrzés, reduced-motion
+  és túlcsordulás próbálva mobilon/asztalon. Renderelt belépés, host és demó átnézve.
+  Képek: test-results/global-atmosphere/. A böngészős Auth/Realtime próba szintetikus.
+- A párhuzamos rating-cards agent DemoApp RatingFormjához nem nyúltam;
+  csak importok/hook/fejléc változott, a koordinációs jegyzet ezt rögzíti.
+- A 4297/4298 tesztszerverek leálltak; commit/deploy nincs. A kért munka kész;
+  a párhuzamos értékelőlap-fejlesztés a saját átadása szerint folytatódik.
+
+## Háttérkontraszt és kapcsolatpulzus kész — 2026-09-24
+
+- Közös HomeAtmosphere erősebb árnyékokkal (11–13%) és szélvonalakkal (32%),
+  beljebb húzott rétegekkel. Nem került be új háttérréteg vagy függőség.
+- Játékosváró: 72%-os papírfedettségű panel kizárólag lobby állapotban;
+  kivetítő résztvevőpanelje 78%-os. QR és értékelőlap továbbra is fedett.
+- Az Élő kapcsolat zöld pontja 2 s pulzust kap. Friss snapshot + live állapot
+  szükséges; hibánál, offline/betöltéskor nem zöld és nem animált. Reduced-motion
+  és háttérbe tett lap megállítja; csak opacity/transform mozog.
+- npm run check: 239/239 teszt, típusok/lint/build sikeres. App/invite/lobby E2E
+  első futás: 28 sikeres, két asztali újratöltés/jelenlét próba időkorlátba futott.
+  A kettő külön, egy workerrel változtatás nélkül sikeres (2/2). Új pulzuspróba
+  mobilon és asztalon is sikeres: live → reduced-motion → hiba → visszatérés → offline.
+- Renderelt kezdőlap, mobil/asztali váró és asztali QR-kivetítő átnézve:
+  test-results/contrast-motion/. Újrapróba: contrast-motion-recheck/.
+  Auth/RPC/Realtime szintetikus, új élő Supabase- vagy fizikai telefonpróba nincs.
+- A 4287/4288 saját E2E-szerverek a tesztfutások végén leálltak. Commit/deploy nincs.
+  A kért felületi munka kész; következő termékfeladat továbbra is körvezérlés.
+
 ## Váró élő jelenléttel és kezdőlapi háttérrel kész — 2026-09-24
 
 - Kivetítőn és játékosváróban kezdőlapi háttérmozgás; QR átlátszatlan fehér kártyán.

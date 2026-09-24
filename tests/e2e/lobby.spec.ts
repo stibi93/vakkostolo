@@ -143,3 +143,31 @@ test('kimaradt eseményt polling és háttérből visszatérés javít, idegen j
   await expect(page.getByRole('alert')).toContainText('jelenlegi belépéseddel');
   await expect(page.getByRole('listitem')).toHaveCount(0);
 });
+
+test('élő kapcsolat pulzál, hibánál leáll; váróháttér megállítható', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const game = mockGame(); const state = await game.connect(page, 1); await join(page);
+  const indicator = page.locator('.lobby-connection');
+  const animation = () => indicator.evaluate(element => getComputedStyle(element, '::before').animationName);
+  await expect.poll(animation).toBe('connection-heartbeat');
+  await expect(page.locator('.player-session')).toHaveClass(/player-waiting/);
+  await page.evaluate(() => document.getAnimations().forEach(a => { if (a.effect?.getTiming().iterations === Infinity) a.currentTime = 2700; }));
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: info.outputPath('lobby-motion.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Háttérmozgás szüneteltetése' }).click();
+  await expect(page.locator('.home-atmosphere')).not.toHaveClass(/home-motion-running/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(animation).toBe('none');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await expect.poll(animation).toBe('connection-heartbeat');
+  state.fail = true; game.hub.change(gameId);
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect.poll(animation).toBe('none');
+  await expect(indicator).not.toHaveClass(/lobby-connection-live/);
+  state.fail = false;
+  await page.getByRole('button', { name: 'Újrapróbálás' }).click();
+  await expect.poll(animation).toBe('connection-heartbeat');
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await expect(indicator).toHaveClass(/lobby-connection-offline/);
+  await expect.poll(animation).toBe('none');
+});

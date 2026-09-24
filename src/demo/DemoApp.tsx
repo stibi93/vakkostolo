@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
+import { HomeMotionToggle } from '../ui/HomeAtmosphere';
+import { useAppMotion } from '../ui/useAppMotion';
 import type { FormEvent } from 'react';
 import { canSubmit, remainingSeconds, revealableIndexes, scoreRating, validateRating } from '../domain/game';
 import type { GameStatus, Rating, RoundStatus } from '../domain/game';
@@ -24,6 +26,7 @@ const alcohol = (value: number) => `${(value / 10).toLocaleString('hu-HU')}%`;
 const number = (value: number) => String(value).padStart(2, '0');
 
 export function DemoApp() {
+  const motion = useAppMotion();
   const demoPhotos = useDemoPhotos();
   const [view, setView] = useState<View>('host');
   const [status, setStatus] = useState<GameStatus>('lobby');
@@ -90,6 +93,7 @@ export function DemoApp() {
       <header className="topbar">
         <Link className="brand" to="/" aria-label="Vakkóstoló, kezdőlap">Vakkóstoló</Link>
         <span className="demo-badge"><span aria-hidden="true" />PRÓBAKÓSTOLÓ</span>
+        <HomeMotionToggle motion={motion} />
       </header>
 
       <main id="main" tabIndex={-1}>

@@ -10,7 +10,7 @@
 .join-form button { min-height: 48px; }
 .join-status { font-size: 20px; overflow-wrap: anywhere; }
 .join-panel h1 { overflow-wrap: anywhere; }
-.projector-shell { min-height: 100vh; background: var(--paper); color: var(--ink); }
+.projector-shell { min-height: 100vh; background: transparent; color: var(--ink); }
 .projector-main { box-sizing: border-box; min-height: 100vh; padding: clamp(24px, 4vw, 64px); display: grid; align-items: center; }
 .projector-toolbar { position: fixed; right: 12px; bottom: 12px; z-index: 2; }
 .projector-view { display: grid; gap: clamp(24px, 4vw, 64px); grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr); align-items: start; }

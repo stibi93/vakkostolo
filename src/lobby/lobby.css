@@ -11,6 +11,7 @@
 .lobby-connection::before { content: ''; flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--control-border); }
 .lobby-connection-live::before { background: #2f7d4f; }
 .lobby-connection-offline::before { background: var(--error); }
+.player-session.player-waiting { background: color-mix(in srgb, var(--sheet) 72%, transparent); }
 .lobby-retry { margin-top: 12px; }
 
 .lobby-roster { margin-top: 24px; }
@@ -38,6 +39,8 @@
 .lobby-empty { padding: 18px; border: 1px dashed var(--control-border); text-align: center; }
 
 @media (prefers-reduced-motion: no-preference) {
+  .lobby-connection-live.connection-motion::before { animation: connection-heartbeat 2s ease-in-out infinite; }
+  @keyframes connection-heartbeat { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
   .lobby-pulse { animation: lobby-pulse 2.4s ease-out infinite; }
   .lobby-participants li.is-online { animation: lobby-arrive .45s ease-out; }
   @keyframes lobby-pulse { 70% { box-shadow: 0 0 0 8px #2f7d4f00; } 100% { box-shadow: 0 0 0 0 #2f7d4f00; } }
@@ -49,7 +52,7 @@
 }
 
 .projector-view .lobby-panel { margin-top: 0; padding: clamp(20px, 2.4vw, 36px); border: 1px solid var(--line); border-top: 6px solid var(--accent);
-  background: color-mix(in srgb, var(--sheet) 92%, transparent); }
+  background: color-mix(in srgb, var(--sheet) 78%, transparent); }
 .projector-view .lobby-stage { font-size: clamp(18px, 1.6vw, 26px); }
 .projector-view .lobby-roster-head h3 { font-size: clamp(26px, 2.6vw, 40px); }
 .projector-view .lobby-online-count { font-size: clamp(16px, 1.4vw, 22px); }

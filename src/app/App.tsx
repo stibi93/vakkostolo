@@ -3,6 +3,9 @@ import { Link, Route, Routes } from 'react-router';
 import { PageFrame } from './PageFrame';
 import { HomePage } from './HomePage';
 import './app.css';
+import { HomeAtmosphere } from '../ui/HomeAtmosphere';
+import { useAmbientMotion } from '../ui/useAmbientMotion';
+import { AppMotionContext } from '../ui/useAppMotion';
 
 const DemoApp = lazy(() => import('../demo/DemoApp').then((module) => ({ default: module.DemoApp })));
 const OrganizerPage = lazy(() => import('./OrganizerPage').then((module) => ({ default: module.OrganizerPage })));
@@ -14,8 +17,9 @@ const PlayerEntryPage = lazy(() => import('../invites/PlayerEntryPage').then((mo
 const LobbyPage = lazy(() => import('../lobby/LobbyPage').then((module) => ({ default: module.LobbyPage })));
 
 export function App() {
+  const motion = useAmbientMotion();
   return (
-    <Suspense fallback={<PageFrame><p role="status">Az oldal betöltése…</p></PageFrame>}>
+    <AppMotionContext value={motion}><HomeAtmosphere motion={motion}><Suspense fallback={<PageFrame><p role="status">Az oldal betöltése…</p></PageFrame>}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/jatekmester" element={<OrganizerPage />} />
@@ -34,6 +38,6 @@ export function App() {
           <Link className="button-primary" to="/">Vissza a kezdőlapra <span aria-hidden="true">↗</span></Link>
         </PageFrame>} />
       </Routes>
-    </Suspense>
+    </Suspense></HomeAtmosphere></AppMotionContext>
   );
 }

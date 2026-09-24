@@ -43,7 +43,7 @@ test('konfiguráció nélkül a hostoldal tájékoztat és a demo elérhető mar
   await page.getByRole('link', { name: 'Játékmestereknek', exact: true }).click();
   await expect(page).toHaveURL(/\/jatekmester$/);
   await expect(page.getByRole('heading', { name: 'Kóstoló szervezése' })).toBeVisible();
-  await expect(page.locator('.home-ambient')).toHaveCount(0);
+  await expect(page.locator('.home-ambient')).toHaveCount(1);
   await page.reload();
   await expect(page.getByText('A közös online kóstoló még készül.', { exact: false })).toBeVisible();
   await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).click();
@@ -106,7 +106,7 @@ test('a kezdőlapi fotó betöltődik, képhibánál is használható a belépé
   await page.getByRole('link', { name: 'Játékmestereknek', exact: true }).click();
   await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).click();
   await expect(page).toHaveURL(/\/host$/);
-  await expect(page.locator('.home-ambient')).toHaveCount(0);
+  await expect(page.locator('.home-ambient')).toHaveCount(1);
 });
 
 test('a képes ismeretterjesztő blokk kutatásai billentyűzettel elérhetők', async ({ page }, testInfo) => {
@@ -134,4 +134,34 @@ test('a képes ismeretterjesztő blokk kutatásai billentyűzettel elérhetők',
   await insights.locator('summary').first().focus();
   await page.keyboard.press('Enter');
   await expect(insights.locator('details').first().getByRole('link')).not.toBeVisible();
+});
+
+
+test('közös háttér minden útvonalon, navigáláskor megmaradó szüneteltetéssel', async ({ page }, info) => {
+  test.setTimeout(60_000);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const routes = ['/', '/join', '/join/invalid', '/jatekmester', '/host', '/host/invalid', '/auth/callback', '/play/invalid', '/present/invalid', '/demo', '/missing'];
+  for (const [index, route] of routes.entries()) {
+    await page.goto(route);
+    await expect(page.getByText('Az oldal betöltése…', { exact: true })).toHaveCount(0);
+    await expect(page.locator('.home-ambient')).toHaveCount(1);
+    await expect(page.locator('.home-atmosphere')).toHaveClass(/home-motion-running/);
+    const toggle = page.getByRole('button', { name: 'Háttérmozgás szüneteltetése' });
+    await expect(toggle).toHaveCount(1);
+    await toggle.click();
+    await expect(page.locator('.home-atmosphere')).not.toHaveClass(/home-motion-running/);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    if ([1, 4, 9].includes(index)) {
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: info.outputPath(`global-background-${index}.png`), fullPage: true });
+    }
+  }
+  await page.getByRole('link', { name: 'Vissza a kezdőlapra' }).click();
+  await page.getByRole('link', { name: 'Csatlakozás a játékhoz' }).click();
+  await expect(page).toHaveURL(/\/join$/);
+  await expect(page.getByRole('button', { name: 'Háttérmozgás indítása' })).toBeVisible();
+  await expect(page.locator('.home-atmosphere')).not.toHaveClass(/home-motion-running/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.getByRole('button', { name: 'Mozgás kikapcsolva' })).toBeDisabled();
+  expect(await page.locator('.home-ambient').evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
 });
