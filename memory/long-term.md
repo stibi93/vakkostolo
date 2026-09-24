@@ -1,5 +1,14 @@
 # Tartós projektmemória
 
+## Kezdőlapról valódi játékba — 2026-09-24
+
+- A felhasználó a próbakóstoló helyett valódi játékosbelépést kér. A kezdőlap
+  főművelete /join; teljes meghívólink → /join/:token → becenév → közös váró.
+  A játékmester indítása automatikusan megnyitja a kóstolólapot.
+- A kézi belépés ugyanazt a meghívót használja, mint a QR. Nem adunk új
+  nyilvános játéklistát vagy rövid kódot; a szerver ellenőrzi a meghívót és tagságot.
+  Indok: a meglévő biztonságos belépési folyamatot kell elérhetővé tenni a kezdőlapról.
+
 ## Kezdőlapi képek szerepe — 2026-09-24
 
 - A felhasználó legújabb kérése szerint a három fotó infotainment szekció:
@@ -11,6 +20,16 @@
   nem vizsgált. Források/korlátok: docs/tasting-insights.md.
 - A fejlécben csak a Vakkóstoló márkanév szerepeljen, ismétlődő kategórianév
   nélkül; a láblécben ne ismételjük a márkát.
+
+## Kezdőlapi mozgás és szervezési tájékoztató — 2026-09-24
+
+- Felhasználói kérésre élénkebb levél- és szőlőmozgás, két finom szélfuvallat
+  egészíti ki az arculatot. Legfeljebb hat transform/opacity animáció; a közös
+  szüneteltetés, reduced-motion és képernyőn kívüli leállítás megtartandó.
+- A kezdőlap háromképes szerkesztett galériát, számozott címkéket és pohárpecsétet
+  használ. Generált hangulatképek, helyi tömörített JPEG-ek, dokumentált promptokkal.
+- A játékmesteri tájékoztató külön /jatekmester oldalra került, mert a felhasználó
+  külön akarta választani a kezdőlaptól. /host marad a funkcionális belépés.
 
 ## Értékelési szempontok a bemutatkozásban — 2026-09-24
 

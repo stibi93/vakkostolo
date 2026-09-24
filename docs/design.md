@@ -69,13 +69,18 @@ Forrás: `src/ui/HarvestArtwork.tsx`, stílus: `src/ui/harvest.css`. Nincs küls
 illusztráció vagy képszolgáltatás; ez dekoráció, nem egy játékbeli bor képe.
 A demó kis címkegrafikája megmarad, a csendélet csak a kezdőlapon látható.
 
-Két réteg mozog: a szőlőág finoman leng, mögötte a világos kör lassan eltolódik.
+Az illusztráció két rétege mozog: a szőlőág 7,5 másodperces félciklussal leng,
+mögötte a világos kör 16 másodperces félciklussal eltolódik.
 Kizárólag CSS `transform` animáció, JavaScript képkockahurok, videó, blur és
 új függőség nélkül. A szöveg, palack és pohár stabil. A megállító gomb a
 jelenlegi fázisban szüneteltet; újraindításkor onnan folytatja. Képernyőn kívül
 IntersectionObserver, háttérlapon Page Visibility állítja le a mozgást.
 A rendszer csökkentett mozgás beállítását induláskor és változáskor is követjük.
-A teljes kezdőlap mögött további két, halvány szőlőlevél-árnyékréteg mozog.
+A teljes kezdőlap mögött további két, halvány szőlőlevél-árnyékréteg mozog
+12 és 15 másodperces félciklussal. Két saját SVG-vonalrajz szélfuvallatot
+jelez: 9 és 11 másodpercenként elúszik és elhalványul, eltolt indulással.
+Ezek csak `transform` és `opacity` tulajdonságot animálnak; legfeljebb hat
+réteg mozog egyszerre, a szövegek végig stabilak.
 A `HomeAtmosphere` csak ezen az útvonalon él, a `useAmbientMotion` közös
 állapota kezeli a rajzot és a hátteret. A fejléc közös kapcsolójával minden mozgás
 megállítható; rejtett böngészőlapon és reduced-motion esetén mind leáll.
@@ -83,12 +88,28 @@ A fix hátteret görgetés közben is látni; a rajz továbbra is külön szüne
 ha kikerül a képernyőről. A háttér nincs interakcióban a tartalommal, nem kap
 fókuszt, és nem olvassa fel a képernyőolvasó.
 
-A játékmesteri rész mellett AI-val készített szőlőfürtös hangulatkép jelenik meg:
-`public/images/harvest-grapes.jpg`, 1536 × 1024 px, kb. 222 KiB progresszív JPEG.
-A kompozíció és méret az eredeti generált PNG-é, csak a webes kódolás tömörített.
-Lazy loading és megadott képarány; betöltési hibánál a kép kimarad, a belépés
-használható marad. Forrás és végleges prompt: `public/images/IMAGE-SOURCES.md`.
-Nem egy konkrét borászat vagy a kóstoló titkos borának fényképe.
+A kezdőlap háromképes galériája saját számozott címkékkel és pohárpecséttel
+kapcsolódik az arculathoz. AI-val készült hangulatképek:
+`public/images/harvest-grapes.jpg` (222 KiB), `vineyard-rows.jpg` (295 KiB)
+és `blind-tasting-table.jpg` (181 KiB). Progresszív JPEG-ek; az eredeti PNG
+kompozícióját és felbontását megtartják. A galéria képei késleltetve töltődnek,
+előre lefoglalt képaránnyal. Betöltési hibánál azonos méretű, pecsétes helyőrző
+marad. Források és végleges promptok: `public/images/IMAGE-SOURCES.md` és
+`public/images/GALLERY-SOURCES.md`. Nem konkrét borászat vagy a kóstoló titkos
+borának fényképei.
+
+A játékmesterek tájékoztatója külön, publikus `/jatekmester` aloldalon érhető
+el a kezdőlap fejlécéből. Itt szerepel az online működés készültsége, a belépés
+és a szervezés három lépése, kóstolóasztal-fotóval. A tényleges játékmesteri
+felület útvonala továbbra is `/host`.
+
+A kezdőlap főművelete „Csatlakozás a játékhoz”, célja a `/join` belépési oldal.
+Az oldal a közös űrlaparculattal fogadja a meghívólinket, majd a meglévő
+meghívó-ellenőrzéshez és beceneves váróbelépéshez vezet. Nincs háttéranimáció
+az adatbevitel mögött. Hibás linknél a mező fókuszt és kapcsolt hibaüzenetet kap;
+online konfiguráció nélkül a felület egyértelműen jelzi a belépés hiányát.
+A kezdőlapi képes útmutató harmadik eleme is a valódi játékhoz csatlakozást
+magyarázza, nem a demót. A demó útvonala megmarad külön fejlesztői próbához.
 
 Kóstolás és adatbevitel közben nincs háttéranimáció.
 

@@ -118,7 +118,7 @@ test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async 
   expect(unexpected).toEqual([]);
 });
 
-test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagság', async ({ page }) => {
+test('kezdőlapról meghívólink, becenév, valódi váró és megmaradó tagság', async ({ page }, testInfo) => {
   const calls = { signups: 0, previews: 0, joins: [] as Record<string, unknown>[] };
   const unexpected = await mockSupabase(page, async (route, url) => {
     if (url.pathname === '/rest/v1/rpc/preview_invite') {
@@ -138,7 +138,26 @@ test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagsá
     return true;
   });
 
-  await page.goto(`/join/${token}`);
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Csatlakozás a játékhoz' }).click();
+  await expect(page.getByRole('heading', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
+  await page.reload();
+  const inviteLink = page.getByLabel('Meghívólink', { exact: true });
+  await page.getByRole('button', { name: 'Meghívó megnyitása' }).click();
+  await expect(inviteLink).toBeFocused();
+  await expect(inviteLink).toHaveAttribute('aria-invalid', 'true');
+  await inviteLink.fill(`https://other.invalid/join/${token}`);
+  await inviteLink.press('Enter');
+  await expect(page.getByRole('alert')).toContainText('ehhez az oldalhoz');
+  expect(calls.signups).toBe(0);
+  expect(calls.previews).toBe(0);
+  await inviteLink.fill(`  ${new URL(page.url()).origin}/join/${token}  `);
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: testInfo.outputPath('player-entry.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await inviteLink.press('Enter');
+  await expect(page).toHaveURL(new RegExp(`/join/${token}$`));
   const nickname = page.getByLabel('Becenév');
   await expect(nickname).toBeVisible();
   await expect(page.getByText('Erre a kóstolóra hívtak meg:')).toBeVisible();
@@ -153,6 +172,7 @@ test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagsá
   await expect(page.getByRole('heading', { name: 'Péntesti kóstoló' })).toBeVisible();
   await expect(page.getByText('Bent vagy a váróban', { exact: false })).toContainText('Bent vagy a váróban Anna néven.');
   expect(calls.signups).toBe(1);
+  await page.screenshot({ path: testInfo.outputPath('player-waiting.png'), fullPage: true });
   expect(calls.joins).toEqual([{ p_token: token, p_nickname: 'Anna' }]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 

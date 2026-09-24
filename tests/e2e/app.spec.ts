@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('kezdőlap → próbakóstoló → újratöltés → kezdőlap', async ({ page }, testInfo) => {
+test('kezdőlap → játékosbelépés → újratöltés → kezdőlap', async ({ page }, testInfo) => {
   const demoRequests: string[] = [];
   page.on('request', (request) => {
     if (/\/src\/demo\/|\/assets\/DemoApp-/.test(request.url())) demoRequests.push(request.url());
@@ -18,13 +18,14 @@ test('kezdőlap → próbakóstoló → újratöltés → kezdőlap', async ({ p
   await page.keyboard.press('Enter');
   await expect(page.getByRole('main')).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('home.png'), fullPage: true });
-  await page.getByRole('link', { name: 'Próbakóstoló megnyitása' }).click();
-  await expect(page).toHaveURL(/\/demo$/);
-  await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
-  await expect(page.locator('header').getByText('VAKBORKÓSTOLÓ', { exact: true })).toHaveCount(0);
-  await expect(page.locator('footer')).not.toContainText('Vakkóstoló');
+  await expect(page.locator('a[href="/demo"]')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Csatlakozás a játékhoz' }).click();
+  await expect(page).toHaveURL(/\/join$/);
+  await expect(page.getByRole('heading', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('nincs beállítva');
+  await expect(page.getByLabel('Meghívólink', { exact: true })).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
   await page.getByRole('link', { name: 'Vakkóstoló, kezdőlap' }).click();
   await expect(page.getByRole('heading', { name: 'Vakborkóstoló, telefonon.' })).toBeVisible();
 });
@@ -34,7 +35,7 @@ test('ismeretlen útvonalról vissza lehet térni a kezdőlapra', async ({ page 
   await expect(page.getByRole('heading', { name: 'Az oldal nem található.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toHaveCount(0);
   await page.getByRole('link', { name: 'Vissza a kezdőlapra' }).click();
-  await expect(page.getByRole('link', { name: 'Próbakóstoló megnyitása' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
 });
 
 test('konfiguráció nélkül a hostoldal tájékoztat és a demo elérhető marad', async ({ page }) => {

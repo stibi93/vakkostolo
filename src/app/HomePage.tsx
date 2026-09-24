@@ -15,8 +15,8 @@ export function HomePage() {
         <p className="eyebrow">KÖZÖS BORKÓSTOLÓ · SAJÁT TIPPEK</p>
         <h1 id="welcome-title">Vakborkóstoló,<br /><em>telefonon.</em></h1>
         <p className="entry-copy">Kóstolj a többiekkel, és rögzítsd a saját értékelésedet a telefonodon.</p>
-        <Link className="button-primary" to="/demo">Próbakóstoló megnyitása <span aria-hidden="true">↗</span></Link>
-        <p className="entry-note">Helyi demó, három mintaborral. A tippek és a kiválasztott képek az oldal frissítéséig maradnak meg.</p>
+        <Link className="button-primary" to="/join">Csatlakozás a játékhoz <span aria-hidden="true">↗</span></Link>
+        <p className="entry-note">A játékmester meghívólinkjével és egy becenévvel beléphetsz a közös váróba.</p>
       </div>
       <HarvestArtwork motion={motion} />
     </section>

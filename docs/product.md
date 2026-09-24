@@ -11,13 +11,19 @@ a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
 
 | Szerep | Tervezett felület | Feladat |
 | --- | --- | --- |
-| Játékos | `/join/:token`, `/play/:gameId` | Becenév, váró, saját tippek, engedélyezett eredmény |
+| Játékos | `/join`, `/join/:token`, `/play/:gameId` | Meghívólink, becenév, váró, saját tippek, engedélyezett eredmény |
 | Játékmester | `/host`, `/host/:gameId` | Borok, meghívás, időzítő, körváltás, felfedés |
 | Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
 
 A hostbelépés, játéklétrehozás, meghívás, közös váró és az első élő kör
 beküldése elkészült. A szerkesztés, további körvezérlés és eredmények még terv. A kezdőlap a `/` címen van;
 a jelenlegi demo a `/demo` alatt három nézetkapcsolóval egy oldalon fut.
+A kezdőlap főgombja a `/join` játékosbelépésre vezet. Itt a játékmestertől
+kapott teljes meghívólink illeszthető be; a QR közvetlenül a `/join/:token`
+oldalt nyitja. A meghívó ellenőrzése és a becenév megadása után a játékos a
+közös váróba kerül, a játékmester indításakor automatikusan a kóstolólapra vált.
+Nincs nyilvános játéklista vagy külön, rövid belépőkód. A demó nem a kezdőlap
+elsődleges belépési folyamata.
 Az MVP-kivetítő a játékmester bejelentkezett böngészőjének másik lapja;
 megosztható, csak olvasható prezentációtoken későbbi bővítés. A váróállapota kész:
 kóstolócím, QR-kód, link és becenevek; boradatot nem kér le. A meghívó tokenjét a

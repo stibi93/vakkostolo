@@ -13,6 +13,29 @@
 - E kérés kész; következő termékegység továbbra is körvezérlés. A párhuzamos
   belépési/Auth-munka saját átadás szerint folytatandó. Push/deploy nem történt.
 
+## Kezdőlapi valódi játékosbelépés kész — 2026-09-24
+
+- Főgomb: Csatlakozás a játékhoz → /join. Új PlayerEntryPage fogadja a teljes
+  meghívólinket, majd a meglévő /join/:token beceneves belépés és /play/:gameId
+  közös váró következik. A QR továbbra is közvetlenül a meghívót nyitja.
+- A kezdőlapi demóhivatkozások és a szervezői aloldal próbagombja kikerült;
+  a képes útmutató harmadik eleme a csatlakozást és a várakozást magyarázza.
+  A külön /demo útvonal megmaradt. Jogosultság és játéklogika nem változott.
+- Az új beviteli mező csak a jelenlegi vagy konfigurált publikus oldal meghívóját
+  fogadja el; mindig helyi útvonalra navigál. Üres/hibás linknél fókusz és
+  hibaüzenet, konfiguráció nélkül egyértelmű tájékoztatás.
+- npm run check: 210/210 teszt, típusok, lint, build sikeres. Célzott app/invite/live
+  Playwright 34/34: kezdőlap → link → becenév → váró, újratöltés, hibák,
+  billentyűzet; hostindításra két vendég automatikus kóstolólapja is sikeres.
+  Szintetikus Auth/RPC/Realtime válaszok, ebben a körben új élő Supabase-próba nem volt.
+- A renderelt mobil/asztali kezdőlap, belépési űrlap és váró átnézve; nincs
+  túlcsordulás. Képek: test-results/player-entry-e2e/, player-entry-home-*.png.
+- Párhuzamos új superadmin/Google Auth munka külön worktree-ben látható.
+  A saját változások és integrációs határok: memory/player-entry-handoff.md.
+  A másik agent Auth és JoinPage fájljait megőriztem; commit/deploy nem történt.
+- E feladat kész. Következő integráció: a külön készülő Google-játékosbelépés
+  kapcsolódjon a /join felülethez, a meghívó és visszatérő tagság megőrzésével.
+
 ## Kezdőlapi képek funkciója és feliratok — 2026-09-24
 
 - A közös és demófejléc külön VAKBORKÓSTOLÓ felirata, valamint a lábléc
@@ -26,6 +49,26 @@
   test-results/home-purpose/. Következő termékegység továbbra is a körvezérlés.
 - A külön agent fotóigazítási és dokumentációs módosításai megmaradtak;
   a mostani commit kizárólag e feladat saját diffjét tartalmazza. Push/deploy nincs.
+
+## Gyorsabb mozgás, galéria és játékmesteroldal kész — 2026-09-24
+
+- Levélárnyékok 12/15 s, szőlőág 7,5 s félciklus; két finom SVG-szélfuvallat
+  9/11 s ciklussal. Közös szüneteltetés, reduced-motion és háttérlap-kezelés megmaradt.
+- Háromképes, számozott kezdőlapi galéria és saját pohárpecsét. Új generált
+  progresszív JPEG-ek: vineyard-rows.jpg (295 KiB), blind-tasting-table.jpg (181 KiB).
+  Pontos promptok: public/images/GALLERY-SOURCES.md. Stabil képhiba-helyőrző.
+- Szervezési tájékoztató és belépés külön /jatekmester oldalon, fejlécből elérhető.
+  A funkcionális /host útvonal és a párhuzamos élőjáték-fejlesztés megmaradt.
+- Friss check: 199/199 teszt, típusok, lint és build sikeres; app Playwright 12/12.
+  360/768/1440 px renderelt kezdőlap és aloldal átnézve; végső fotóigazítás
+  után új build és 360/1440 px vizuális próba is sikeres. Kimenet: test-results/breeze-review/.
+- Production Chromium: 3–3 s mérés, 6 animáció; 0 layout, 0 paint, 0 ms script,
+  107/96 ms alatti főszálmunka mobil/asztali viewporton. Rövid helyi minta, nem fizikai telefonmérés.
+- A párhuzamos munkamenet közben a1f04a0 és 7f82aa8 commitokba rögzítette az
+  arculati változásokat; ez az agent nem indított commitot vagy deployt.
+  A későbbi 7159661 szövegpontosítás megmaradt. Saját végső módosítás: fotóigazítás és docs/memória.
+- E feladatból nincs hátralévő megvalósítás. A következő termékegység továbbra is
+  a szerveroldali körvezérlés; az alábbi aktív arculati jegyzet történeti állapot.
 
 ## Bemutatkozó szövegek és arculati commit — 2026-09-24
 

@@ -9,6 +9,7 @@ const OrganizerPage = lazy(() => import('./OrganizerPage').then((module) => ({ d
 const HostArea = lazy(() => import('../auth/HostArea').then((module) => ({ default: module.HostArea })));
 const ProjectorPage = lazy(() => import('../invites/ProjectorPage').then((module) => ({ default: module.ProjectorPage })));
 const JoinPage = lazy(() => import('../invites/JoinPage').then((module) => ({ default: module.JoinPage })));
+const PlayerEntryPage = lazy(() => import('../invites/PlayerEntryPage').then((module) => ({ default: module.PlayerEntryPage })));
 
 const LobbyPage = lazy(() => import('../lobby/LobbyPage').then((module) => ({ default: module.LobbyPage })));
 
@@ -24,6 +25,7 @@ export function App() {
         <Route path="/present/:gameId" element={<ProjectorPage />} />
         <Route path="/auth/callback" element={<HostArea />} />
         <Route path="/play/:gameId" element={<LobbyPage />} />
+        <Route path="/join" element={<PlayerEntryPage />} />
         <Route path="/join/:token" element={<JoinPage />} />
         <Route path="*" element={<PageFrame>
           <p className="eyebrow">404 · ISMERETLEN OLDAL</p>

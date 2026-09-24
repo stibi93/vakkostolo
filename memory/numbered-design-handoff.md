@@ -67,3 +67,12 @@ Aktív arculati folytatás: gyorsabb mozgás, szélfuvallatok, háromképes kezd
 App.tsx egy új lazy route-tal, ui grafikai CSS/komponensek és app E2E.
 A live-round által frissített állapotszöveget az új aloldalra viszem át.
 Portok: 4255 dev, 4256 preview, 4257/4258 E2E. Más agent fájljait megőrzöm.
+
+A gyorsabb mozgás + galéria + /jatekmester feladat lezárva. Check 199/199,
+app E2E 12/12; 360/768/1440 px vizuálisan átnézve. A végső fotókeret-javítás
+után új build és mobil/asztali renderellenőrzés is kész. Rövid production mérés:
+6 animáció, 0 layout/paint/script; test-results/breeze-review/performance.json.
+Képpromptok: public/images/GALLERY-SOURCES.md. A párhuzamos munkamenet közben
+commitolta a közös munka nagy részét (a1f04a0, 7f82aa8); ne alkalmazd újra.
+A friss szövegpontosítások megmaradtak. Saját commit/deploy nem indult.
+A saját 4255/4256 szerverek leállítva; a 4257/4258 E2E már lezárult.

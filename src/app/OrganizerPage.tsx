@@ -12,7 +12,6 @@ export function OrganizerPage() {
         <p className="organizer-status">A közös online kóstoló még készül. Létrehozhatod a kóstolót, meghívhatod a résztvevőket, és elindíthatod az első kört. A további körvezérlés és az eredmények még készülnek.</p>
         <div className="actions">
           <Link className="button-primary" to="/host">Játékmesteri belépés <span aria-hidden="true">↗</span></Link>
-          <Link className="button-secondary" to="/demo">Próbakóstoló megnyitása</Link>
         </div>
       </div>
       <EditorialPhoto src="/images/blind-tasting-table.jpg" alt="Borospoharak és textillel letakart palackok egy kóstolóasztalon." number="01" caption="A kóstoló előkészítése" eager />
