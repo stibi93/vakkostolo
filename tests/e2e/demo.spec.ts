@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('host → saját tipp → blokkos felfedés → végeredmény', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/demo');
   await expect(page.getByRole('heading', { name: /Na, ez/ })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('host.png'), fullPage: true });
@@ -37,7 +37,7 @@ test('host → saját tipp → blokkos felfedés → végeredmény', async ({ pa
 
 test('lejárt időnél a játékos nem küldhet be és nem hosszabbítható a kör', async ({ page }) => {
   await page.clock.install();
-  await page.goto('/');
+  await page.goto('/demo');
   await page.getByLabel('Kóstolási idő').selectOption('60');
   await page.getByRole('button', { name: 'Kóstoló indítása' }).click();
   await page.getByRole('button', { name: 'Játékos', exact: true }).click();

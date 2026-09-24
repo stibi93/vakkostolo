@@ -15,7 +15,8 @@ a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
 | Játékmester | `/host`, `/host/:gameId` | Borok, meghívás, időzítő, körváltás, felfedés |
 | Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
 
-Ezek éles útvonaltervek. A jelenlegi demo három nézetkapcsolóval egy oldalon fut.
+Ezek éles útvonaltervek, még nincsenek implementálva. A kezdőlap a `/` címen van;
+a jelenlegi demo a `/demo` alatt három nézetkapcsolóval egy oldalon fut.
 Az MVP-kivetítő a játékmester bejelentkezett böngészőjének másik lapja;
 megosztható, csak olvasható prezentációtoken későbbi bővítés.
 

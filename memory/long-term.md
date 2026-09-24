@@ -26,3 +26,13 @@
 
 Indokok: `docs/decisions/001-foundation.md`. Változáskor ezt a lapot javítsd,
 ne tarts meg egymásnak ellentmondó döntéseket aktív szabályként.
+
+## Fejlesztési munkamenet — 2026-09-24
+
+- Felhasználói kérés: Git és logikus fejlesztési egységek, elsőként scaffolding.
+  A meglévő projektalap külön induló commitban megőrizve; minden további
+  egység konkrét viselkedést, ellenőrzést és dokumentációt fogjon össze.
+- A kezdőlap és a helyi demo külön útvonal (`/`, `/demo`). A demo csak
+  megnyitáskor töltődik be, így az alkalmazásbelépési pont külön bővíthető
+  Auth és valódi játék felé. A külön csomag nem jogosultsági határ.
+- Helyi repository `main` ágon; távoli szolgáltató még nincs beállítva.

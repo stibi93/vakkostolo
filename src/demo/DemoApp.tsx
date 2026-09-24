@@ -81,13 +81,14 @@ export function DemoApp() {
 
   return (
     <div className="app-shell" data-view={view}>
+      <a className="skip-link" href="#main">Ugrás a tartalomhoz</a>
       <header className="topbar">
-        <a className="brand" href="#main" aria-label="Vakpohár, ugrás a tartalomhoz">vakpohár<span aria-hidden="true">.</span></a>
+        <a className="brand" href="/" aria-label="Vakpohár, kezdőlap">vakpohár<span aria-hidden="true">.</span></a>
         <span className="topbar-note">BOR VAN. CÍMKE NINCS.</span>
         <span className="demo-badge"><span aria-hidden="true" />PRÓBAKÓSTOLÓ</span>
       </header>
 
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <section className="hero">
           <div className="hero-editorial">
             <p className="eyebrow">VAKKÓSTOLÓ, BARÁTOK KÖZÖTT</p>

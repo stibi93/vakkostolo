@@ -24,6 +24,11 @@ flowchart LR
 
 ## Rétegek a kódban
 
+- `src/app/`: alkalmazásbelépési pont, kezdőlap, közös keret és útvonalválasztás.
+  Jelenleg két oldal van (`/`, `/demo`), natív linkekkel és teljes oldalbetöltéssel.
+  A demo dinamikus importtal külön JS-csomagba kerül; a kezdőlap nem tölti le
+  a mintaborokat. Ez betöltési határ, nem biztonsági védelem: a demo csomagja publikus.
+  Az Auth és paraméteres játékútvonalak fejlesztésekor központi routerre bővítendő.
 - `src/domain/`: keretrendszertől független validáció, pontozás, állapotgép.
 - `src/demo/`: csak a helyi demonstráció adatai és React-felülete.
 - `src/lib/supabase.ts`: konfigurálható kliensgyár, egyelőre nincs a UI-ra kötve.

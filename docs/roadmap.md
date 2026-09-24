@@ -6,8 +6,8 @@ várakozás nincs bennük. AI-támogatott fejlesztés mellett is szükséges ell
 
 | Fázis | Tartalom / kimenet | Becsült óra | Állapot |
 | --- | --- | ---: | --- |
-| 0. Projektalap | termékterv, architektúra, frontend-váz, CI, DB-alap és tesztek | 8–12 | jelen átadás |
-| 1. Fejlesztői AI és memória | AGENTS, skillek, rövid/hosszú memória, átadás | 3–5 | jelen átadás |
+| 0. Projektalap | termékterv, architektúra, frontend-váz, CI, DB-alap és tesztek | 8–12 | helyi alap kész |
+| 1. Fejlesztői AI és memória | AGENTS, skillek, rövid/hosszú memória, átadás | 3–5 | alap kész |
 | 2. Belépés és váró | host Auth, vendég Auth, meghívó/QR, tagság, visszatérés | 8–12 | következik |
 | 3. Élő játék | host szerkesztő, RPC állapotgép, Realtime, időzítés, értékelő | 14–22 | tervezett |
 | 4. Felfedés és eredmények | blokkos felfedés, szerverpontozás, kivetítő, ranglista | 10–16 | tervezett |
@@ -15,8 +15,28 @@ várakozás nincs bennük. AI-támogatott fejlesztés mellett is szükséges ell
 | 6. Opcionális AI a termékben | anonim eredmény-összefoglaló, értékelés, költségkorlát | 6–10 | MVP után |
 
 MVP összesen 53–83 óra tervezési keret; 20% tartalékkal kb. 64–100 óra.
-A jelen átadásra jelölt sorok keretbecslések, nem utólag mért ráfordítások.
+A késznek jelölt sorok keretbecslések, nem utólag mért ráfordítások.
 Az opcionális futásidejű AI további 6–10 óra, nem része az MVP-összegnek.
+
+## Önálló fejlesztési egységek
+
+Minden egység külön, működő és ellenőrzött commit legyen; nagyobb szeletnél
+több összetartozó commit megengedett. Új migráció külön fájlba kerül.
+
+| Egység | Kimenet és ellenőrzési feltétel | Állapot |
+| --- | --- | --- |
+| Projektalap rögzítése | meglévő források, tervek és lockfile helyi Gitben; `npm run check` | kész |
+| Alkalmazásváz | magyar kezdőlap, külön `/demo`, ismeretlen oldal, mobil navigációs próba | kész |
+| Auth és adatkapcsolat | központi router, host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák kezelése | következő |
+| Játék létrehozása | `create_game` RPC új migrációban, típusos adapter, hostjog ellenőrzése | tervezett |
+| Meghívó és vendégbelépés | `open_lobby`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | tervezett |
+| Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | tervezett |
+| Élő kör és válaszadás | host szerkesztő, zárolás, lifecycle RPC-k, szerveridő, visszaigazolt tippek | tervezett |
+| Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | tervezett |
+
+Az utolsó két egység további, külön ellenőrizhető szeletekre bontandó a megvalósításkor.
+A belépés/váró mérföldkő csak valódi Supabase Auth és több kliens integrációs
+próbája után tekinthető késznek; a helyi PGlite-próba önmagában nem elég.
 
 ## Következő konkrét fejlesztési szelet
 
