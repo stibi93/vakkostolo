@@ -41,7 +41,7 @@ function ProjectorSession({ store, games, lobby, gameId }: {
   if (!state.user || state.user.is_anonymous !== false) {
     return <ProjectorNotice text="A kivetítőt abban a böngészőben nyisd meg, ahol játékmesterként beléptél." />;
   }
-  return <ProjectorView key={state.user.id} games={games} lobby={lobby} gameId={gameId} />;
+  return <ProjectorView key={`${state.user.id}:${gameId}`} games={games} lobby={lobby} gameId={gameId} />;
 }
 
 function useStoredInvite(gameId: string) {

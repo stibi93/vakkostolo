@@ -12,9 +12,9 @@ const membership = { game_id: gameId, participant_id: '30000000-0000-0000-0000-0
   nickname: 'Anna', title: 'Péntesti kóstoló', status: 'lobby' };
 const postgrestError = (message: string) => ({ status: 400, json: { code: 'P0001', message, details: null, hint: null } });
 
-async function mockSupabase(page: Page, handle: (route: Route, url: URL) => Promise<boolean>) {
+async function mockSupabase(page: Page, handle: (route: Route, url: URL) => Promise<boolean>, hub = realtimeHub()) {
   const unexpected: string[] = [];
-  await realtimeHub().attach(page);
+  await hub.attach(page);
   await page.route('https://auth.vakkostolo.test/**', async (route) => {
     const url = new URL(route.request().url());
     if (!await handle(route, url)) {
@@ -72,17 +72,19 @@ test('host: váró megnyitása, QR és link, újratöltés után is látható', 
 
 test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async ({ page }) => {
   const requested: string[] = [];
+  const hub = realtimeHub();
+  const participants = [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z', seat: 1 }];
   const unexpected = await mockSupabase(page, async (route, url) => {
     requested.push(url.pathname);
     if (url.pathname === '/auth/v1/user') await route.fulfill({ json: authUser });
     else if (url.pathname === '/rest/v1/rpc/list_host_games') {
       await route.fulfill({ json: [{ id: gameId, title: 'Péntesti kóstoló', status: 'lobby', round_seconds: 120,
         reveal_every: 2, created_at: '2026-09-24T08:00:00Z' }] });
-    } else if (url.pathname === '/rest/v1/participants') {
-      await route.fulfill({ json: [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z' }] });
+    } else if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+      await route.fulfill({ json: lobbyResponse(gameId, participants, 'host', null) });
     } else return false;
     return true;
-  });
+  }, hub);
   await page.addInitScript(({ session, key, invite }) => {
     if (!localStorage.getItem('sb-auth-auth-token')) localStorage.setItem('sb-auth-auth-token', JSON.stringify(session));
     if (!sessionStorage.getItem('invite-seeded')) {
@@ -102,6 +104,13 @@ test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async 
   expect(requested).not.toContain('/rest/v1/rpc/get_host_game');
   expect((await qr.boundingBox())!.width).toBeGreaterThanOrEqual(200);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  await expect(page.getByRole('status')).toContainText('Élő kapcsolat.');
+  participants.push({ id: '30000000-0000-0000-0000-000000000002', nickname: 'Béla', joined_at: '2026-09-24T08:02:00Z', seat: 2 });
+  hub.change(gameId, 'participants');
+  await expect(page.getByRole('heading', { name: 'Résztvevők (2)' })).toBeVisible();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Béla' })).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath('projector-lobby.png'), fullPage: true });
 
   await page.evaluate((key) => localStorage.removeItem(key), `vakkostolo:invite:${gameId}`);
   await page.reload();
