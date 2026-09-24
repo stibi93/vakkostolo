@@ -67,7 +67,7 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
         </div>
         <p className="game-hint">A felfedést később te indítod. Az utolsó blokk kevesebb bort is tartalmazhat.</p>
         <h3>Borok</h3>
-        <p id="wine-privacy" className="game-hint">A nevet, a valódi árat és az alkoholfokot csak te láthatod a felfedésig.</p>
+        <p id="wine-privacy" className="game-hint">A borok adatait csak te láthatod a felfedésig.</p>
         {wines.map((wine, index) => <fieldset className="wine-fields" key={wine.id} aria-describedby="wine-privacy">
           <legend>{index+1}. tétel</legend>
           <label>Bor neve és évjárata<input value={wine.name} onChange={(event) => updateWine(wine.id, 'name', event.target.value)} maxLength={200} required autoComplete="off" /></label>

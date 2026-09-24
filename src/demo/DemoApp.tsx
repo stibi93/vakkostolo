@@ -160,7 +160,6 @@ export function DemoApp() {
               {revealed.map((index) => <article className="result-card" key={index}><WinePhoto src={demoPhotos.photos[index].src} alt={`${demoWines[index].name} – ${demoPhotos.photos[index].custom ? 'saját kép' : 'AI-mintafotó'}`} number={number(index + 1)} /><div><h4>{demoWines[index].name}</h4><p className="small-note">{demoPhotos.photos[index].src ? demoPhotos.photos[index].custom ? 'Saját kép · helyi demó' : 'AI-val készített mintafotó' : 'Kép nélküli mintabor'}</p><p>{huf(demoWines[index].priceHuf)} <span className="separator">/</span> {alcohol(demoWines[index].alcoholTenths)}</p><p className="small-note">{ratings[index] ? `Tipped: ${huf(ratings[index].priceHuf)} · ${alcohol(ratings[index].alcoholTenths)} · Tetszés: ${ratings[index].liking}/10` : 'Nem érkezett tipped erre a tételre.'}</p></div><strong>{ratings[index] ? scoreRating(ratings[index], demoWines[index]) : 0}<small>pont</small></strong></article>)}
               {revealed.length > 0 && <div className="score-summary"><span>{status === 'finished' ? 'Végeredmény' : 'Eddigi eredmény'} · Te</span><strong>{totalScore}<small> / {revealed.length * 100} pont</small></strong></div>}
               {status === 'finished' && <p className="summary-copy">{summarizeWithoutAi({ allRoundsRevealed: true, participantCount: 1, wines: demoWines.map((wine, index) => ({ label: wine.name, responseCount: ratings[index] ? 1 : 0, meanLiking: ratings[index]?.liking ?? null })) })}</p>}
-              <p className="small-note">Az ár és az alkoholfok becslésének pontossága ad pontot. A tetszés nem számít bele a pontszámba.</p>
             </>}
           </section>
 
@@ -169,14 +168,13 @@ export function DemoApp() {
             <ol className="wine-list">{rounds.map((round, index) => <li key={index} className={round.status === 'open' ? 'active-wine' : ''}>
               <span className="wine-number">{number(index + 1)}</span><div><strong>{round.status === 'revealed' ? demoWines[index].name.split(' · ')[0] : `${number(index + 1)}. tétel`}</strong><span>{round.status === 'open' && seconds === 0 ? 'Lejárt az idő' : labels[round.status]}</span></div><span className="wine-status" aria-hidden="true">{round.status === 'revealed' ? '✓' : round.status === 'open' ? '●' : '○'}</span>
             </li>)}</ol>
-            <div className="tasting-tip"><span className="eyebrow">PONTOZÁS</span><p>Az ár és az alkoholfok becslésére<br />boronként legfeljebb 100 pont jár.</p></div>
             <div className="ticket-bottom"><span>3 MINTABOR</span><span aria-hidden="true">✕</span><span>HELYI DEMÓ</span></div>
           </aside>
         </div>
         <p className="notice" role="status">{notice}</p>
         <div className="demo-disclaimer"><span className="demo-label">PRÓBAÜZEM</span><p>Ez egy helyi demó: a három nézet ugyanazt a játékot mutatja. Az online játékot külön, a Játékmesteri belépésnél készítheted elő. Itt az oldal frissítése törli a tippeket és a saját képeket.</p></div>
       </main>
-      <footer><span className="footer-wordmark">Vakkóstoló</span><span>ÁR, ALKOHOLFOK ÉS TETSZÉS</span><a href="#main">Vissza az elejére ↑</a></footer>
+      <footer><span className="footer-wordmark">Vakkóstoló</span><a href="#main">Vissza az elejére ↑</a></footer>
     </div>
   );
 }
@@ -203,7 +201,6 @@ function RatingForm({ index, seconds, saved, onSubmit }: { index: number; second
   return <form className="rating-form" onSubmit={handleSubmit}>
     <div className="round-label"><div><p className="eyebrow">AKTUÁLIS TÉTEL</p><h3>{number(index + 1)}. tétel</h3><p>A bor neve a felfedésig rejtve marad.</p></div><span className="round-label-number" aria-hidden="true">{number(index + 1)}</span></div>
     <div className="rating-heading"><div><p className="eyebrow">KÓSTOLÓLAP</p><h3>A te értékelésed</h3></div><span className="timer" aria-label={`Hátralévő idő: ${seconds} másodperc`}>{number(Math.floor(seconds / 60))}:{number(seconds % 60)}</span></div>
-    <p className="muted">Becsüld meg a palack árát és a bor alkoholfokát, majd értékeld, mennyire ízlik.</p>
     <div className="rating-inputs"><label>Becsült palackár <span>Ft / 0,75 l</span><input type="number" inputMode="numeric" min="0" max="1000000" step="1" required placeholder="pl. 4500" value={price} onChange={(event) => setPrice(event.target.value)} /></label>
       <label>Becsült alkoholfok <span>% vol</span><input type="text" inputMode="decimal" required placeholder="pl. 13,5" value={abv} onChange={(event) => setAbv(event.target.value)} /></label></div>
     <label className="liking-label" htmlFor="liking">Mennyire ízlik?<strong>{liking}<span> / 10</span></strong></label>

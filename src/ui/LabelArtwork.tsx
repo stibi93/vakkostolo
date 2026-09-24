@@ -21,6 +21,6 @@ export function LabelArtwork({ animated = false }: { animated?: boolean }) {
       <div className="label-mask">A bor neve egyelőre rejtve.</div>
       <div className="label-foot">kóstolási tétel</div>
     </div>
-    <div className="stage-caption" aria-hidden="true"><span>SZÁMOZOTT MINTA</span><span>ÁR · ALKOHOL · TETSZÉS</span></div>
+    <div className="stage-caption" aria-hidden="true"><span>SZÁMOZOTT MINTA</span></div>
   </div>;
 }

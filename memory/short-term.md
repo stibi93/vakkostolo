@@ -1,16 +1,21 @@
 # Aktuális munkamenet
 
-## Commitolási állapot — 2026-09-24
+## Bemutatkozó szövegek és arculati commit — 2026-09-24
 
-- A commitolási kérés közben a párhuzamos munkamenet létrehozta az `a1f04a0`
-  commitot a mainen: háttér, képek és az új galéria/játékmesteroldal alapjai.
-  Az élőkör négy korábbi commitja változatlanul megmaradt.
-- Az arculati folytatás továbbra is aktív: szélfuvallatok, gyorsabb animáció,
-  fotókomponens és stílusok változnak. Ezeket nem rögzítettem félkész állapotban.
-  A munkafát megőriztem; csak ezt az állapotjegyzetet commitolom külön.
-- A 199 tesztes és 30 célzott böngészős ellenőrzés a korábbi kész állapotra
-  vonatkozik. Az új galéria/játékmesteroldal lezárásához friss ellenőrzés kell.
-  Következő termékegység a körvezérlés. Ebben a munkamenetben push/deploy nincs.
+- A meglévő arculati folytatás felhasználói kérésre rögzítve: `7f82aa8`
+  (szélfuvallatok, gyorsabb mozgás, képfeliratok, galériaforrások és app E2E).
+  Commit előtt check 199/199 és app E2E 12/12 sikeres.
+- Új kérésre az ár–alkoholfok–tetszés felsorolás kikerült az alkalmazás és
+  demó láblécéből, a címkegrafikából, bemutatkozó és kísérőszövegekből.
+  A kezdőlap és játékmesteroldal általánosan a kóstolólapról/értékelésről ír.
+  A működő mezők, mezőhibák és játéklogika megmaradtak; a kérés szövegmódosításként
+  kezelve. A régi arculati prototípusok történeti dokumentumok maradtak.
+- Módosítás utáni check 199/199, típusok/lint/build és app+demo E2E 18/18 sikeres.
+  Mobil és asztali kezdőlap, asztali demó renderelt képei átnézve;
+  kimenet: test-results/copy-without-rating-categories/.
+- Párhuzamos arculati munka közben új docs/design.md és editorial.css módosítás
+  jelent meg; ezek megmaradnak a munkafában, nem részei a szövegcommitnak.
+  Következő termékegység a körvezérlés. Push/deploy nem történt.
 
 ## Első online kör elkészült — 2026-09-24
 

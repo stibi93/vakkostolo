@@ -1,5 +1,12 @@
 # Tartós projektmemória
 
+## Értékelési szempontok a bemutatkozásban — 2026-09-24
+
+- A felhasználó az ár, alkoholfok és tetszés szempontjait még változtatni tervezi.
+  Ezért a lábléc, dekoráció és bemutatkozó szöveg ne sorolja ezeket állandó
+  termékjellemzőként. Általánosan kóstolólapról és értékelésről írjunk.
+  A jelenlegi mezők és pontozás átépítése külön fejlesztés; most szövegjavítás történt.
+
 ## Élő kör indítása és saját válasz — 2026-09-24
 
 - A start_round verzióellenőrzést, játék→kör sorzárat és privát kérésnaplót használ.

@@ -20,9 +20,9 @@ export function OrganizerPage() {
     <section className="organizer-steps" aria-labelledby="organizer-steps-title">
       <h2 id="organizer-steps-title">Így készítsd elő</h2>
       <ol>
-        <li><span aria-hidden="true">01</span><h3>Állítsd össze a borsort</h3><p>Add meg a borokat a kóstolás sorrendjében, a valódi árral és alkoholfokkal. A palackokat takard le, és jelöld a tételszámmal.</p></li>
+        <li><span aria-hidden="true">01</span><h3>Állítsd össze a borsort</h3><p>Add meg a borokat a kóstolás sorrendjében. A palackokat takard le, és jelöld a tételszámmal.</p></li>
         <li><span aria-hidden="true">02</span><h3>Nyisd meg a várót</h3><p>A résztvevők a QR-kóddal vagy a meghívólinkkel, egy becenév megadásával csatlakozhatnak.</p></li>
-        <li><span aria-hidden="true">03</span><h3>Indítsd el az első kört</h3><p>Ha mindenki készen áll, indítsd el a kóstolást. A körben a résztvevők árat és alkoholfokot becsülnek, majd értékelik, mennyire ízlik a bor.</p></li>
+        <li><span aria-hidden="true">03</span><h3>Indítsd el az első kört</h3><p>Ha mindenki készen áll, indítsd el a kóstolást. A résztvevők a saját telefonjukon töltik ki a kóstolólapot.</p></li>
       </ol>
     </section>
   </PageFrame>;

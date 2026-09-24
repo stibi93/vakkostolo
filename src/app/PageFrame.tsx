@@ -12,7 +12,7 @@ export function PageFrame({ children, headerAction }: { children: ReactNode; hea
         {headerAction}
       </header>
       <main id="main" className="entry-main" tabIndex={-1}>{children}</main>
-      <footer><span className="footer-wordmark">Vakkóstoló</span><span>ÁR, ALKOHOLFOK ÉS TETSZÉS</span></footer>
+      <footer><span className="footer-wordmark">Vakkóstoló</span></footer>
     </div>
   );
 }
