@@ -23,12 +23,14 @@ A 30 fős cél nem kapacitásgarancia; hostlapok és kivetítő is kapcsolatot h
 
 `.env.example` alapján hozz létre helyi `.env.local` fájlt. Csak a Supabase URL
 és publishable key publikus; service-role/secret key soha nem kezdődhet `VITE_`-tal.
-Jelenleg a demo konfiguráció nélkül fut, ezek a változók a következő integrációhoz kellenek.
+A demo konfiguráció nélkül fut; a `/host` belépéshez ezek a változók szükségesek.
+A Google provider és a pontos callbackcímek beállítása: [Auth-útmutató](auth.md).
 
 Supabase: EU-régió, anonim bejelentkezés engedélyezése, Google OAuth a hostnak,
 pontos callback allowlist, fejlesztői és éles környezet szétválasztása. A publikus
 vendég-authhoz abuse-védelem és szükség esetén CAPTCHA; a meghívás rate limitjét
-a DB/Edge Function rétegben kell megoldani. Ezek még nem működő részei az alapnak.
+a DB/Edge Function rétegben kell megoldani. A vendégbelépés és meghívás még nincs
+implementálva; a host Auth klienskódja elkészült, valódi integrációs próbája hátravan.
 
 ## Frontend telepítési recept
 
@@ -45,13 +47,14 @@ a várható létszámhoz, az újrapróbálkozásokhoz és az abuse-védelemhez k
 A platform alapértéke jelenleg 30/IP/óra. A QR-belépés pilotjában ezt is teszteljük.
 [Auth rate limit konfiguráció](https://supabase.com/docs/guides/local-development/cli/config#authrate_limitanonymous_users).
 
-1. Írható Git checkoutban inicializáld a repositoryt és töltsd fel a választott távoli tárhelyre.
+1. A helyi Git-repository már inicializált; állítsd be a választott távoli tárhelyet.
 2. Pages-projekt: build `npm run build`, output `dist`, Node 22.22+.
-3. Környezeti változók csak az éles backend-integráció elkészülte után szükségesek.
-4. A `public/_redirects` biztosítja a későbbi kliensoldali útvonalak SPA-fallbackjét.
+3. A host-belépéshez add meg a publikus Supabase-változókat buildkor, és állítsd be az Auth providert.
+4. A `public/_redirects` biztosítja a kliensoldali útvonalak SPA-fallbackjét, az Auth callbackhez is.
 5. HTTPS-címről teszteld a kamerával olvasható belépési URL-t, majd két külön eszközzel a játékot.
 
-Ez recept, a projektből most nem történt publikálás. A jelenlegi build demót telepítene.
+Ez recept, a projektből most nem történt publikálás. A build kezdőlapot, demót és
+konfigurációfüggő host-belépést ad; többjátékos eseményre még nem alkalmas.
 CI: `.github/workflows/ci.yml`; lint + típus + tesztek + build minden PR/push esetén.
 A CI nem deployol, és nem futtat migrációt az éles adatbázison.
 Dependabot-konfiguráció heti npm és GitHub Actions frissítési javaslatokat készít

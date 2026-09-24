@@ -1,59 +1,55 @@
 # Aktuális munkamenet
 
-Dátum: 2026-09-24. Aktuális mérföldkő: Git és alkalmazásváz.
+Dátum: 2026-09-24. Aktuális mérföldkő: host Auth és adatkapcsolat kliensoldali egysége.
 
 ## Elkészült
 
-- A felhasználó az implementáció megkezdését, Git-repositoryt és logikus
-  fejlesztési egységeket kért, elsőként scaffoldingot.
-- A meglévő React/Vite/TypeScript projektet, demót, DB-alapot és dokumentációt
-  megőriztük. Helyi Git inicializálva `main` ágon; az első commit
-  `c80581d` (`chore: preserve existing project foundation`).
-- Külön alkalmazásbelépési pont: `src/app/App.tsx`, magyar kezdőlap (`/`),
-  közös oldalkeret és ismeretlen útvonalról visszalépés.
-- A korábbi háromnézetes demo a `/demo` útvonalon fut, dinamikus importtal.
-  A kezdőlap nem tölti be a mintaborok modulját; ez nem biztonsági védelem,
-  a demo JS-csomagja továbbra is publikus. Frissítéskor a demo állapota elvész.
-- Natív linkes navigáció; a demo fejlécéből vissza lehet térni a kezdőlapra.
-  Billentyűzetes tartalomra ugrás és betöltési állapot is van.
-- README, architektúra, termékterv és roadmap aktualizálva. A roadmap külön
-  fejlesztési egységeket és ellenőrzési feltételeket tartalmaz.
-- A meglévő arculat maradt: sárga/fekete/piros, helyi Bricolage Grotesque és
-  IBM Plex Mono fontok. A színvilág továbbra is finomítható munkaverzió.
+- React Router 8.4.0, rögzített függőség és lockfile. Útvonalak: `/`, `/demo`,
+  `/host`, `/auth/callback`; a demo és az Auth külön, lazy betöltött modul.
+- Google OAuth PKCE-belépés, egyszeri kódbeváltás StrictMode mellett is,
+  callbackkódok/hibarészletek eltávolítása az URL-ből, rögzített saját visszatérési cél.
+- Szerverrel ellenőrzött munkamenet-visszaállítás (`getUser`), helyi hatókörű
+  kijelentkezés, Auth-események, lapfókusz és hálózati visszatérés kezelése.
+- Anonim munkamenet nem kap hostkezdőnézetet. A felületi elágazás nem DB-jogosultság:
+  játék-létrehozó API még nincs; a host és tulajdonjog ellenőrzése a következő RPC feladata.
+- Hiányzó/hibás publikus konfiguráció külön felületet kap. Publishable és legacy
+  anon kulcs támogatott, privilegizált kulcs és nem HTTPS távoli URL elutasítva.
+  A VITE-változó továbbra is publikus; az ellenőrzés nem titkosítja a buildet.
+- Magyar hibaállapotok, újrapróbálás, hálózati és műveleti időkorlát, késői
+  válaszok elleni védelem. A demo változatlanul helyi, nem többjátékos próba.
+- Útmutató: `docs/auth.md`; README, roadmap, architektúra, product/operations,
+  `.env.example` és helyi Supabase callback-allowlist aktualizálva.
+- A párhuzamos szövegezési munka feliratai megőrizve, az Auth-próbák elvárásai
+  az új „Játékmesteri fiók” címhez igazítva. Átadás: `memory/ui-copy-handoff.md`.
+  Az Auth-commitból a már követett fájlok külön szövegcseréi kimaradnak;
+  ezek és a szövegezési jegyzetek a munkapéldányban megmaradnak.
 
 ## Ellenőrzések — 2026-09-24
 
-- A kiinduló állapoton és a végső kódon is sikeres `npm run check`:
-  típusellenőrzés, ESLint, 25 domain/PGlite teszt, production build.
-- 8 sikeres Playwright-próba asztali és 360 px mobilméretben: kezdőlap,
-  billentyűzetes navigáció, demo megnyitása/újratöltése, ismeretlen útvonal,
-  teljes demójáték és időkorlát.
-- A sima `npm run test:e2e` indításkor nem találta a hozzá tartozó böngészőt.
-  Sikeres futtatás: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/opt/google/chrome/chrome npm run test:e2e`.
-  Más gépen az alapfolyamat: `npx playwright install chromium`.
-- Asztali és mobil kezdőlap-képernyőképek átnézve; nincs vízszintes túlcsordulás.
-  Képek a Gitből kizárt `test-results/` alatt.
-- A production build külön `DemoApp-*.js` fájlt készít. A navigációs teszt
-  ellenőrzi, hogy a kezdőlap nem kér demo-modult.
-- Valódi iOS/Android, Supabase Auth/Realtime, többeszközös és távoli CI-próba nem volt.
-  A PGlite-tesztek továbbra sem helyettesítik ezeket.
+- `npm run check`: sikeres típusellenőrzés, lint, 49 teszt és production build.
+- `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/opt/google/chrome/chrome npm run test:e2e`:
+  22 sikeres próba asztali és 360 px mobilméretben, köztük PKCE-kódcsere,
+  újratöltés, két lap kijelentkezése, anonim fiók, callbackhiba és újrapróbálás.
+- Az E2E két izolált Vite-szervert indít (4173 konfigurálatlan, 4174 szintetikus
+  Auth-konfigurációval). A valódi Supabase SDK Auth HTTP-válaszai helyettesítettek;
+  a fejlesztő saját projektjét és kulcsait a teszt nem használja.
+- A `frontend-design` skill az új felhasználói utasítás szerint alkalmazva.
+  A belépési, belépett és callbackhibás nézet képei asztali és 360 px szélességen
+  átnézve; a hibagombok fölötti térköz javítva, a két érintett próba újrafuttatva.
+  A belépés Tab/Enter billentyűzettel is végigpróbálva (4 célzott próba).
+  A teljes 22 böngészős próba a térközjavítás előtt sikeres volt.
+- npm install: 0 ismert sérülékenység. Új DB-migráció nem kellett, RLS nem változott.
+- Valódi Google/Supabase Auth, Docker stack, iOS/Android, többeszközös játék,
+  Realtime és távoli CI nem futott. A szimulált Auth és PGlite ezeket nem helyettesíti.
 
-## Még nem kész
+## Hiányzó részek és következő konkrét lépés
 
-Host/Google és anonim vendég Auth, játék-létrehozás, QR-meghívó, közös váró,
-host CRUD és lifecycle RPC-k, Realtime/snapshot/reconnect, szerveroldali
-pontozás, felhőtelepítés. A `/host`, `/join/:token`, `/play/:gameId`,
-`/present/:gameId` egyelőre útvonaltervek, nem működő oldalak.
+Következő fejlesztési egység: játék létrehozása. Új `create_game` migráció,
+tartós host-auth szerveroldali ellenőrzése, generált DB-típusok, típusos adapter,
+magyar létrehozó űrlap és jogosultsági/adatvalidációs tesztek.
+Utána meghívó/QR és anonim vendégbelépés, snapshot/Realtime közös váró.
+A teljes belépés/váró mérföldkő még nincs kész.
 
-Távoli repository nincs beállítva, külső fiók vagy deploy nem jött létre.
-A helyi Git immár írható és működő repository; a korábbi helyőrzőre vonatkozó
-jegyzet elavult. A skillek továbbra is a `skills/` alatt vannak.
-
-## Következő konkrét lépés
-
-Auth és adatkapcsolat külön fejlesztési egységként: központi router,
-host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák.
-Utána játék-létrehozás, meghívó/vendégbelépés, majd snapshot/Realtime közös váró.
-A teljes következő termékszelet változatlanul: host → játék → QR → két vendég
-közös váróban. Az adapter generált Supabase-típusokat és a snapshot határán
-futásidejű validálást kapjon. Lásd `docs/roadmap.md`.
+Az igazi Google-belépéshez tesztprojekt, publikus frontend-konfiguráció és
+Google provider/callback-beállítás szükséges a `docs/auth.md` szerint.
+Távoli repository és deploy továbbra sincs beállítva. A helyi Git `main` ágon működik.

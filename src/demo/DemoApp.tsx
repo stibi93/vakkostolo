@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import type { FormEvent } from 'react';
 import { canSubmit, remainingSeconds, revealableIndexes, scoreRating, validateRating } from '../domain/game';
 import type { GameStatus, Rating, RoundStatus } from '../domain/game';
@@ -83,7 +84,7 @@ export function DemoApp() {
     <div className="app-shell" data-view={view}>
       <a className="skip-link" href="#main">Ugrás a tartalomhoz</a>
       <header className="topbar">
-        <a className="brand" href="/" aria-label="Vakpohár, kezdőlap">vakpohár<span aria-hidden="true">.</span></a>
+        <Link className="brand" to="/" aria-label="Vakpohár, kezdőlap">vakpohár<span aria-hidden="true">.</span></Link>
         <span className="topbar-note">BOR VAN. CÍMKE NINCS.</span>
         <span className="demo-badge"><span aria-hidden="true" />PRÓBAKÓSTOLÓ</span>
       </header>

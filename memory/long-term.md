@@ -36,3 +36,14 @@ ne tarts meg egymásnak ellentmondó döntéseket aktív szabályként.
   megnyitáskor töltődik be, így az alkalmazásbelépési pont külön bővíthető
   Auth és valódi játék felé. A külön csomag nem jogosultsági határ.
 - Helyi repository `main` ágon; távoli szolgáltató még nincs beállítva.
+
+## Host Auth — 2026-09-24
+
+- React Router kezeli az alkalmazásútvonalakat, a Supabase SDK PKCE-folyamattal
+  a Google-belépést. Indok: központi útvonalak a következő játékfunkciókhoz,
+  bevett Auth-kliens saját tokenkezelés helyett.
+- A callback explicit, egyszeri kódbeváltás; a cél a saját `/host`, nincs szabad
+  átirányítás. A felület szerverrel ellenőrzött usert használ, az anonimitást
+  megkülönbözteti. A játékjogosultság továbbra is DB/RPC-felelősség.
+- A host Auth klienskódja kész; a valódi Google/Supabase integráció külön kapu.
+  A tesztek szintetikus Auth HTTP-válaszokat használnak, nem külső fiókot.

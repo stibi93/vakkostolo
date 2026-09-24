@@ -1,11 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseConfig } from './config';
 
-/** Integration seam; the demo deliberately never calls this factory. */
-export function createSupabaseClient() {
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) throw new Error('A Supabase publikus konfigurációja még nincs beállítva.');
+/** Created once by the Auth runtime; the demo never imports this module. */
+export function createSupabaseClient({ url, key }: SupabaseConfig) {
   return createClient(url, key, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      flowType: 'pkce',
+      // The callback is exchanged explicitly once, including under StrictMode.
+      detectSessionInUrl: false,
+    },
+    global: {
+      fetch: (input, init) => fetch(input, {
+        ...init,
+        signal: AbortSignal.any([AbortSignal.timeout(10_000), ...(init?.signal ? [init.signal] : [])]),
+      }),
+    },
   });
 }

@@ -25,13 +25,16 @@ flowchart LR
 ## Rétegek a kódban
 
 - `src/app/`: alkalmazásbelépési pont, kezdőlap, közös keret és útvonalválasztás.
-  Jelenleg két oldal van (`/`, `/demo`), natív linkekkel és teljes oldalbetöltéssel.
+  React Router kezeli a `/`, `/demo`, `/host`, `/auth/callback` útvonalakat.
   A demo dinamikus importtal külön JS-csomagba kerül; a kezdőlap nem tölti le
   a mintaborokat. Ez betöltési határ, nem biztonsági védelem: a demo csomagja publikus.
-  Az Auth és paraméteres játékútvonalak fejlesztésekor központi routerre bővítendő.
+- `src/auth/`: lazy betöltött hostfelület, PKCE-callback és Reacttól független
+  munkamenet-kezelő. Egy Supabase-kliens/böngészőlap; szerverrel ellenőrzött user,
+  Auth-események, visszatérés, időkorlát és késői válaszok elleni védelem.
 - `src/domain/`: keretrendszertől független validáció, pontozás, állapotgép.
 - `src/demo/`: csak a helyi demonstráció adatai és React-felülete.
-- `src/lib/supabase.ts`: konfigurálható kliensgyár, egyelőre nincs a UI-ra kötve.
+- `src/lib/`: publikus konfiguráció validálása és az Auth által használt kliensgyár.
+  Generált DB-típusok és játékadat-adapter a következő, `create_game` egységben készülnek.
 - `src/ai/`: kikapcsolt, szolgáltatófüggetlen összefoglaló-szerződés.
 - `supabase/migrations/`: verziózott adatmodell, jogosultság, DB-műveletek.
 - `tests/`: domain- és PostgreSQL/RLS-regressziók.
@@ -87,7 +90,9 @@ módosítást korlátozott RPC-n végez, táblák közvetlen módosítására ni
 ## Ami most szándékosan előkészítés
 
 Az első migráció nem teljes játékbackend: nincs create/join/start/reveal/finish RPC,
-OAuth callback, éles QR, Realtime-előfizetés vagy hosztolás. Ezeknél nem
+éles QR, Realtime-előfizetés vagy hosztolás. A host Auth és OAuth callback már
+elkészült, beállítása és integrációs ellenőrzése a [belépési útmutatóban](auth.md).
+A hiányzó műveleteknél nem
 publikálunk működőnek látszó, jogosultságot megkerülő ideiglenes API-t.
 Az adatmodell és a submit_rating függvény már futtatható és tesztelhető alap.
 

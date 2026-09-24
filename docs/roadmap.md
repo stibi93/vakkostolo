@@ -8,7 +8,7 @@ várakozás nincs bennük. AI-támogatott fejlesztés mellett is szükséges ell
 | --- | --- | ---: | --- |
 | 0. Projektalap | termékterv, architektúra, frontend-váz, CI, DB-alap és tesztek | 8–12 | helyi alap kész |
 | 1. Fejlesztői AI és memória | AGENTS, skillek, rövid/hosszú memória, átadás | 3–5 | alap kész |
-| 2. Belépés és váró | host Auth, vendég Auth, meghívó/QR, tagság, visszatérés | 8–12 | következik |
+| 2. Belépés és váró | host Auth, vendég Auth, meghívó/QR, tagság, visszatérés | 8–12 | folyamatban; host Auth kliens kész |
 | 3. Élő játék | host szerkesztő, RPC állapotgép, Realtime, időzítés, értékelő | 14–22 | tervezett |
 | 4. Felfedés és eredmények | blokkos felfedés, szerverpontozás, kivetítő, ranglista | 10–16 | tervezett |
 | 5. Pilot és kiadás | jogosultsági integráció, eszközök, hálózati hibák, deploy, mentés | 10–16 | tervezett |
@@ -27,8 +27,8 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | --- | --- | --- |
 | Projektalap rögzítése | meglévő források, tervek és lockfile helyi Gitben; `npm run check` | kész |
 | Alkalmazásváz | magyar kezdőlap, külön `/demo`, ismeretlen oldal, mobil navigációs próba | kész |
-| Auth és adatkapcsolat | központi router, host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák kezelése | következő |
-| Játék létrehozása | `create_game` RPC új migrációban, típusos adapter, hostjog ellenőrzése | tervezett |
+| Auth és adatkapcsolat | központi router, host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák kezelése | kliens kész, szimulált Auth-próbákkal; valódi integráció hátravan |
+| Játék létrehozása | `create_game` RPC új migrációban, típusos adapter, hostjog ellenőrzése | következő |
 | Meghívó és vendégbelépés | `open_lobby`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | tervezett |
 | Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | tervezett |
 | Élő kör és válaszadás | host szerkesztő, zárolás, lifecycle RPC-k, szerveridő, visszaigazolt tippek | tervezett |
@@ -44,6 +44,8 @@ Egy host bejelentkezik, létrehoz egy játékot, megnyitja a várót; két telef
 ugyanazon QR-ról anonim vendégként belép, újratöltéskor megőrzi tagságát.
 Ehhez create_game/open_lobby/join_game RPC, Supabase Auth-konfiguráció,
 meghívókezelés, QR-generálás és a demo helyett valódi adatadapter szükséges.
+A host Auth kliens elkészült. A következő kódolási egység a játék létrehozása;
+a külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
 Az adapter a migrációból generált Supabase TypeScript-típusokat használja;
 a snapshot válaszát futásidőben is validálni kell a határon.
 Kész, ha az idegen játék olvasása továbbra is tiltott és a QR nem ad hostjogot.

@@ -4,12 +4,20 @@
 .entry-main h1 { max-width: 900px; font-size: clamp(42px, 7vw, 88px); line-height: 1; letter-spacing: -.055em; margin: 24px 0; }
 .entry-main > p { line-height: 1.65; }
 .entry-main .button-primary { min-height: 48px; text-decoration: none; }
+.entry-main .button-secondary { min-height: 48px; text-decoration: none; }
 .entry-poster { padding: clamp(24px, 5vw, 64px); background: var(--yellow); }
 .entry-copy { max-width: 560px; font-size: 18px; line-height: 1.6; }
 .entry-poster .button-primary { margin-top: 16px; }
 .entry-note { max-width: 460px; font-family: var(--mono); font-size: 11px; line-height: 1.7; margin: 18px 0 0; }
 .entry-next { max-width: 700px; padding: 40px 0 16px; }
 .entry-next p:not(.eyebrow) { line-height: 1.7; }
+.auth-panel { max-width: 780px; padding: clamp(24px, 5vw, 48px); background: var(--sheet); border-top: 8px solid var(--yellow); }
+.auth-panel h1 { font-size: clamp(40px, 6vw, 64px); margin-top: 16px; }
+.auth-panel p { line-height: 1.7; overflow-wrap: anywhere; }
+.auth-panel h2 { margin-top: 28px; }
+.auth-message { border-left: 4px solid var(--red); padding: 12px 16px; background: var(--paper); }
+.auth-panel .actions { margin-top: 24px; }
+.auth-panel button { max-width: 100%; min-width: 0; }
 @media (max-width: 480px) {
   .entry-shell .topbar { flex-wrap: wrap; gap: 12px; padding: 18px 0; }
   .entry-main .button-primary { min-width: 0; width: 100%; gap: 12px; }

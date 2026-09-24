@@ -31,3 +31,15 @@ test('ismeretlen útvonalról vissza lehet térni a kezdőlapra', async ({ page 
   await page.getByRole('link', { name: 'Vissza a kezdőlapra' }).click();
   await expect(page.getByRole('link', { name: 'Próbakóstoló megnyitása' })).toBeVisible();
 });
+
+test('konfiguráció nélkül a hostoldal tájékoztat és a demo elérhető marad', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).click();
+  await expect(page).toHaveURL(/\/host$/);
+  await expect(page.getByRole('heading', { name: 'A belépés még nem elérhető.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Belépés Google-fiókkal' })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'A belépés még nem elérhető.' })).toBeVisible();
+  await page.getByRole('link', { name: 'Próbakóstoló megnyitása' }).click();
+  await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
+});

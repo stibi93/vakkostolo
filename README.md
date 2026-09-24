@@ -7,9 +7,10 @@ közösen felfedett eredmények. Munkanév, szabadon változtatható.
 
 Alkalmazásváz kezdőlappal (`/`) és külön megnyitható, egy böngészőlapon működő
 UX-demóval (`/demo`). Ismeretlen útvonalon visszalépési lehetőség jelenik meg.
-A demo a
-játékmester, játékos és prezentáció nézetét mutatja. Nem többeszközös játék,
-nincs valódi bejelentkezés vagy szerverre mentés. Az éles backendhez adatmodell,
+A demo a játékmester, játékos és prezentáció nézetét mutatja. Nem többeszközös
+játék, a tippeket nem menti szerverre. A külön `/host` oldalon Supabase Google
+belépés, munkamenet-visszaállítás és kijelentkezés készült; a használatához
+tesztprojekt-konfiguráció szükséges. Az éles backendhez adatmodell,
 SQL-migráció, hozzáférési szabályok, válaszbeküldő függvény és tesztek készültek.
 A hiányzó éles funkciókat a [megvalósítási terv](docs/roadmap.md) sorolja fel.
 
@@ -35,13 +36,17 @@ npm run preview
 ```
 
 Böngészős próba: egyszer `npx playwright install chromium`, utána
-`npm run test:e2e`. A teszt elindítja és leállítja a helyi szervert, asztali és
-360 px széles Chromiumban végigjátssza a demót. A képernyőképek a Gitből kizárt
+`npm run test:e2e`. A teszt két helyi szervert indít (4173 és 4174), asztali és
+360 px széles Chromiumban ellenőrzi a demót és az Auth-folyamatot. Az Auth-próbák
+szintetikus HTTP-válaszokat használnak, nem a fejlesztő valódi projektjét.
+A képernyőképek a Gitből kizárt
 `test-results/` mappába kerülnek. Ez emulált mobilméret, nem valódi iOS/Android-eszközteszt.
 
-`dist/` a publikálható statikus build. A `.env.example` csak a későbbi éles
-integráció publikus változóit tartalmazza. Kitöltése önmagában nem kapcsolja át
-a demót. A Supabase-kliens gyára elő van készítve, de a UI még nem használja.
+`dist/` a publikálható statikus build. A `.env.example` alapján létrehozott
+`.env.local` publikus Supabase-beállításait a `/host` használja. A Google providert
+és a callbackcímeket is be kell állítani: [belépési útmutató](docs/auth.md).
+A demo ettől független, helyi próba marad. Valódi Google/Supabase-integrációs
+teszt és többeszközös játékpróba még nem történt.
 
 ## Fejlesztési egységek és Git
 
