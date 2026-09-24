@@ -66,6 +66,7 @@ export function createLobbyApi(client: SupabaseClient<Database>): LobbyApi {
       for (const event of ['INSERT', 'UPDATE'] as const) {
         channel.on('postgres_changes', { event, schema: 'public', table: 'participants', filter: `game_id=eq.${gameId}` }, notify);
       }
+      channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rounds', filter: `game_id=eq.${gameId}` }, notify);
       channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${gameId}` }, notify)
         .subscribe((status) => {
           if (!active) return;

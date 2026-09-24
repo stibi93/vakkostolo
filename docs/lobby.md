@@ -60,8 +60,10 @@ eltűnik. Az offline jelzés letiltja a kézi frissítést. Offline játék ninc
 2026-09-24: a migráció a helyi stackre alkalmazva; a valódi próba sikeres, beleértve
 az idegen Realtime-előfizető kizárását, meghívócserét és új feliratkozást.
 Google OAuth, hosztolt környezet, fizikai telefon és Windows LAN-továbbítás
-ellenőrzését ez nem helyettesíti. A kör indítása, kóstolólap és eredmények a
-következő fejlesztési egységek.
+ellenőrzését ez nem helyettesíti. Az első kör és a kóstolólap már elkészült: [élő kör](live-round.md).
+Az alkalmazás most a bővített `get_game_snapshot` végpontot használja; az eredeti
+váró-RPC szerződése változatlan. A Realtime a `rounds` UPDATE eseményére is figyel.
+A további körvezérlés és eredmények a következő egységek.
 
 Forrás: [Supabase Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
 és a rögzített `@supabase/realtime-js` csomag `RealtimeChannel.ts` előfizetési szerződése.

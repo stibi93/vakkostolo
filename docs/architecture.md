@@ -33,6 +33,8 @@ flowchart LR
   Auth-események, visszatérés, időkorlát és késői válaszok elleni védelem.
 - `src/lobby/`: biztonságos snapshot-adapter, Realtime, játékhoz kötött kliensállapot
   és közös host/vendég váró. Részletek: [közös váró](lobby.md).
+- `src/live/`: jogosult élő snapshot, idempotens első körindítás, monoton
+  szerveridős kijelzés és saját válaszbeküldés. A váró frissítési store-ját használja.
 - `src/domain/`: keretrendszertől független validáció, pontozás, állapotgép.
 - `src/games/`: típusos RPC-adapter futásidejű válaszvalidációval; létrehozó
   űrlap, saját játéklista és kizárólag hostnak szánt részletes boradatok.
@@ -90,14 +92,15 @@ Csak tagsággal rendelkező felhasználók olvasnak játékállapotot. Mások v�
 csak felfedett körnél olvashatók. Host számára induláskor csak a saját
 válasz lenne olvasható; a beadottsági számláló külön aggregált RPC feladata.
 
-A QR meghívó tokenjét a backend ellenőrzi, a tárolt változat hash. A `join_game`
-RPC-ről és rate limitről külön implementáció szükséges. Az éles kliens minden
+A QR meghívó tokenjét a backend ellenőrzi, a tárolt változat hash. A `join_game` RPC és a hosszú tokenes meghívó már elkészült; a hosztolt Auth
+rate limitje továbbra is üzemeltetési ellenőrzés. Az éles kliens minden
 módosítást korlátozott RPC-n végez, táblák közvetlen módosítására nincs grant.
 
 ## Ami most szándékosan előkészítés
 
 Az első és a létrehozási migráció még nem teljes játékbackend: nincs
-start/reveal/finish RPC vagy hosztolás. Meghívó, anonim belépés, QR és a közös
+reveal/finish RPC vagy hosztolás. Az első kör start RPC-je és a saját válasz
+folyamata már elkészült: [élő kör](live-round.md). Meghívó, anonim belépés, QR és a közös
 váró Realtime-előfizetése már elkészült.
 A `create_game`, saját hostlista és hostrészletek elkészültek. A host Auth és OAuth callback már
 elkészült, beállítása és integrációs ellenőrzése a [belépési útmutatóban](auth.md).

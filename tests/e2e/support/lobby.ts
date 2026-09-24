@@ -39,6 +39,6 @@ export function realtimeHub() {
   };
 }
 export function lobbyResponse(gameId: string, participants: unknown[] = [], role = 'host', self: string | null = null, status = 'lobby') {
-  return { game: { id: gameId, title: 'Péntesti kóstoló', status, version: 1 }, role,
+  return { round: null, own_rating: null, game: { id: gameId, title: 'Péntesti kóstoló', status, version: 1 }, role,
     self_participant_id: self, participants, server_now: new Date().toISOString() };
 }

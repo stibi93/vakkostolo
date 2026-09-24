@@ -41,7 +41,7 @@ function mockGame() {
           }
           return route.fulfill({ json: { game_id: gameId, participant_id: membershipId(index), nickname: data.p_nickname ?? 'Anna', title: 'Péntesti kóstoló', status } });
         }
-        if (path === '/rest/v1/rpc/get_lobby_snapshot') {
+        if (path === '/rest/v1/rpc/get_game_snapshot') {
           state.requests++;
           const requested = route.request().postDataJSON().p_game_id;
           if (state.denied || requested !== gameId || (!host && !participants.some((p) => p.id === membershipId(index)))) {

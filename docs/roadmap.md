@@ -32,7 +32,8 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Meghívó és vendégbelépés | `issue_invite`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | kliens és DB kész; helyi Supabase-en valódi próba lefutott; LAN-próba `npm run dev:lan`-nal; telefonos próba hátravan |
 | Kivetítő váró | `/present/:gameId`: cím, QR, link, becenevek, boradat nélkül | kész (host böngészőjének másik lapja) |
 | Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | implementáció és helyi Supabase-próba kész; fizikai eszközök hátravannak |
-| Élő kör és válaszadás | host szerkesztő, zárolás, lifecycle RPC-k, szerveridő, visszaigazolt tippek | tervezett |
+| Első élő kör és válaszadás | idempotens indítás, szerverhatáridő, saját mentett tipp és visszatérés | helyi implementáció és valódi Supabase-próba kész |
+| További körvezérlés | korai zárás, hosszabbítás, következő kör és blokkhatár | következő egység |
 | Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | tervezett |
 
 Az utolsó két egység további, külön ellenőrizhető szeletekre bontandó a megvalósításkor.
@@ -47,7 +48,9 @@ Ehhez create_game/open_lobby/join_game RPC, Supabase Auth-konfiguráció,
 meghívókezelés, QR-generálás és a demo helyett valódi adatadapter szükséges.
 A host Auth és a játék létrehozásának helyi implementációja elkészült.
 A meghívó/QR, anonim vendégbelépés és közös váró snapshot/Realtime elkészült.
-A következő egység az első élő kör szerveroldali indítása és a játékos kóstolólapja.
+Az első kör szerveroldali indítása és a saját tippek beküldése is elkészült.
+A következő egység a korai körzárás, hosszabbítás és a következő tétel indítása,
+a blokkos felfedéshez szükséges állapotátmenetekkel.
 A fizikai telefonos és hosztolt integráció külön ellenőrzési kapu.
 A külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
 Az adapter a migrációból generált Supabase TypeScript-típusokat használja;

@@ -42,7 +42,7 @@ async function setup(page: Page) {
       if (state.loseFirstResponse && state.calls.length === 1) return route.abort('failed');
       return route.fulfill({ json: gameId });
     }
-    if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+    if (url.pathname === '/rest/v1/rpc/get_game_snapshot') {
       return route.fulfill({ json: { ...lobbyResponse(gameId), game: { id: gameId, title: state.game?.title, status: state.game?.status, version: 0 } } });
     }
     if (url.pathname === '/rest/v1/rpc/get_host_game') {

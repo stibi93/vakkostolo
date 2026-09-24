@@ -1,17 +1,17 @@
 import { LobbyError, lobbyErrorMessage } from './api';
-import type { LobbyApi, LobbyConnection, LobbySnapshot } from './model';
+import type { SnapshotApi, LobbyConnection, LobbySnapshot } from './model';
 
-export interface LobbyState {
-  snapshot: LobbySnapshot | null; loading: boolean; stale: boolean;
+export interface LobbyState<T = LobbySnapshot> {
+  snapshot: T | null; loading: boolean; stale: boolean;
   error: string | null; connection: LobbyConnection;
 }
 /** Each mounted game owns a store. Events only invalidate; RPC snapshots are authoritative. */
-export function createLobbyStore(api: LobbyApi, gameId: string) {
-  let state: LobbyState = { snapshot: null, loading: true, stale: false, error: null, connection: 'connecting' };
+export function createLobbyStore<T>(api: SnapshotApi<T>, gameId: string) {
+  let state: LobbyState<T> = { snapshot: null, loading: true, stale: false, error: null, connection: 'connecting' };
   const listeners = new Set<() => void>();
   let active = false, online = true, busy = false, queued = false, generation = 0;
   let unwatch: (() => void) | undefined;
-  function update(patch: Partial<LobbyState>) {
+  function update(patch: Partial<LobbyState<T>>) {
     state = { ...state, ...patch }; listeners.forEach((listener) => listener());
   }
   async function refresh() {

@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { Link, Navigate, useLocation } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { HostWorkspace } from '../games/HostWorkspace';
-import type { LobbyApi } from '../lobby/model';
+import type { LiveApi } from '../live/model';
 import type { GamesApi } from '../games/model';
 import type { InvitesApi } from '../invites/model';
 import { authRuntime } from './runtime';
@@ -28,7 +28,7 @@ export function HostArea() {
 }
 
 function HostSession({ store, games, invites, lobby }: {
-  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi; lobby: LobbyApi;
+  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi; lobby: LiveApi;
 }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const location = useLocation();

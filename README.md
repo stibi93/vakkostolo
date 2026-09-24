@@ -85,3 +85,6 @@ A következő egységek sorrendjét és készültségi feltételeit a
 Helyi Git-repository létrejött; távoli repository nincs beállítva.
 Külső fiók, felhőprojekt, domain vagy telepítés nem jött létre.
 A meglévő GitHub Actions ellenőrzések GitHubra feltöltés után futnak távol is.
+
+Az első online kör indítása és a játékos tippek mentése elkészült;
+[API, működés és helyi integrációs próba](docs/live-round.md).

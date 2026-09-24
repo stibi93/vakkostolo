@@ -4,8 +4,8 @@ import { authRuntime } from '../auth/runtime';
 import type { createAuthStore } from '../auth/store';
 import { gameErrorMessage } from '../games/api';
 import type { GamesApi } from '../games/model';
-import { LobbyPanel } from '../lobby/LobbyPanel';
-import type { LobbyApi } from '../lobby/model';
+import { LiveGamePanel } from '../live/LiveGamePanel';
+import type { LiveApi } from '../live/model';
 import { QrCode } from './QrCode';
 import { inviteUrl, publicAppOrigin, readStoredInvite } from './model';
 import type { Invite } from './model';
@@ -32,7 +32,7 @@ function ProjectorNotice({ text }: { text: string }) {
 }
 
 function ProjectorSession({ store, games, lobby, gameId }: {
-  store: ReturnType<typeof createAuthStore>; games: GamesApi; lobby: LobbyApi; gameId: string;
+  store: ReturnType<typeof createAuthStore>; games: GamesApi; lobby: LiveApi; gameId: string;
 }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   useEffect(() => { void store.start(); }, [store]);
@@ -56,7 +56,7 @@ function useStoredInvite(gameId: string) {
   return invite;
 }
 
-function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: LobbyApi; gameId: string }) {
+function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: LiveApi; gameId: string }) {
   const invite = useStoredInvite(gameId);
   const [title, setTitle] = useState<{ status: 'loading' } | { status: 'ready'; value: string | null } |
     { status: 'error'; message: string }>({ status: 'loading' });
@@ -77,12 +77,12 @@ function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: Lobby
   const url = inviteUrl(publicAppOrigin(), invite.token);
   return <section className="projector-view" aria-labelledby="projector-title">
     <div className="projector-invite">
-      <p className="eyebrow">VAKKÓSTOLÓ · VÁRÓ</p>
+      <p className="eyebrow">VAKKÓSTOLÓ · KÓSTOLÓ</p>
       <h1 id="projector-title">{title.value}</h1>
       <p className="projector-lead">Olvasd be a QR-kódot a telefonod kamerájával, és adj meg egy becenevet.</p>
       <QrCode value={url} label="QR-kód a kóstolóba való belépéshez" />
       <p className="projector-link"><code>{url}</code></p>
     </div>
-    <LobbyPanel api={lobby} gameId={gameId} showTitle={false} />
+    <LiveGamePanel presentation api={lobby} gameId={gameId} showTitle={false} />
   </section>;
 }

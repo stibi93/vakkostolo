@@ -7,8 +7,9 @@ export interface LobbySnapshot {
   serverNow: string; participants: LobbyParticipant[];
 }
 export type LobbyConnection = 'connecting' | 'live' | 'fallback' | 'offline';
-export interface LobbyApi {
-  get(gameId: string): Promise<LobbySnapshot>;
+export type LobbyApi = SnapshotApi<LobbySnapshot>;
+export interface SnapshotApi<T> {
+  get(gameId: string): Promise<T>;
   watch(gameId: string, changed: () => void, connection: (state: LobbyConnection) => void,
     sessionChanged: () => void): () => void;
 }

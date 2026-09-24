@@ -62,7 +62,8 @@ Csak bejelentkezett játékost fogad. A tagságot az Auth UID-ből határozza me
 nem fogad másik játékos ID-t. Ellenőrzi az aktív játékot és nyitott kört,
 sorzár után a szerveridőt. Beszúr vagy felülír, a korlátokat a DB is ellenőrzi.
 Hibakódok: `AUTH_REQUIRED`, `ROUND_NOT_FOUND`, `ROUND_NOT_OPEN`,
-`DEADLINE_PASSED`, `NOT_A_PARTICIPANT`; hibás értéknél constraint violation.
+`DEADLINE_PASSED`, `NOT_A_PARTICIPANT`, `ROUND_NOT_ELIGIBLE`; hibás értéknél constraint violation.
+A kör megnyitása után csatlakozott résztvevő csak a következő körben értékelhet.
 A körzár megakadályozza, hogy host-zárással egyszerre kicsússzon egy beküldés.
 
 ## Meghívó és vendégbelépés — `202609240002_invites_join.sql`
@@ -104,12 +105,18 @@ játékállapot és résztvevőlista, titkos adat nélkül. A `202609240003` mig
 a `games` és `participants` Realtime-publicationjét is bekapcsolja.
 Szerződés, eseménykezelés és próbák: [közös váró](lobby.md).
 
+## Első élő kör — `202609240005_live_round.sql`
+
+Elkészült a `start_round(game_id, expected_version, request_id)` és a
+`get_game_snapshot(game_id)`: idempotens első indítás, sorzár, szerverhatáridő,
+saját mentett tipp és későn belépők védelme. Részletes paraméternevek, hibák
+és ellenőrzések: [első élő kör](live-round.md).
+
 ## Következő RPC-k terve
 
 | Művelet | Ellenőrzés / tranzakció |
 | --- | --- |
-| get_game_snapshot | tagság; server_now; aktív kör; csak jogosult mezők |
-| start_round | host; sorzár; expected_version; legközelebbi pending kör |
+| next_round | host; verzió és sorzár; lezárt előző kör; felfedési blokk szabálya |
 | extend_round | host; még nem járt le; +30 s, felső korlát |
 | close_round | host; idempotens lezárás; audit |
 | reveal_block | host; összes érintett kör closed; rögzített pillanatképek egy tranzakcióban |
@@ -122,7 +129,7 @@ tranzakcióban. Nem olvassuk át közvetlenül a titkos táblát publikus view-n
 Realtime-publicationbe csak `games`, `rounds`, `participants` kerülhet induláskor.
 Beküldési állapot hostoldalon külön lekérdezés; sem titkos bor, sem rating payload
 nem broadcastolható a szobának. A váró migrációja a `games` és `participants` publicationjét már bekapcsolja;
-a `rounds` bekapcsolása az élő kör egységében szükséges.
+a `rounds` táblát a 005 élőkör-migráció kapcsolja be.
 
 ## Tesztelés és migráció
 

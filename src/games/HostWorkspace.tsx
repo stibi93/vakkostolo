@@ -4,8 +4,8 @@ import { CreateGameForm } from './CreateGameForm';
 import { gameErrorMessage } from './api';
 import { gameStatusLabels } from './model';
 import type { GameStatus } from '../domain/game';
-import { LobbyPanel } from '../lobby/LobbyPanel';
-import type { LobbyApi } from '../lobby/model';
+import { LiveGamePanel } from '../live/LiveGamePanel';
+import type { LiveApi } from '../live/model';
 import { InvitePanel } from '../invites/InvitePanel';
 import type { InvitesApi } from '../invites/model';
 import type { GamesApi } from './model';
@@ -24,7 +24,7 @@ function useGameQuery<T>(load: () => Promise<T>) {
   return { state, retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
 }
 
-export function HostWorkspace({ api, invites, lobby }: { api: GamesApi; invites: InvitesApi; lobby: LobbyApi }) {
+export function HostWorkspace({ api, invites, lobby }: { api: GamesApi; invites: InvitesApi; lobby: LiveApi }) {
   const { gameId } = useParams();
   return gameId ? <HostGameDetails key={gameId} api={api} invites={invites} lobby={lobby} gameId={gameId} />
     : <><HostGameList api={api} /><CreateGameForm api={api} /></>;
@@ -46,7 +46,7 @@ function HostGameList({ api }: { api: GamesApi }) {
     <button className="button-secondary" disabled={state.status === 'loading'} onClick={retry}>Lista frissítése</button>
   </section>;
 }
-function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invites: InvitesApi; lobby: LobbyApi; gameId: string }) {
+function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invites: InvitesApi; lobby: LiveApi; gameId: string }) {
   const load = useCallback(() => api.get(gameId), [api, gameId]);
   const { state, retry } = useGameQuery(load);
   const [statusOverride, setStatusOverride] = useState<GameStatus | null>(null);
@@ -60,6 +60,7 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
     {state.status === 'ready' && <>
       <h2 id="saved-game-title" className="saved-game-title">{state.data.title}</h2>
       <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds} másodperc/bor · Felfedés {state.data.revealEvery} boronként</p>
+      <LiveGamePanel showTitle={false} api={lobby} gameId={gameId} onStatusChange={setStatusOverride} />
       <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok nem láthatók a játékosoknak felfedés előtt.</p>
       <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.position}>
         <h3>{wine.position}. {wine.name}</h3>
@@ -67,8 +68,7 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
       </li>)}</ol>
       <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
         onStatusChange={setStatusOverride} />
-      <LobbyPanel showTitle={false} api={lobby} gameId={gameId} />
-      <p>A boradatok mentve vannak. A szerkesztés és a kóstolás indítása még nem érhető el.</p>
+      <p>A boradatok mentve vannak. A borok szerkesztése még nem érhető el.</p>
     </>}
   </section>;
 }

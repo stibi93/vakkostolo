@@ -37,7 +37,7 @@ test('host: váró megnyitása, QR és link, újratöltés után is látható', 
     } else if (url.pathname === '/rest/v1/rpc/issue_invite') {
       calls.issue++;
       await route.fulfill({ json: { token, expires_at: new Date(Date.now() + 12 * 3600_000).toISOString(), status: 'lobby' } });
-    } else if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+    } else if (url.pathname === '/rest/v1/rpc/get_game_snapshot') {
       await route.fulfill({ json: lobbyResponse(gameId, participants.map((p, i) => ({ ...p, seat: i+1 })), 'host', null, calls.issue ? 'lobby' : 'draft') });
     } else if (url.pathname === '/rest/v1/participants') {
       expect(url.searchParams.get('game_id')).toBe(`eq.${gameId}`);
@@ -80,7 +80,7 @@ test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async 
     else if (url.pathname === '/rest/v1/rpc/list_host_games') {
       await route.fulfill({ json: [{ id: gameId, title: 'Péntesti kóstoló', status: 'lobby', round_seconds: 120,
         reveal_every: 2, created_at: '2026-09-24T08:00:00Z' }] });
-    } else if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+    } else if (url.pathname === '/rest/v1/rpc/get_game_snapshot') {
       await route.fulfill({ json: lobbyResponse(gameId, participants, 'host', null) });
     } else return false;
     return true;
@@ -125,7 +125,7 @@ test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagsá
       calls.previews++;
       expect(route.request().postDataJSON()).toEqual({ p_token: token });
       await route.fulfill({ json: { title: 'Péntesti kóstoló', joinable: true } });
-    } else if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+    } else if (url.pathname === '/rest/v1/rpc/get_game_snapshot') {
       await route.fulfill({ json: lobbyResponse(gameId, [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z', seat: 1 }], 'player', membership.participant_id) });
     } else if (url.pathname === '/auth/v1/signup') {
       calls.signups++;

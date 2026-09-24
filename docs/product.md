@@ -15,8 +15,8 @@ a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
 | Játékmester | `/host`, `/host/:gameId` | Borok, meghívás, időzítő, körváltás, felfedés |
 | Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
 
-Ezek közül a `/host` belépési és munkamenet-kezelési része elkészült; a
-játékszerkesztés és a többi játékútvonal még terv. A kezdőlap a `/` címen van;
+A hostbelépés, játéklétrehozás, meghívás, közös váró és az első élő kör
+beküldése elkészült. A szerkesztés, további körvezérlés és eredmények még terv. A kezdőlap a `/` címen van;
 a jelenlegi demo a `/demo` alatt három nézetkapcsolóval egy oldalon fut.
 Az MVP-kivetítő a játékmester bejelentkezett böngészőjének másik lapja;
 megosztható, csak olvasható prezentációtoken későbbi bővítés. A váróállapota kész:
@@ -44,6 +44,8 @@ host böngészője tárolja, ezért más böngészőben a kivetítő nem tudja m
    becsült palackár, becsült alkoholfok, tetszési index. Mindhárom kötelező.
 5. A beküldés szerver-visszaigazolást ad. A játékos a kör lejártáig módosíthat.
    Nincs kötelező automatikus beküldés, és nincs hamis „mentve” hálózati hibánál.
+   Az első kör indítása és ez a válaszadási folyamat elkészült; részletek:
+   [első élő kör](live-round.md).
 6. A határidő lezárja a beküldést. A játékmester korábban is zárhat, vagy
    lejárat előtt hosszabbíthat. Új tétel mindig tudatos játékmesteri művelet.
 7. Felfedés egyenként, minden N. bor után vagy csak a végén. N alapértéke 2,
