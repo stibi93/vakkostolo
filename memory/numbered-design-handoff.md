@@ -61,3 +61,9 @@ A teljes háttér + JPEG feladat kész és ellenőrizve. Check 169/169, app E2E
 12/12, három szélesség átnézve; performance.json az atmosphere-review alatt.
 A 4245-ös saját preview leállítva. Új asset és prompt: public/images/.
 A kész közös állapot tartalmazza a fejlécbeli közös mozgáskapcsolót.
+
+Aktív arculati folytatás: gyorsabb mozgás, szélfuvallatok, háromképes kezdőlap,
+/jatekmester tájékoztató aloldal. Érintett: HomePage, új OrganizerPage,
+App.tsx egy új lazy route-tal, ui grafikai CSS/komponensek és app E2E.
+A live-round által frissített állapotszöveget az új aloldalra viszem át.
+Portok: 4255 dev, 4256 preview, 4257/4258 E2E. Más agent fájljait megőrzöm.

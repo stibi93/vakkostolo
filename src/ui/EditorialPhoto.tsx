@@ -11,7 +11,7 @@ export function EditorialPhoto({ src, alt, number, caption, eager = false, width
         : <img src={src} alt={alt} width={width} height={height} loading={eager ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)} />}
       <span className="editorial-photo-number" aria-hidden="true">{number}</span>
     </div>
-    <figcaption><span>{caption}</span><span aria-hidden="true">↗</span></figcaption>
+    <figcaption>{caption}</figcaption>
   </figure>;
 }
 

@@ -6,8 +6,8 @@
 .harvest-vine { position: absolute; top: 2%; left: 3%; width: 46%; transform-origin: 12% 12%; }
 .harvest-vine svg { width: 100%; height: auto; display: block; }
 @media (prefers-reduced-motion: no-preference) {
-  .harvest-vine { animation: harvest-vine-sway 12s ease-in-out infinite alternate; animation-play-state: paused; }
-  .harvest-light { animation: harvest-light-drift 24s ease-in-out infinite alternate; animation-play-state: paused; }
+  .harvest-vine { animation: harvest-vine-sway 7.5s ease-in-out infinite alternate; animation-play-state: paused; }
+  .harvest-light { animation: harvest-light-drift 16s ease-in-out infinite alternate; animation-play-state: paused; }
   .harvest-running .harvest-vine, .harvest-running .harvest-light { animation-play-state: running; }
   @keyframes harvest-vine-sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg) translateY(4px); } }
   @keyframes harvest-light-drift { from { transform: translate(-8px, 4px); } to { transform: translate(12px, -10px); } }
