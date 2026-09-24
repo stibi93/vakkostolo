@@ -1,6 +1,7 @@
 import { readSupabaseConfig } from '../lib/config';
 import { createSupabaseClient } from '../lib/supabase';
 import { readAuthCallback } from './callback';
+import { createGamesApi } from '../games/api';
 import { createAuthStore } from './store';
 
 const callback = readAuthCallback(new URL(window.location.href));
@@ -14,7 +15,7 @@ function createRuntime() {
     const client = createSupabaseClient(config.config);
     const store = createAuthStore(client.auth, callback, `${window.location.origin}/auth/callback`,
       (url) => window.location.assign(url));
-    return { status: 'ready', store } as const;
+    return { status: 'ready', store, games: createGamesApi(client) } as const;
   } catch {
     return { status: 'invalid' } as const;
   }

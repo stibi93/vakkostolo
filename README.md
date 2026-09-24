@@ -12,6 +12,9 @@ játék, a tippeket nem menti szerverre. A külön `/host` oldalon Supabase Goog
 belépés, munkamenet-visszaállítás és kijelentkezés készült; a használatához
 tesztprojekt-konfiguráció szükséges. Az éles backendhez adatmodell,
 SQL-migráció, hozzáférési szabályok, válaszbeküldő függvény és tesztek készültek.
+A bejelentkezett host létrehozhat 1–12 boros kóstolót, megnézheti saját mentett
+játékait és azok boradatait. A szerver ellenőrzi a hostot, az adatokat és az
+ismételt mentést. Meghívó és játékindítás ebben az egységben még nincs.
 A hiányzó éles funkciókat a [megvalósítási terv](docs/roadmap.md) sorolja fel.
 
 ## Indítás
@@ -31,6 +34,7 @@ Ez még nem szinkronizálja az eszközök játékát. A fejlesztői szervert ne 
 ```sh
 npm run check
 npm run test:db
+npm run db:types
 npm run build
 npm run preview
 ```
@@ -39,6 +43,10 @@ Böngészős próba: egyszer `npx playwright install chromium`, utána
 `npm run test:e2e`. A teszt két helyi szervert indít (4173 és 4174), asztali és
 360 px széles Chromiumban ellenőrzi a demót és az Auth-folyamatot. Az Auth-próbák
 szintetikus HTTP-válaszokat használnak, nem a fejlesztő valódi projektjét.
+Ugyanez vonatkozik az új játék létrehozási/lista/részlet RPC-próbákra is.
+Párhuzamos munkánál saját worktree és függőségtelepítés mellett például
+`PLAYWRIGHT_BASE_PORT=4195 npm run test:e2e -- --workers=2` használható;
+ilyenkor a tesztszerverek a 4195 és 4196 portot foglalják.
 A képernyőképek a Gitből kizárt
 `test-results/` mappába kerülnek. Ez emulált mobilméret, nem valódi iOS/Android-eszközteszt.
 

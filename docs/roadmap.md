@@ -28,8 +28,8 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Projektalap rögzítése | meglévő források, tervek és lockfile helyi Gitben; `npm run check` | kész |
 | Alkalmazásváz | magyar kezdőlap, külön `/demo`, ismeretlen oldal, mobil navigációs próba | kész |
 | Auth és adatkapcsolat | központi router, host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák kezelése | kliens kész, szimulált Auth-próbákkal; valódi integráció hátravan |
-| Játék létrehozása | `create_game` RPC új migrációban, típusos adapter, hostjog ellenőrzése | következő |
-| Meghívó és vendégbelépés | `open_lobby`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | tervezett |
+| Játék létrehozása | atomikus, idempotens `create_game`, hostlista/részletek, típusos adapter és magyar űrlap | helyi implementáció és tesztek kész; Supabase-integráció hátravan |
+| Meghívó és vendégbelépés | `open_lobby`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | következő; külön agent fejleszti |
 | Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | tervezett |
 | Élő kör és válaszadás | host szerkesztő, zárolás, lifecycle RPC-k, szerveridő, visszaigazolt tippek | tervezett |
 | Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | tervezett |
@@ -44,8 +44,10 @@ Egy host bejelentkezik, létrehoz egy játékot, megnyitja a várót; két telef
 ugyanazon QR-ról anonim vendégként belép, újratöltéskor megőrzi tagságát.
 Ehhez create_game/open_lobby/join_game RPC, Supabase Auth-konfiguráció,
 meghívókezelés, QR-generálás és a demo helyett valódi adatadapter szükséges.
-A host Auth kliens elkészült. A következő kódolási egység a játék létrehozása;
-a külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
+A host Auth és a játék létrehozásának helyi implementációja elkészült.
+A következő egység a meghívó/QR és anonim vendégbelépés, külön ágon;
+utána a közös váró snapshot/Realtime és visszatérés következik.
+A külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
 Az adapter a migrációból generált Supabase TypeScript-típusokat használja;
 a snapshot válaszát futásidőben is validálni kell a határon.
 Kész, ha az idegen játék olvasása továbbra is tiltott és a QR nem ad hostjogot.

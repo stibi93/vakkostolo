@@ -1,6 +1,8 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { Link, Navigate, useLocation } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
+import { HostWorkspace } from '../games/HostWorkspace';
+import type { GamesApi } from '../games/model';
 import { authRuntime } from './runtime';
 import type { createAuthStore } from './store';
 
@@ -10,7 +12,7 @@ export function HostArea() {
       <section className="auth-panel" aria-labelledby="host-title">
         <p className="eyebrow">ONLINE BELÉPÉS</p>
         <h1 id="host-title">Játékmester</h1>
-        {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} /> : <>
+        {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} games={authRuntime.games} /> : <>
           <h2>A belépés még nem elérhető.</h2>
           <p>{authRuntime.status === 'missing'
             ? 'Az online kapcsolat még nincs beállítva. Addig a próbakóstolóban végigjárhatod a játék menetét.'
@@ -22,7 +24,7 @@ export function HostArea() {
   );
 }
 
-function HostSession({ store }: { store: ReturnType<typeof createAuthStore> }) {
+function HostSession({ store, games }: { store: ReturnType<typeof createAuthStore>; games: GamesApi }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const location = useLocation();
   useEffect(() => {
@@ -58,14 +60,13 @@ function HostSession({ store }: { store: ReturnType<typeof createAuthStore> }) {
       {state.user.is_anonymous === false ? <>
         <h2>Játékmesteri fiók</h2>
         <p>Bejelentkezve{state.user.email ? `: ${state.user.email}` : '.'}</p>
-        <p>A játék létrehozása és a közös váró a következő fejlesztési lépés. Most a próbakóstolóban nézheted meg a vezérlést.</p>
-        <Link className="button-secondary" to="/demo">Próbakóstoló megnyitása</Link>
+        <HostWorkspace key={state.user.id} api={games} />
       </> : <>
         <h2>Most vendégként vagy belépve.</h2>
         <p>Játékmesterként tartós fiókra van szükséged. Előbb jelentkezz ki, majd lépj be Google-fiókkal.</p>
         <p>A kijelentkezéssel a böngészőben tárolt vendégbelépés megszűnik.</p>
       </>}
-      <div className="actions"><button className="button-primary" disabled={!!state.pending}
+      <div className="actions"><button className="button-secondary" disabled={!!state.pending}
         onClick={() => void store.signOut()}>{state.pending === 'sign-out' ? 'Kijelentkezés…' : 'Kijelentkezés'}</button></div>
     </> : <>
       <h2>Játékmesteri belépés</h2>

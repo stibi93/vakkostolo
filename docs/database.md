@@ -24,7 +24,36 @@ egész tized-százalékpont (0–250), tetszés 1–10. A beviteli felső árhat
 Boradat nem változhat játékindítás után; ezt a következő host-RPC-k fogják ellenőrizni,
 a mostani alap közvetlen felhasználói írást egyáltalán nem enged.
 
-## Elkészült RPC
+## Elkészült RPC-k
+
+`create_game(p_request_id uuid, p_title text, p_round_seconds integer,
+p_reveal_every integer, p_wines jsonb) → uuid`
+
+A `202609240001_create_game.sql` migráció a hívót az `auth.uid()` és a kanonikus
+`auth.users.is_anonymous = false` alapján ellenőrzi. Nincs kliens által megadható
+host vagy állapot. Egy tranzakcióban hozza létre a draft játékot, a sorrendezett
+pending köröket, a titkos boradatokat és a `game_created` auditeseményt.
+Meghívó nem keletkezik; az a következő fejlesztési egység külön művelete.
+
+A cím trim után 1–100 karakter, az idő 30–1800 egész másodperc, a felfedési
+gyakoriság 1–12. A borlista 1–12 eleme pontosan a `name` (1–200 karakter),
+`price_huf` (1–1 000 000 egész Ft) és `alcohol_tenths` (0–250 egész) mezőket kapja.
+A lista sorrendje adja a körök sorszámát. Hibás elemnél semmi nem marad mentve.
+
+Hostonként egy kérésazonosító egy normalizált payloadhoz tartozik. Az ismételt
+azonos kérés ugyanazt a játékazonosítót adja; eltérő adat `REQUEST_ID_CONFLICT`.
+A tranzakciós advisory lock az egyidejű ismétlést is sorosítja; a privát
+`game_creation_requests` csak hash-t tárol, boradatot nem másol. Hibakódok:
+`AUTH_REQUIRED`, `PERMANENT_AUTH_REQUIRED`, `INVALID_REQUEST_ID`, `INVALID_TITLE`,
+`INVALID_SETTINGS`, `INVALID_WINES`, `INVALID_WINE`, `REQUEST_ID_CONFLICT`.
+
+`list_host_games() → jsonb`: a tartós fiók legutóbbi legfeljebb 100 saját játéka,
+`id`, `title`, `status`, `round_seconds`, `reveal_every`, `created_at` mezőkkel.
+`get_host_game(p_game_id uuid) → jsonb`: ugyanez a saját játékhoz, plusz a
+sorrendezett `wines` lista (`position`, `name`, `price_huf`, `alcohol_tenths`).
+Idegen és nem létező ID egyaránt `GAME_NOT_FOUND`. Ez host-DTO, játékosnak nem
+adható. Mindhárom RPC csak `authenticated` szereppel hívható, rögzített üres
+`search_path` mellett. Az anonim Auth-fiókot a belső ellenőrzés utasítja el.
 
 `submit_rating(p_round_id uuid, p_price_huf integer, p_alcohol_tenths integer,
 p_liking integer) → ratings`
@@ -40,7 +69,6 @@ A körzár megakadályozza, hogy host-zárással egyszerre kicsússzon egy bekü
 
 | Művelet | Ellenőrzés / tranzakció |
 | --- | --- |
-| create_game | tartós host-auth; játék + borok atomikusan; véletlen meghívó |
 | open_lobby | host; legalább 1 teljesen kitöltött bor; draft állapot |
 | join_game | tokenhash, lejárat, lobby/engedett késői csatlakozás, létszám, rate limit |
 | get_game_snapshot | tagság; server_now; aktív kör; csak jogosult mezők |
@@ -64,7 +92,17 @@ nem broadcastolható a szobának. A publication bekapcsolása a következő fáz
 Supabase Auth UID tesztadapterrel. A migráció SQL-je változtatás nélkül fut.
 Ellenőrizzük a rejtett és felfedett olvasást, másik játék elkülönítését,
 a határidőt, validációt, újrabeküldést és a közvetlen írás tilalmát.
-Ez nem teszteli a Supabase gatewayt, valódi JWT-ket, OAuth-t vagy WebSocketet.
+Az új létrehozási tesztek az atomikusságot, idempotenciát, tartós Auth-ot és
+host-adatelkülönítést is ellenőrzik. A PGlite egy kapcsolaton fut: a valódi
+többkapcsolatos versengést, Supabase gatewayt, JWT-ket, OAuth-t és WebSocketet
+ez nem teszteli.
+
+`npm run db:types` az összes migráció végrehajtása utáni PostgreSQL-katalógusból
+generálja a `src/lib/database.types.ts` fájlt. A `npm run db:types:check` (a teljes
+check része) észleli az elavult típust. A helyi generátor a jelenlegi tábla- és
+RPC-típusokra korlátozott; ismeretlen adattípusnál megáll, kapcsolati/nested select
+metaadatot nem generál. Az adapter explicit RPC-ket használ. Docker nélkül is
+futtatható, de kiadás előtt valódi Supabase-séma és Auth-integráció ellenőrzése kell.
 
 Supabase-projektben a CLI migrációs folyamata alkalmazható a `supabase/migrations/`
 könyvtárra. Távoli push előtt tesztprojekt és mentés; éles migrációhoz külön

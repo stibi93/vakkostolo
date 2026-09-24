@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { loadDatabase } from '../scripts/database-harness.mjs';
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -20,21 +20,7 @@ async function asUser(uid: string, role = 'authenticated') {
   await db.exec(`set role ${role}`);
 }
 
-beforeAll(async () => {
-  await db.exec(`
-    create role anon nologin;
-    create role authenticated nologin;
-    create schema auth;
-    create table auth.users (id uuid primary key);
-    create function auth.uid() returns uuid language sql stable as $$
-      select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
-    $$;
-    grant usage on schema auth, public to anon, authenticated;
-    grant execute on function auth.uid() to anon, authenticated;
-  `);
-  const sql = await readFile(new URL('../supabase/migrations/202609230001_foundation.sql', import.meta.url), 'utf8');
-  await db.exec(sql);
-});
+beforeAll(async () => { await loadDatabase(db); });
 
 beforeEach(async () => {
   await db.exec(`reset role;

@@ -9,7 +9,9 @@ A helyi munkamenetet a Supabase SDK tárolja és frissíti. A felület a szerver
 `getUser` válaszát ellenőrzi; a tárolt userobjektum önmagában nem nyit hostnézetet.
 Csak az explicit nem anonim felhasználó kap játékmesteri kezdőnézetet. Ez még
 nem jogosít egyetlen játék kezelésére sem: azt a játék hostazonosítója, az RLS
-és a következő egységben készülő RPC-k ellenőrzik. Játéklétrehozó API még nincs.
+és a host-RPC-k ellenőrzik. A `create_game`, `list_host_games`, `get_host_game`
+a kanonikus Auth-sorban is ellenőrzi a nem anonim fiókot; a két olvasó RPC
+csak saját játékot enged. A migrációkat a tesztprojektre is alkalmazni kell.
 
 ## Helyi frontend és távoli tesztprojekt
 
@@ -72,14 +74,16 @@ Ilyenkor a Google felé engedélyezett Supabase callback:
 válaszok tesztjei a meglévő domain/DB-próbák mellett.
 
 `npm run test:e2e`: külön, kényszerítetten konfiguráció nélküli (4173) és
-szintetikus Auth-konfigurációjú (4174) Vite-szerver. A böngésző a valódi Supabase
+szintetikus Auth-konfigurációjú (4174) Vite-szerver. A `PLAYWRIGHT_BASE_PORT`
+átállítja az első portot, a második az azt követő port. A böngésző a valódi Supabase
 SDK-t használja, de a teszt az Auth HTTP-válaszokat helyettesíti. A fejlesztő
 `.env.local` projektjét nem használja. Ez nem valódi Google- vagy Supabase-próba.
 
 Kiadás előtt tesztprojektben kell igazolni: Google → callback → újratöltés,
 lejárt munkamenet frissítése, két lap kijelentkezése, megszakított consent,
-engedélyezett callbackcímek és valódi mobilos visszatérés. A következő host-RPC
-külön DB-tesztet kap a tartós Auth és a tulajdonjog ellenőrzésére.
+engedélyezett callbackcímek és valódi mobilos visszatérés. A host-RPC-k
+PGlite-tesztjei a tartós Auth és a tulajdonjog ellenőrzését már lefedik;
+kiadás előtt a tényleges Auth/JWT és RPC kapcsolatot is próbálni kell.
 
 Hivatkozások: [Supabase Google-belépés](https://supabase.com/docs/guides/auth/social-login/auth-google),
 [PKCE](https://supabase.com/docs/guides/auth/sessions/pkce-flow),

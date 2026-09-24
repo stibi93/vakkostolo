@@ -14,6 +14,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/demo" element={<DemoApp />} />
         <Route path="/host" element={<HostArea />} />
+        <Route path="/host/:gameId" element={<HostArea />} />
         <Route path="/auth/callback" element={<HostArea />} />
         <Route path="*" element={<PageFrame>
           <p className="eyebrow">404 · ISMERETLEN OLDAL</p>

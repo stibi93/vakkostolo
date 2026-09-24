@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { authSession, authUser } from '../fixtures/auth';
 
+const authOrigin = `http://127.0.0.1:${Number(process.env.PLAYWRIGHT_BASE_PORT ?? 4173) + 1}`;
+
 // Real Supabase JS client, synthetic HTTP responses: this is not a live OAuth integration test.
 async function mockAuth(page: Page, anonymous = false) {
   const user = { ...authUser, is_anonymous: anonymous };
@@ -14,7 +16,7 @@ async function mockAuth(page: Page, anonymous = false) {
       expect(url.searchParams.get('code_challenge')).toBeTruthy();
       expect(url.searchParams.get('code_challenge_method')?.toLowerCase()).toBe('s256');
       const callback = new URL(url.searchParams.get('redirect_to')!);
-      expect(callback.origin).toBe('http://127.0.0.1:4174');
+      expect(callback.origin).toBe(authOrigin);
       expect(callback.pathname).toBe('/auth/callback');
       callback.searchParams.set('code', 'synthetic-code');
       await route.fulfill({ status: 302, headers: { location: callback.href } });
@@ -33,6 +35,8 @@ async function mockAuth(page: Page, anonymous = false) {
       calls.logouts++;
       calls.logoutScope = url.searchParams.get('scope') ?? '';
       await route.fulfill({ status: 204 });
+    } else if (url.pathname === '/rest/v1/rpc/list_host_games') {
+      await route.fulfill({ json: [] });
     } else {
       await route.abort();
       throw new Error(`Unexpected mocked Auth endpoint: ${url.pathname}`);
@@ -57,7 +61,7 @@ test('Google PKCE → host → újratöltés → helyi kijelentkezés', async ({
   await expect(page.getByRole('button', { name: 'Belépés Google-fiókkal' })).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('host-sign-in.png'), fullPage: true });
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL('http://127.0.0.1:4174/host');
+  await expect(page).toHaveURL(`${authOrigin}/host`);
   await expect(page.getByRole('heading', { name: 'Játékmesteri fiók' })).toBeVisible();
   await expect(page.getByText('Bejelentkezve: host@example.test')).toBeVisible();
   expect(calls.exchanges).toBe(1);
@@ -78,7 +82,7 @@ test('megszakított OAuth: tiszta URL és új belépési lehetőség', async ({ 
   const calls = await mockAuth(page);
   await page.goto('/auth/callback?error=access_denied&error_description=private-provider-detail&next=https://outside.test');
   await expect(page.getByRole('alert')).toContainText('A belépés nem fejeződött be');
-  await expect(page).toHaveURL('http://127.0.0.1:4174/auth/callback');
+  await expect(page).toHaveURL(`${authOrigin}/auth/callback`);
   await expect(page.getByRole('button', { name: 'Új Google-belépés' })).toBeVisible();
   await expect(page.getByText('private-provider-detail')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('host-error.png'), fullPage: true });
@@ -90,7 +94,7 @@ test('lejárt kód nem ad hostfelületet', async ({ page }) => {
   calls.rejectCode = true;
   await signIn(page);
   await expect(page.getByRole('alert')).toContainText('Indíts új belépést');
-  await expect(page).toHaveURL('http://127.0.0.1:4174/auth/callback');
+  await expect(page).toHaveURL(`${authOrigin}/auth/callback`);
   await expect(page.getByRole('heading', { name: 'Játékmesteri fiók' })).toHaveCount(0);
   expect(calls.exchanges).toBe(1);
 });

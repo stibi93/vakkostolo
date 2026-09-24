@@ -25,16 +25,18 @@ flowchart LR
 ## Rétegek a kódban
 
 - `src/app/`: alkalmazásbelépési pont, kezdőlap, közös keret és útvonalválasztás.
-  React Router kezeli a `/`, `/demo`, `/host`, `/auth/callback` útvonalakat.
+  React Router kezeli a `/`, `/demo`, `/host`, `/host/:gameId`, `/auth/callback` útvonalakat.
   A demo dinamikus importtal külön JS-csomagba kerül; a kezdőlap nem tölti le
   a mintaborokat. Ez betöltési határ, nem biztonsági védelem: a demo csomagja publikus.
 - `src/auth/`: lazy betöltött hostfelület, PKCE-callback és Reacttól független
   munkamenet-kezelő. Egy Supabase-kliens/böngészőlap; szerverrel ellenőrzött user,
   Auth-események, visszatérés, időkorlát és késői válaszok elleni védelem.
 - `src/domain/`: keretrendszertől független validáció, pontozás, állapotgép.
+- `src/games/`: típusos RPC-adapter futásidejű válaszvalidációval; létrehozó
+  űrlap, saját játéklista és kizárólag hostnak szánt részletes boradatok.
 - `src/demo/`: csak a helyi demonstráció adatai és React-felülete.
-- `src/lib/`: publikus konfiguráció validálása és az Auth által használt kliensgyár.
-  Generált DB-típusok és játékadat-adapter a következő, `create_game` egységben készülnek.
+- `src/lib/`: publikus konfiguráció validálása, közös kliensgyár és a végrehajtott
+  migrációk katalógusából generált DB-típusok (`npm run db:types`).
 - `src/ai/`: kikapcsolt, szolgáltatófüggetlen összefoglaló-szerződés.
 - `supabase/migrations/`: verziózott adatmodell, jogosultság, DB-műveletek.
 - `tests/`: domain- és PostgreSQL/RLS-regressziók.
@@ -72,8 +74,11 @@ határidő alapján már lejártnak mutatja. Nem kell másodpercenkénti szerver
 szinkronizálja a visszaszámlálást. Hálózati újracsatlakozás, lapfókusz és
 Realtime-esemény új snapshotot kér. A háttérbe tett telefon nem maradhat régi körön.
 Beküldések versengése az upsert és a körzár miatt sorosítható; ismételt kérés
-nem készít duplikált választ. Hostparancsokhoz a következő fázisban request ID
-és egyedi auditkulcs védi az ismétlést.
+nem készít duplikált választ. A `create_game` ismétlését hosthoz kötött request ID,
+payloadhash és tranzakciós advisory lock védi. A kliens a megnyitott űrlapban
+őrzi a kérésazonosítót; újratöltés után előbb a saját játéklistát kell ellenőrizni,
+ha a korábbi mentés válasza elveszett. A további hostparancsoknak külön kell
+megvalósítaniuk az idempotenciát és az elavult állapot ellenőrzését.
 
 ## Titkosság
 
@@ -89,8 +94,9 @@ módosítást korlátozott RPC-n végez, táblák közvetlen módosítására ni
 
 ## Ami most szándékosan előkészítés
 
-Az első migráció nem teljes játékbackend: nincs create/join/start/reveal/finish RPC,
-éles QR, Realtime-előfizetés vagy hosztolás. A host Auth és OAuth callback már
+Az első és a létrehozási migráció még nem teljes játékbackend: nincs
+join/start/reveal/finish RPC, éles QR, Realtime-előfizetés vagy hosztolás.
+A `create_game`, saját hostlista és hostrészletek elkészültek. A host Auth és OAuth callback már
 elkészült, beállítása és integrációs ellenőrzése a [belépési útmutatóban](auth.md).
 A hiányzó műveleteknél nem
 publikálunk működőnek látszó, jogosultságot megkerülő ideiglenes API-t.
