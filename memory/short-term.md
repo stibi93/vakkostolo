@@ -1,5 +1,49 @@
 # Aktuális állapot — 2026-09-24
 
+## Boronkénti egyedi kérdések és térközjavítás
+
+- Új és mentett kóstoló borlapján közös QuestionEditor: szőlőfajta-, ország-
+  és saját kérdés; legfeljebb 5 kérdés, 2–6 opció, egy kijelölt helyes válasz.
+  Hátralévő bor szerkeszthető; a mentett áttekintésben a kérdések megnyithatók.
+- Játékos a meglévő tipp mellett minden kérdésre választ ad. Atomi mentés,
+  felülírás és újratöltés; a kiértékelésnél saját/helyes válasz és találatjelzés.
+  Kivetítőn csak a helyes válasz. A 100 pontos rangsor változatlan.
+- 0017 migráció alkalmazva a helyi Supabase-en, ne írjuk át. Privát kérdés-
+  és választáblák, szerveres validálás, régi submit_rating sem kerülheti meg
+  a kérdéseket. Felfedés előtt csak aktuális kérdés/opciók és saját válasz.
+- Felhasználói visszajelzés alapján a kérdésmezők között 20 px távolság,
+  külön sor a hozzáadógombnak és a helyesválasz-mezőnek, kerettől elválasztott
+  címek, mobilon tördelődő műveletek. Mindhárom kérdéstípusra ellenőrizve.
+- Ellenőrzés: npm run check sikeres (310 teszt, típusok/lint/build);
+  games/live/results/schedule E2E 62/62 asztalon és 360 px-en, billentyűzettel
+  is. Az érintett szerkesztő-, játékos-, eredmény- és kivetítőképek átnézve.
+  node scripts/test-questions-local.mjs: valódi helyi Auth/RPC teljes folyamat
+  sikeres, saját szintetikus adatok törölve. Ez nem távoli élesítési próba.
+- Másik munkamenet háttér-/szüretigrafika-módosításai megőrizve. Az alábbi
+  korábbi teljes-check akadályt a mostani sikeres check feloldotta.
+- Következő: felhasználói próba saját borral az Egyedi kérdések részben;
+  távoli használat előtt a 0017 migráció alkalmazása és ottani integrációs próba.
+
+
+## Többszínű háttér és intenzívebb szüreti rajz
+
+- HomeAtmosphere: bordó/zsálya/szilva/kék/agyagrózsaszín levelek és szélvonalak,
+  új mozgó pohárkarikák és sodródó levélrészletek minden útvonalon.
+- HarvestArtwork: eltérő színű szőlőbogyók, zöld/kék levelek, rétegzett színfoltok,
+  külön mozgó szélrajz; ág 4,8 s félciklus, −6/+7 fok. Galériacímkék is színesek.
+- Hat háttér + három kezdőlapi animáció; csak transform/opacity. Közös szünet,
+  reduced-motion és képernyőn kívüli szünet megmarad. Nincs új függőség.
+- Renderelt kezdőlap 360/1280 px átnézve: test-results/colour-motion/.
+  Célzott E2E 4/4, saját komponenslint sikeres. Külön böngészőpróba mind a
+  kilenc animáció szünetét, reduced-motion leállást és túlcsordulást ellenőrizte.
+  Chromium 3 s mérés: 0 új layout, 0 stílus-újraszámítás, 0 s script;
+  ez asztali mérés, nem általános telefonos teljesítménygarancia.
+- Az első, csak hátteret érintő állapot npm run check: 304/304, build/lint sikeres.
+  A végső teljes check a párhuzamos egyedi-kérdés fejlesztés ResultsPanel.tsx:57
+  szintaktikai hibáján állt meg. Teljes app E2E 10/16, útvonalbetöltési hibákkal;
+  a célzott animációtesztek újrafuttatva 4/4. Másik munkamenet fájljai érintetlenek.
+- Következő: a párhuzamos fejlesztés lezárása után teljes check és app E2E.
+
 ## Teljes kóstolómenet az új űrlapon, kártyás felfedés és admin törlés
 
 - Új kóstoló létrehozásakor közvetlen Bor / Szünet / Felfedés hozzáadás.

@@ -12,7 +12,7 @@ interface StoredGame {
 interface CreatePayload {
   p_request_id: string; p_title: string; p_round_seconds: number; p_reveal_every: number;
   p_steps?: {kind:string;wine_index?:number;wine_indexes?:number[];title?:string;message?:string;seconds?:number}[];
-  p_wines: { name: string; price_huf: number; alcohol_tenths: number }[];
+  p_wines: { questions?: {correctOptionId:string;options:{id:string;label:string}[]}[]; name: string; price_huf: number; alcohol_tenths: number }[];
 }
 async function setup(page: Page) {
   await page.routeWebSocket('wss://auth.vakkostolo.test/**', (ws) => ws.close());
@@ -205,4 +205,29 @@ test('új kóstoló: szünet és többboros felfedés már az első mentés elő
   expect(state.calls[0]).toEqual(state.calls[1]);
   expect(state.calls[0].p_steps?.map(s=>s.kind)).toEqual(['wine','break','wine','reveal']);
   expect(state.calls[0].p_steps?.[3].wine_indexes).toEqual([0,1]);
+});
+
+test('egyedi kérdések új bornál: sablon, hibajavítás és mentett payload',async({page},info)=>{
+ const state=await setup(page);await fillGame(page);
+ await page.getByRole('button',{name:'Szőlőfajta-kérdés'}).focus();await page.keyboard.press('Enter');
+ await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('helyes választ');expect(state.calls).toHaveLength(0);
+ await page.getByLabel('Helyes válasz (felfedésig titkos)').selectOption({label:'Furmint'});
+ await page.getByRole('button',{name:'Országkérdés'}).click();
+ await page.getByLabel('Helyes válasz (felfedésig titkos)').nth(1).selectOption({label:'Magyarország'});
+ await page.getByRole('button',{name:'Saját kérdés',exact:true}).click();
+ const custom=page.getByRole('group',{name:'3. kérdés',exact:true});
+ await custom.getByLabel('Kérdés szövege').fill('Milyen hordóban érlelődött a bor?');
+ await custom.getByLabel('1. válaszlehetőség',{exact:true}).fill('Tölgy');await custom.getByLabel('2. válaszlehetőség',{exact:true}).fill('Akác');
+ await custom.getByLabel('Helyes válasz (felfedésig titkos)').selectOption({label:'Tölgy'});
+ for(const fields of await page.locator('.question-fields').all()) {
+   const add=await fields.getByRole('button',{name:'Válaszlehetőség hozzáadása',exact:true}).boundingBox();
+   const label=await fields.locator('label').filter({has:page.locator('select')}).boundingBox();
+   expect(label!.y-(add!.y+add!.height)).toBeGreaterThanOrEqual(19);
+ }
+ await page.getByRole('region',{name:'Egyedi kérdések',exact:true}).screenshot({path:info.outputPath('question-editor.png')});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).click();await expect(page).toHaveURL(new RegExp(`/host/${gameId}$`));
+ const questions=state.calls[0].p_wines[0].questions!;expect(questions).toHaveLength(3);
+ expect(questions[0].correctOptionId).toBe(questions[0].options[0].id);expect(state.calls[0].p_steps).toEqual([{kind:'wine',wine_index:0}]);
 });

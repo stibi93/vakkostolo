@@ -281,3 +281,25 @@ ne tarts meg egymásnak ellentmondó döntéseket aktív szabályként.
 - Párhuzamos agentmunka külön ágon, worktree-ben, saját függőségtelepítéssel és
   tesztportokon történik. Átadás konkrét commit és API-szerződés alapján; a közös
   munkapéldány más agenthez tartozó módosításait nem szabad sajátként commitolni.
+
+
+## 2026-09-24 — Kibővített dekorációs paletta
+
+Felhasználói kérésre a bordó mellé zsályazöld, szilva, tompa kék és
+agyagrózsaszín került a háttérbe és a kezdőlapi szüreti grafikába.
+Új pohárkarikák, sodródó levélrészletek és külön illusztrációs szélréteg:
+hat közös háttéranimáció, a kezdőlap rajzával legfeljebb kilenc. Az erősebb
+szőlőmozgás 4,8 másodperces félciklusú. Csak transform/opacity animálható;
+a közös szünet és reduced-motion kötelező. A dekoráció játékadattól független.
+
+
+## 2026-09-24 — Boronkénti egyedi kérdések
+
+A játékmester opcionálisan legfeljebb öt egyválaszos kérdést adhat egy borhoz,
+kérdésenként 2–6 opcióval. A helyes válasz kötelezően kijelölt, felfedésig
+privát; a megkezdett bor kérdéssora zárolt. A játékos a tippel együtt adja le
+és módosítja válaszait. Az egyedi kérdések külön találatjelzést kapnak,
+a 100 pontos rangsort nem módosítják: a kérés kiértékelést kért, új pontozási
+képletet nem. A kérdések és válaszok privát táblákban, stabil ID-k szerint
+kapcsolódnak. A régi beküldési végpont is megköveteli a kérdésválaszokat,
+így régi klienssel sem kerülhető meg a szerveroldali érvényességellenőrzés.

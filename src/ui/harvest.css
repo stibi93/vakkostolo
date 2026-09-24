@@ -1,15 +1,19 @@
-.harvest-artwork { position: relative; isolation: isolate; overflow: hidden; min-width: 0; background: var(--blue); border-left: 1px solid var(--ink); display: grid; align-items: center; padding: 32px 0 44px; }
+.harvest-artwork { position: relative; isolation: isolate; overflow: hidden; min-width: 0; background: #d5e1dc; border-left: 1px solid var(--ink); display: grid; align-items: center; padding: 32px 0 44px; }
 .harvest-scene { position: relative; width: 100%; aspect-ratio: 1; pointer-events: none; }
 .harvest-still-life { position: absolute; inset: 0; width: 100%; height: 100%; }
-.harvest-landscape { color: var(--accent); opacity: .22; }
-.harvest-light { position: absolute; width: 76%; height: 76%; top: 5%; left: 15%; border-radius: 50%; background: var(--paper); opacity: .65; }
+.harvest-landscape { color: #517c8b; opacity: .35; }
+.harvest-light { position: absolute; width: 76%; height: 76%; top: 5%; left: 15%; border-radius: 50%; background: #e9cfc7; opacity: .8; box-shadow: 42px 28px 0 -12px #bdcddc, -40px 42px 0 -18px #c4c8ad; }
 .harvest-vine { position: absolute; top: 2%; left: 3%; width: 46%; transform-origin: 12% 12%; }
 .harvest-vine svg { width: 100%; height: auto; display: block; }
+.harvest-breeze { position: absolute; inset: 0; opacity: .6; }
+.harvest-breeze svg { display: block; width: 100%; height: 100%; }
 @media (prefers-reduced-motion: no-preference) {
-  .harvest-vine { animation: harvest-vine-sway 7.5s ease-in-out infinite alternate; animation-play-state: paused; }
+  .harvest-vine { animation: harvest-vine-sway 4.8s ease-in-out infinite alternate; animation-play-state: paused; }
+  .harvest-breeze { animation: harvest-breeze-drift 8s ease-in-out infinite alternate; animation-play-state: paused; }
   .harvest-light { animation: harvest-light-drift 16s ease-in-out infinite alternate; animation-play-state: paused; }
-  .harvest-running .harvest-vine, .harvest-running .harvest-light { animation-play-state: running; }
-  @keyframes harvest-vine-sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg) translateY(4px); } }
+  .harvest-running .harvest-vine, .harvest-running .harvest-light, .harvest-running .harvest-breeze { animation-play-state: running; }
+  @keyframes harvest-breeze-drift { from { transform: translate(-16px, 10px) rotate(-4deg); opacity: .4; } to { transform: translate(20px, -12px) rotate(4deg); opacity: .8; } }
+  @keyframes harvest-vine-sway { from { transform: rotate(-6deg) translate(-3px, -3px); } to { transform: rotate(7deg) translate(6px, 9px); } }
   @keyframes harvest-light-drift { from { transform: translate(-8px, 4px); } to { transform: translate(12px, -10px); } }
 }
 @media (max-width: 700px) {

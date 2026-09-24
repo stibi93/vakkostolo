@@ -48,6 +48,15 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
             <div><dt><CategoryIcon category="alcohol" />Alkoholtartalom</dt><dd>{alcohol(wine.alcoholTenths)}</dd></div>
             <div><dt><CategoryIcon category="liking" />Átlagos tetszés</dt><dd>{wine.averageLiking===null?'—':`${numeric(wine.averageLiking)} / 10`}</dd><dd className="result-fact-note">{wine.responseCount} értékelés</dd></div>
           </dl>
+          {!!wine.questions?.length && <section className="question-results" aria-label="Egyedi kérdések eredménye">
+            <h4>Egyedi kérdések</h4>
+            {wine.questions.map(q=><div className="custom-question" key={q.id}>
+              <strong>{q.prompt}</strong>
+              <p>Helyes válasz: <strong>{q.options.find(o=>o.id===q.correctOptionId)?.label}</strong></p>
+              {!presentation && selfId && <p>{q.ownOptionId ? <>A tipped: {q.options.find(o=>o.id===q.ownOptionId)?.label} · <strong>{q.ownOptionId===q.correctOptionId?'Eltaláltad':'Nem talált'}</strong></> : 'Ehhez a kérdéshez nincs leadott válaszod.'}</p>}
+            </div>)}
+            <p className="small-note">Az egyedi kérdések nem adnak versenypontot.</p>
+          </section>}
           {!presentation && selfId && <OwnComparison wine={wine} version={results.scoringVersion} />}
           {presentation && <p className="result-public-note">A saját tippedet és pontjaidat a telefonodon láthatod.</p>}
         </div>

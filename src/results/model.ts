@@ -1,8 +1,10 @@
+import type { QuestionResult } from '../questions/model';
 export interface OwnResult {
   priceBucket: number | null; priceHuf: number | null; alcoholTenths: number; liking: number;
   pricePoints: number | null; alcoholPoints: number; total: number | null;
 }
 export interface WineResult {
+  questions?: QuestionResult[];
   id: string; position: number; name: string; priceHuf: number; priceBucket: number; alcoholTenths: number;
   photoUpdatedAt: string | null; responseCount: number; averageLiking: number | null; own: OwnResult | null;
 }

@@ -1,13 +1,21 @@
 .home-atmosphere { position: relative; isolation: isolate; min-height: 100svh; }
 .home-ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 0% 30%, #d9e6eb55, transparent 58%), radial-gradient(ellipse at 100% 85%, #eadce344, transparent 56%); }
 .ambient-leaves { position: absolute; width: min(1000px, 90vw); aspect-ratio: 720 / 820; transform-origin: 15% 85%; }
+.ambient-leaf-canopy { fill: #69846b; }
+.ambient-leaves-right .ambient-leaf-canopy { fill: #8a586e; }
+.ambient-leaf-tips { fill: #ad7665; }
+.ambient-leaves-right .ambient-leaf-tips { fill: #517c8b; }
 .ambient-leaves svg { display: block; width: 100%; height: 100%; }
 .ambient-leaves-left { top: -160px; left: -80px; color: var(--accent); opacity: .13; transform: rotate(-18deg); }
-.ambient-leaves-right { right: -100px; bottom: -300px; color: var(--accent); opacity: .11; transform: rotate(150deg); transform-origin: 50% 50%; }
+.ambient-leaves-right { right: -100px; bottom: -300px; color: #517c8b; opacity: .11; transform: rotate(150deg); transform-origin: 50% 50%; }
 .ambient-gust { position: absolute; width: min(760px, 95vw); aspect-ratio: 560 / 150; color: var(--accent); opacity: 0; }
 .ambient-gust svg { width: 100%; height: 100%; display: block; }
 .ambient-gust-first { left: 12%; top: 38%; }
 .ambient-gust-second { right: 8%; top: 68%; }
+.ambient-rings, .ambient-drift { position: absolute; }
+.ambient-rings svg, .ambient-drift svg { display: block; width: 100%; height: 100%; }
+.ambient-rings { width: min(560px, 62vw); aspect-ratio: 1; top: 24%; right: 30%; opacity: .22; transform: rotate(-14deg); }
+.ambient-drift { width: min(850px, 85vw); aspect-ratio: 680 / 480; left: 10%; top: 30%; opacity: .19; transform: translate(-30px, -12px) rotate(-8deg); }
 .home-motion-toggle { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); padding: 10px 12px; min-height: 44px; font-size: 11px; margin-left: auto; }
 .home-motion-toggle > span { font-size: 16px; }
 .home-motion-toggle:hover:not(:disabled) { background: var(--sheet); }
@@ -17,7 +25,16 @@
   .ambient-leaves-right { animation: canopy-right 15s ease-in-out infinite alternate; animation-play-state: paused; }
   .ambient-gust { animation: wind-gust 9s ease-in-out infinite; animation-play-state: paused; }
   .ambient-gust-second { animation-delay: -4.5s; animation-duration: 11s; }
-  .home-motion-running .ambient-leaves, .home-motion-running .ambient-gust { animation-play-state: running; }
+  .ambient-rings { animation: glass-orbit 24s ease-in-out infinite alternate; animation-play-state: paused; }
+  .ambient-drift { animation: leaf-drift 17s ease-in-out infinite; animation-delay: -5s; animation-play-state: paused; }
+  .home-motion-running .ambient-leaves, .home-motion-running .ambient-gust,
+  .home-motion-running .ambient-rings, .home-motion-running .ambient-drift { animation-play-state: running; }
+  @keyframes glass-orbit { to { transform: translate(-48px, 34px) rotate(32deg) scale(1.06); } }
+  @keyframes leaf-drift {
+    0% { opacity: 0; transform: translate(-70px, -38px) rotate(-12deg); }
+    18%, 62% { opacity: .24; }
+    100% { opacity: 0; transform: translate(110px, 82px) rotate(12deg); }
+  }
   @keyframes canopy-left { to { transform: translate(32px, 18px) rotate(-10deg); } }
   @keyframes canopy-right { to { transform: translate(-26px, -22px) rotate(157deg); } }
   @keyframes wind-gust {
@@ -32,5 +49,7 @@
   .ambient-leaves-right { right: -210px; bottom: -225px; }
   .ambient-gust-first { left: -10%; }
   .ambient-gust-second { right: -10%; }
+  .ambient-rings { width: 360px; right: -70px; top: 20%; opacity: .18; }
+  .ambient-drift { width: 460px; left: -55px; top: 40%; }
   .home-motion-toggle { margin-left: 0; }
 }

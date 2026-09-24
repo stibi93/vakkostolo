@@ -1,3 +1,4 @@
+import type { Question } from '../questions/model';
 import type { GameResults, ResultPhotoApi } from '../results/model';
 import type { ScheduleApi } from '../schedule/model';
 import type { Rating } from '../domain/game';
@@ -5,6 +6,7 @@ import type { LobbySnapshot, SnapshotApi } from '../lobby/model';
 import type { PresenceApi } from '../lobby/presence';
 
 export interface ActiveRound {
+  questions?: Question[];
   id: string; position: number; status: 'open' | 'closed' | 'revealed';
   openedAt: string; closesAt: string | null; eligible: boolean; canSubmit: boolean;
 }

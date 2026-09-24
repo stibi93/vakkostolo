@@ -5,11 +5,11 @@ import { lobbyResponse, realtimeHub } from './support/lobby';
 const gameId = '10000000-0000-0000-0000-000000000001';
 const roundId = '20000000-0000-0000-0000-000000000001';
 const member = (index: number) => `30000000-0000-0000-0000-${String(index).padStart(12, '0')}`;
-interface RatingRow { round_id: string; price_bucket: number; alcohol_tenths: number; liking: number; submitted_at: string }
+interface RatingRow { custom_answers?: Record<string,string>; round_id: string; price_bucket: number; alcohol_tenths: number; liking: number; submitted_at: string }
 function fixture() {
   const hub = realtimeHub();
   const saved = new Map<number, RatingRow>();
-  const state = { started: false, opened: Date.now(), deadline: Date.now() + 120_000, version: 1,
+  const state = { questions: [] as {id:string;prompt:string;options:{id:string;label:string}[]}[], started: false, opened: Date.now(), deadline: Date.now() + 120_000, version: 1,
     startCalls: [] as Record<string, unknown>[], submitCalls: [] as Record<string, unknown>[],
     failStart: false, failSubmit: false, loseSubmit: false, failRead: false, deny: false, expired: false, late: false };
   const participants = [1, 2].map(index => ({ id: member(index), nickname: `Vendég ${index}`, joined_at: new Date(Date.now()-60_000).toISOString(), seat: index }));
@@ -35,7 +35,7 @@ function fixture() {
           return route.fulfill({ json: { ...lobbyResponse(gameId, participants, index ? 'player' : 'host', index ? member(index) : null),
             game: { id: gameId, title: 'Élő kóstoló', status: state.started ? 'tasting' : 'lobby', version: state.version },
             // Server clock is independent of Playwright's emulated client clock.
-            server_now: new Date().toISOString(), round: state.started ? { id: roundId, position: 1, status: 'open',
+            server_now: new Date().toISOString(), round: state.started ? { questions:state.questions, id: roundId, position: 1, status: 'open',
               opened_at: new Date(state.opened).toISOString(), closes_at: new Date(state.deadline).toISOString(),
               eligible: index > 0 && !state.late, can_submit: index > 0 && !state.late && !state.expired && Date.now() < state.deadline } : null,
             own_rating: saved.get(index) ?? null,
@@ -47,11 +47,11 @@ function fixture() {
           if (!state.started) begin();
           return route.fulfill({ json: roundId });
         }
-        if (path === '/rest/v1/rpc/submit_rating') {
+        if (['/rest/v1/rpc/submit_rating','/rest/v1/rpc/submit_rating_with_questions'].includes(path)) {
           const input = route.request().postDataJSON(); state.submitCalls.push(input);
           if (state.expired) return route.fulfill({ status: 400, json: { message: 'DEADLINE_PASSED' } });
           if (state.failSubmit) return route.abort('failed');
-          saved.set(index, { round_id: roundId, price_bucket: input.p_price_bucket, alcohol_tenths: input.p_alcohol_tenths,
+          saved.set(index, { custom_answers:input.p_answers, round_id: roundId, price_bucket: input.p_price_bucket, alcohol_tenths: input.p_alcohol_tenths,
             liking: input.p_liking, submitted_at: new Date().toISOString() });
           if (state.loseSubmit) return route.abort('failed');
           return route.fulfill({ json: saved.get(index) });
@@ -200,4 +200,19 @@ test('tippelőlap: árkategória-kártyák, fél fokos alkoholléptető 12%-os h
   await expect(page.getByRole('radio', { name: 'Tetszés: 9 a 10-ből' })).toBeChecked();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('rating-saved.png'), fullPage: true });
+});
+
+test('egyedi kérdések játékosnál: kötelező válasz, módosítás és újratöltés',async({page},info)=>{
+ const f=fixture();f.state.questions=[{id:'grape',prompt:'Melyik szőlőfajta?',options:[{id:'a',label:'Furmint'},{id:'b',label:'Olaszrizling'}]}];
+ await f.attach(page,1);f.begin();await page.goto(`/play/${gameId}`);await fill(page);
+ await page.getByRole('button',{name:'Tipp beküldése'}).click();await expect(page.getByRole('alert')).toContainText('minden egyedi kérdésre');expect(f.state.submitCalls).toHaveLength(0);
+ await page.getByRole('radio',{name:'Furmint',exact:true}).focus();await page.keyboard.press('Space');
+ await page.getByRole('button',{name:'Tipp beküldése'}).click();await expect(page.getByText('A szerver által mentett tipped')).toBeVisible();
+ expect(f.state.submitCalls[0].p_answers).toEqual({grape:'a'});
+ await page.reload();await expect(page.getByRole('radio',{name:'Furmint',exact:true})).toBeChecked();
+ await page.getByRole('radio',{name:'Olaszrizling',exact:true}).check();await page.getByRole('button',{name:'Tipp módosítása'}).click();
+ await expect.poll(()=>f.saved.get(1)?.custom_answers).toEqual({grape:'b'});
+ await page.getByRole('group',{name:'Melyik szőlőfajta?'}).screenshot({path:info.outputPath('player-question.png')});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await expect(page.getByText('Helyes válasz',{exact:false})).toHaveCount(0);
 });

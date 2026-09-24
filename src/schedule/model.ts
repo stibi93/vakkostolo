@@ -1,5 +1,7 @@
+import type { HostQuestion } from '../questions/model';
 import type { GameStatus } from '../domain/game';
 export interface ScheduleStep {
+  questions?: HostQuestion[];
   id: string; kind: 'wine' | 'break' | 'reveal'; reveal_round_ids?: string[]; title: string; message: string; seconds: number;
   status: 'pending' | 'open' | 'closed' | 'revealed' | 'done';
   price_huf: number | null; alcohol_tenths: number | null; round_position: number | null;

@@ -19,6 +19,15 @@ export function HarvestArtwork({ motion }: { motion: AmbientMotion }) {
   return <div ref={stage} className={`harvest-artwork${running ? ' harvest-running' : ''}`}>
     <div className="harvest-scene" aria-hidden="true">
       <div className="harvest-light" />
+      <div className="harvest-breeze">
+        <svg viewBox="0 0 600 600" fill="none" focusable="false">
+          <path d="M44 213C132 125 238 276 314 216S421 137 519 173" stroke="#517c8b" strokeWidth="3" />
+          <path d="M12 242C124 175 206 304 297 253S439 175 565 206" stroke="#a96864" strokeWidth="2" />
+          <path d="M72 180c18-26 42-29 63-20-15 26-37 31-63 20Z" fill="#738e70" />
+          <path d="M443 289c23-9 46-4 58 16-28 9-47 4-58-16Z" fill="#a96864" />
+          <path d="M370 103c-6-24 5-44 28-54 7 24-4 43-28 54Z" fill="#8c668d" />
+        </svg>
+      </div>
       <svg className="harvest-still-life" viewBox="0 0 600 600" fill="none" focusable="false">
         <g className="harvest-landscape" stroke="currentColor" strokeWidth="1.5">
           <path d="M-30 493C114 383 251 475 338 455S498 361 639 403M-15 516C136 418 239 496 351 477S514 391 621 426M-10 543C156 450 248 524 364 501S518 422 630 452M-20 574C148 482 275 550 387 527S544 451 629 482M-5 602C160 513 279 580 409 555S544 484 625 512" />
@@ -51,13 +60,18 @@ export function HarvestArtwork({ motion }: { motion: AmbientMotion }) {
         <svg viewBox="0 0 270 300" fill="none" focusable="false">
           <g stroke="var(--ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 35c38 7 95 13 120 49 15 21 14 46 24 65M135 78c11-20 28-34 50-36M86 48C73 34 75 18 90 19c15 0 16 18 3 20" />
-            <path d="m132 76-12-23 17 4-5-33 23 13 14-28 12 30 26-14-6 29 28 3-21 18 15 17-35-1-7 22-19-18-18 6Z" fill="var(--paper)" />
+            <path d="m132 76-12-23 17 4-5-33 23 13 14-28 12 30 26-14-6 29 28 3-21 18 15 17-35-1-7 22-19-18-18 6Z" fill="#91a889" />
             <path d="m137 81 34-42m-24 30 1-22m8 11 24-5m-23 5 3 25m7-35 16-7" strokeWidth="1.4" />
-            <path d="m111 64-22-1 6 15-31 4 22 15-22 23 34-1-1 23 18-14 18 18 1-31 21-3-16-19 8-18Z" fill="var(--accent)" />
+            <path d="m111 64-22-1 6 15-31 4 22 15-22 23 34-1-1 23 18-14 18 18 1-31 21-3-16-19 8-18Z" fill="#517c8b" />
             <path d="m124 83-29 30m15-17-18-1m18 1 4 22" stroke="var(--paper)" strokeWidth="1.4" />
             <path d="m153 124-21 35m26-22 23 24m-22-19 2 46" />
-            <g fill="var(--accent)" stroke="var(--paper)" strokeWidth="2">
-              <path d="M111 160c-2-26 39-31 42-4 4 27-36 32-42 4Zm40-4c-3-26 38-28 41-3 3 27-37 31-41 3Zm39 9c-3-24 34-29 39-4 6 26-33 32-39 4ZM98 193c-2-27 40-29 42-4 3 29-39 33-42 4Zm41-5c-2-28 41-28 43-2 1 28-40 32-43 2Zm41 7c-4-26 36-31 41-6 5 26-37 34-41 6Zm-68 31c-3-27 36-31 41-7 6 28-35 34-41 7Zm41-5c-4-27 36-31 41-7 5 29-35 33-41 7Zm-24 35c-4-26 34-32 40-7 6 27-34 33-40 7Zm30-13c-3-22 30-27 35-6 5 24-30 29-35 6Zm-9 37c-3-20 25-25 29-6 5 22-26 26-29 6Z" />
+            <g stroke="var(--paper)" strokeWidth="2">
+              {[
+                [132, 159, '#73405d'], [172, 156, '#a4677d'], [209, 165, '#596f8e'],
+                [119, 192, '#517c8b'], [161, 189, '#61263f'], [201, 195, '#8971a0'],
+                [133, 225, '#a4677d'], [173, 221, '#73405d'],
+                [150, 254, '#596f8e'], [176, 242, '#a4677d'], [165, 278, '#61263f'],
+              ].map(([cx, cy, fill]) => <ellipse key={`${cx}-${cy}`} cx={cx} cy={cy} rx={cy === 278 ? 15 : 21} ry={cy === 278 ? 15 : 22} fill={String(fill)} />)}
             </g>
             <path d="m121 150 8-3m33-1 8-2m30 10 8-2m-98 35 7-3m33-7 8-2m34 6 8-3m-76 33 7-3m33-6 8-2m-35 34 7-3m17-9 7-2m-13 33 6-2" stroke="var(--paper)" strokeWidth="1.5" />
           </g>

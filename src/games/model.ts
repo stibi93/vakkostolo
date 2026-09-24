@@ -1,7 +1,8 @@
+import { parseQuestions, type HostQuestion } from '../questions/model';
 import type { TastingSchedule } from '../schedule/model';
 import type { GameStatus } from '../domain/game';
 
-export interface WineInput { name: string; priceHuf: number; alcoholTenths: number }
+export interface WineInput { questions?: HostQuestion[]; name: string; priceHuf: number; alcoholTenths: number }
 export type InitialStep = { kind: 'wine'; wine_index: number } | { kind: 'break' | 'reveal'; title: string; message: string; seconds: number; wine_indexes: number[] };
 export interface CreateGameInput { title: string; roundSeconds: number; revealEvery: number; wines: WineInput[]; steps?: InitialStep[] }
 export interface HostGameSummary {
@@ -34,6 +35,7 @@ export function validateGameInput(input: CreateGameInput): string[] {
   if (!integerBetween(input.revealEvery, 1, 12)) errors.push('A felfedési gyakoriság 1–12 egész tétel lehet.');
   if (input.wines.length < 1 || input.wines.length > 12) errors.push('Adj meg 1–12 bort.');
   input.wines.forEach((wine, i) => {
+    try { parseQuestions(wine.questions,true); } catch (error) { errors.push(`${i+1}. tétel: ${(error as Error).message}`); }
     if (length(wine.name) < 1 || length(wine.name) > 200) errors.push(`${i+1}. tétel: a név 1–200 karakter legyen.`);
     if (!integerBetween(wine.priceHuf, 1, 1_000_000)) errors.push(`${i+1}. tétel: az ár 1–1 000 000 egész Ft lehet.`);
     if (!integerBetween(wine.alcoholTenths, 0, 250)) errors.push(`${i+1}. tétel: az alkoholfok 0–25%, legfeljebb egy tizedesjeggyel.`);

@@ -1,3 +1,5 @@
+import { QuestionEditor } from '../questions/QuestionEditor';
+import type { HostQuestion } from '../questions/model';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router';
@@ -8,8 +10,8 @@ import type { GamesApi, InitialStep } from './model';
 import { prepareWinePhoto, WinePhotoError } from './winePhoto';
 
 type PickedPhoto = { blob: Blob; url: string };
-type WineFields = { kind: 'wine'; id: string; name: string; price: string; alcohol: string; photo: PickedPhoto | null; photoMessage: string };
-const emptyWine = (): WineFields => ({ kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
+type WineFields = { questions: HostQuestion[]; kind: 'wine'; id: string; name: string; price: string; alcohol: string; photo: PickedPhoto | null; photoMessage: string };
+const emptyWine = (): WineFields => ({ questions: [], kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
 type CardFields = { kind: 'break' | 'reveal'; id: string; title: string; message: string; seconds: number; targets: string[] };
 type Entry = WineFields | CardFields;
 export function CreateGameForm({ api }: { api: GamesApi }) {
@@ -82,7 +84,7 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
     const steps: InitialStep[] = entries.map(e => e.kind === 'wine' ? {kind:'wine',wine_index:wines.findIndex(w=>w.id===e.id)}
       : {kind:e.kind,title:e.title,message:e.message,seconds:e.seconds,wine_indexes:e.targets.map(id=>wines.findIndex(w=>w.id===id))});
     const input = { ...(entries.some(e=>e.kind !== 'wine') ? {steps} : {}), title, roundSeconds: timed ? Number(seconds) : 0, revealEvery: 2,
-      wines: wines.map((wine) => ({ name: wine.name, priceHuf: wine.price.trim() ? Number(wine.price) : NaN,
+      wines: wines.map((wine) => ({ ...(wine.questions.length ? {questions:wine.questions}:{}), name: wine.name, priceHuf: wine.price.trim() ? Number(wine.price) : NaN,
         alcoholTenths: parseAlcohol(wine.alcohol) })) };
     const invalid = validateGameInput(input);
     if (entries.length > 60) invalid.push('Legfeljebb 60 lépés adható hozzá.');
@@ -167,6 +169,7 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
             <label>Valódi palackár (Ft / 0,75 l)<input type="number" inputMode="numeric" min="1" max="1000000" step="1" value={wine.price} onChange={(event) => updateWine(wine.id, 'price', event.target.value)} required /></label>
             <label>Valódi alkoholfok (% vol)<input type="text" inputMode="decimal" placeholder="pl. 13,5" value={wine.alcohol} onChange={(event) => updateWine(wine.id, 'alcohol', event.target.value)} required /></label>
           </div>
+          <QuestionEditor questions={wine.questions} onChange={questions=>setEntries(current=>current.map(e=>e.id===wine.id && e.kind==='wine'?{...e,questions}:e))} />
           <div className="wine-photo-pick">
             <WinePhoto src={wine.photo?.url ?? null} alt={`${wine.name || `${index+1}. tétel`} – kiválasztott borfotó`} number={String(index+1).padStart(2, '0')} />
             <div>

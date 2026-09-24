@@ -69,9 +69,10 @@ Forrás: `src/ui/HarvestArtwork.tsx`, stílus: `src/ui/harvest.css`. Nincs küls
 illusztráció vagy képszolgáltatás; ez dekoráció, nem egy játékbeli bor képe.
 A demó kis címkegrafikája megmarad, a csendélet csak a kezdőlapon látható.
 
-Az illusztráció két rétege mozog: a szőlőág 7,5 másodperces félciklussal leng,
-mögötte a világos kör 16 másodperces félciklussal eltolódik.
-Kizárólag CSS `transform` animáció, JavaScript képkockahurok, videó, blur és
+Az illusztráció három rétege mozog: a többszínű szőlőág 4,8 másodperces
+félciklussal, −6 és +7 fok között leng; mögötte a rétegzett színfoltok
+16 másodperces, a levéllel kísért szélvonalak 8 másodperces félciklussal mozdulnak.
+Kizárólag CSS `transform` és `opacity` animáció, JavaScript képkockahurok, videó, blur és
 új függőség nélkül. A szöveg, palack és pohár stabil. A megállító gomb a
 jelenlegi fázisban szüneteltet; újraindításkor onnan folytatja. Képernyőn kívül
 IntersectionObserver, háttérlapon Page Visibility állítja le a mozgást.
@@ -79,8 +80,11 @@ A rendszer csökkentett mozgás beállítását induláskor és változáskor is
 A teljes kezdőlap mögött további két, halvány szőlőlevél-árnyékréteg mozog
 12 és 15 másodperces félciklussal. Két saját SVG-vonalrajz szélfuvallatot
 jelez: 9 és 11 másodpercenként elúszik és elhalványul, eltolt indulással.
-Ezek csak `transform` és `opacity` tulajdonságot animálnak; legfeljebb hat
-réteg mozog egyszerre, a szövegek végig stabilak.
+Színes pohártalp-karikák és sodródó levélrészletek egészítik ki őket.
+Ezek csak `transform` és `opacity` tulajdonságot animálnak; összesen hat
+háttérréteg, a kezdőlapi rajzzal legfeljebb kilenc réteg mozog egyszerre.
+A bordó mellett zsályazöld, szilva, tompa kék és agyagrózsaszín jelenik meg;
+a szövegek végig stabilak, a színek nem függnek játékadatoktól.
 A `HomeAtmosphere` az App szintjén, minden útvonal mögött egyetlen példányban él.
 Az AppMotionContext közös állapota kezeli a rajzot és a hátteret; navigáláskor
 a szüneteltetés megmarad. A fejléc közös kapcsolójával a dekoratív mozgás
@@ -119,7 +123,7 @@ csak kezdőlapra és váróra korlátozott mozgási szabályt.
 A közös háttérben a levélárnyékok 11–13% fedettségűek,
 a szélvonalak legfeljebb 32%-ig erősödnek. A rétegek a képernyő közepére is
 benyúlnak; a váró panelje 72%, a kivetítő résztvevőpanelje 78% papírfedettségű.
-A QR és az értékelőfelület továbbra is átlátszatlan. Ugyanaz a négy háttérréteg
+A QR és az értékelőfelület továbbra is átlátszatlan. A közös hat háttérréteg
 mozog, új rajzolási ciklus vagy animációs függőség nélkül.
 
 Az „Élő kapcsolat” zöld pontja két másodperces opacity/transform pulzust kap,

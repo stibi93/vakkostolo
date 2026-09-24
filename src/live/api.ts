@@ -1,3 +1,4 @@
+import { parseQuestions, parseAnswers } from '../questions/model';
 import { parseResults } from '../results/api';
 import { createGamesApi } from '../games/api';
 import { createScheduleApi } from '../schedule/api';
@@ -25,7 +26,7 @@ export function parseSavedRating(value: unknown, roundId: string): SavedRating {
     typeof r.alcohol_tenths !== 'number' || typeof r.liking !== 'number') return invalid();
   const rating = { priceBucket: r.price_bucket, alcoholTenths: r.alcohol_tenths, liking: r.liking };
   if (validateRating(rating).length) return invalid();
-  return { ...rating, roundId, submittedAt: timestamp(r.submitted_at) };
+  return { ...rating, ...(r.custom_answers === undefined ? {} : {customAnswers:parseAnswers(r.custom_answers)}), roundId, submittedAt: timestamp(r.submitted_at) };
 }
 export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = performance.now(), requestMs = 0): GameSnapshot {
   const base = parseLobbySnapshot(value, gameId), row = record(value);
@@ -35,7 +36,7 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
     if (!isUuid(r.id) || !Number.isInteger(r.position) || Number(r.position) < 1 || Number(r.position) > 12 ||
       !['open', 'closed', 'revealed'].includes(String(r.status)) || typeof r.eligible !== 'boolean' ||
       typeof r.can_submit !== 'boolean') return invalid();
-    round = { id: r.id, position: Number(r.position), status: r.status as 'open' | 'closed' | 'revealed',
+    round = { ...(r.questions === undefined ? {} : {questions:parseQuestions(r.questions)}), id: r.id, position: Number(r.position), status: r.status as 'open' | 'closed' | 'revealed',
       openedAt: timestamp(r.opened_at), closesAt: r.closes_at === null ? null : timestamp(r.closes_at), eligible: r.eligible, canSubmit: r.can_submit };
     if ((round.closesAt !== null && Date.parse(round.closesAt) <= Date.parse(round.openedAt)) || (base.role === 'host' && (round.eligible || round.canSubmit)) ||
       (round.canSubmit && (!round.eligible || round.status !== 'open' || base.game.status !== 'tasting' ||
@@ -86,6 +87,7 @@ function fromServer(error: { message: string; code?: string }, status?: number):
     DEADLINE_PASSED: 'Lejárt az idő. Ezt a módosítást a szerver már nem fogadta el.',
     ROUND_NOT_OPEN: 'A kör már nem fogad tippeket.',
     ROUND_NOT_ELIGIBLE: 'Ehhez a körhöz későn érkeztél. A következő tételtől adhatsz tippet.',
+    INVALID_ANSWERS: 'Válassz egy választ minden egyedi kérdésnél.',
     RATING_INVALID: 'A tipp hiányos vagy érvénytelen. Ellenőrizd az árkategóriát, az alkoholfokot és a tetszést.',
     WINES_INCOMPLETE: 'A boradatok hiányosak, ezért a kóstoló nem indítható.',
   };
@@ -130,9 +132,10 @@ export function createLiveApi(client: SupabaseClient<Database>): LiveApi {
       if (!isUuid(roundId)) return invalid();
       const errors = validateRating(rating);
       if (errors.length) throw new LiveError(errors.join(' '));
-      const { data, error, status } = await client.rpc('submit_rating', {
+      const args = {
         p_round_id: roundId, p_price_bucket: rating.priceBucket, p_alcohol_tenths: rating.alcoholTenths, p_liking: rating.liking,
-      });
+      };
+      const { data, error, status } = rating.customAnswers ? await client.rpc('submit_rating_with_questions', {...args,p_answers:rating.customAnswers}) : await client.rpc('submit_rating', args);
       if (error) throw fromServer(error, status);
       return parseSavedRating(data, roundId);
     },

@@ -51,7 +51,7 @@ it('indítás az első kört nyitja szerveridővel; nincs titkos adat vagy mási
   expect(player.round).toMatchObject({ eligible: true, can_submit: true });
   expect(player.own_rating).toBeNull();
   expect(JSON.stringify(player)).not.toMatch(/Titkos|9876|12345|123456|alcohol_tenths|price_huf|wine|score/);
-  expect(Object.keys(player.round!).sort()).toEqual(['can_submit','closes_at','eligible','id','opened_at','position','status']);
+  expect(Object.keys(player.round!).sort()).toEqual(['can_submit','closes_at','eligible','id','opened_at','position','questions','status']);
   await asUser(host); expect((await snapshot()).own_rating).toBeNull();
   expect((await db.query("select status from public.rounds where game_id=$1 order by position", [game])).rows).toEqual([{ status: 'open' }, { status: 'pending' }]);
 });
@@ -130,7 +130,7 @@ it('árkategória: új játék 2-es pontozási verziót kap, a mentett tipp csak
   }
   await db.query('select public.submit_rating($1,8,120,3)', [round]);
   const own = (await snapshot()).own_rating!;
-  expect(Object.keys(own).sort()).toEqual(['alcohol_tenths', 'liking', 'price_bucket', 'round_id', 'submitted_at']);
+  expect(Object.keys(own).sort()).toEqual(['alcohol_tenths', 'custom_answers', 'liking', 'price_bucket', 'round_id', 'submitted_at']);
   expect(own).toMatchObject({ price_bucket: 8, alcohol_tenths: 120, liking: 3 });
   await expect(db.query('select private.price_bucket(1000)')).rejects.toThrow(/permission denied/);
 });

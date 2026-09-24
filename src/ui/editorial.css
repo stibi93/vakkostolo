@@ -46,3 +46,7 @@
   .organizer-intro .editorial-photo img { object-position: center 58%; }
   .organizer-steps ol { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
+
+/* Colour accents echo the illustrated harvest without recolouring controls. */
+.editorial-photo:nth-child(2) .editorial-photo-number { background: #d5e1dc; color: #304c49; }
+.editorial-photo:nth-child(3) .editorial-photo-number { background: #e9cfc7; color: #61263f; }

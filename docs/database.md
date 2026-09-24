@@ -227,3 +227,28 @@ A létrehozási bizonylat initial_schedule_hash mezője a teljes kezdeti bemenet
 védi. Ugyanaz a host/kérés sorosodik, az ismétlés ugyanazt a játékot adja vissza,
 és nem írja vissza a később szerkesztett menetet. A régi create_game megmarad.
 Helyi integrációs próba: `node scripts/test-create-schedule-local.mjs`.
+
+## Egyedi kérdések — 0017
+
+`private.wine_questions`: boronként legfeljebb 5 kérdés, stabil kérdés- és
+opcióazonosítókkal, 2–6 opcióval és egy helyes válasszal. A kérdés szövege
+1–200, az opcióé 1–100 karakter. A `save_tasting_schedule` ugyanabban a
+tranzakcióban validálja/menti, a megkezdett lépések és a bizonylatok szabályai
+változatlanok. A kérdésmező elhagyása a régi kliens miatt megtartja a kérdéseket;
+explicit üres tömb törli őket. Létrehozáskor a `create_game_with_schedule`
+a borok `questions` tömbjét is menti, és az idempotencia hash-e is tartalmazza.
+
+`private.question_answers`: értékelésenként privát válaszmappa. Az új
+`submit_rating_with_questions` a meglévő szerveroldali tagság-/idő-/állapot-
+ellenőrzést és zárolást használja. A rating és a kérdésválasz együtt, atomikusan
+íródik; hiányzó/idegen opció vagy plusz válasz hiba. A régi `submit_rating`
+sem kerülheti meg a kötelező kérdéseket. Mindkét új tábla kaszkáddal törlődik.
+
+A játékos snapshotjában csak az aktuális kérdés ID/szöveg/opció ID/felirat
+engedélylistája és a saját mentett válasz szerepel. A helyes válasz kizárólag
+az engedélyezett eredmény-DTO már felfedett boraihoz csatlakozik. Más játékos
+nyers kérdésválasza és a titkos helyes választ tartalmazó sor nem jut
+publikus táblába vagy Realtime payloadba. A ranglista képlete nem változott.
+
+Integrációs próba: `node scripts/test-questions-local.mjs` (helyi Supabase,
+szintetikus Auth-felhasználók, automatikus takarítás).

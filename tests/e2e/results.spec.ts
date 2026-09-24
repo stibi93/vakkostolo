@@ -8,7 +8,7 @@ const first='20000000-0000-0000-0000-000000000001', second='20000000-0000-0000-0
 const member=(i:number)=>`30000000-0000-0000-0000-${String(i).padStart(12,'0')}`;
 const participants=Array.from({length:10},(_,i)=>({id:member(i+1),nickname:i===0?'Anna':`Vendég ${i+1}`,seat:i+1,joined_at:'2026-09-24T10:00:00Z'}));
 function fixture(revealed=true) {
-  const hub=realtimeHub();const state={revealed,finished:false,failPhoto:false,photoReads:0,card:null as null | {id:string;title:string;message:string;round_ids:string[]}};
+  const hub=realtimeHub();const state={questions:false,revealed,finished:false,failPhoto:false,photoReads:0,card:null as null | {id:string;title:string;message:string;round_ids:string[]}};
   const publicWines=[{id:first,position:1,name:'Dűlőválogatás Furmint 2024',price_huf:5000,price_bucket:5,alcohol_tenths:135,photo_updated_at:'2026-09-24T10:00:00Z',response_count:2,average_liking:8},
     {id:second,position:2,name:'Kékfrankos 2023',price_huf:7500,price_bucket:6,alcohol_tenths:125,photo_updated_at:null,response_count:0,average_liking:null}];
   return {state,hub,async attach(page:Page,host=false) {
@@ -27,7 +27,7 @@ function fixture(revealed=true) {
         round:state.card ? null : {id:second,position:2,status:state.revealed?'revealed':'open',opened_at:new Date(Date.now()-30000).toISOString(),closes_at:new Date(Date.now()+60000).toISOString(),eligible:!host,can_submit:!host&&!state.revealed},own_rating:null,
         ...(state.card ? {reveal_card:state.card} : {}),
         ...(state.revealed?{revealed:publicWines,results:{scoring_version:2,final:state.finished,revealed_count:2,max_points:200,
-          wines:publicWines.map((w,i)=>({...w,own:host||i===1?null:{price_bucket:6,price_huf:null,alcohol_tenths:140,liking:8,price_points:25,alcohol_points:41.6666666666667,total:67}})),
+          wines:publicWines.map((w,i)=>({...w,...(state.questions?{questions:[{id:'grape',prompt:'Melyik szőlőfajta?',options:[{id:'a',label:'Furmint'},{id:'b',label:'Olaszrizling'}],correctOptionId:'a',ownOptionId:host?null:'b'}]}:{}),own:host||i===1?null:{price_bucket:6,price_huf:null,alcohol_tenths:140,liking:8,price_points:25,alcohol_points:41.6666666666667,total:67}})),
           leaderboard:participants.map((p,i)=>({id:p.id,nickname:p.nickname,seat:p.seat,rank:i<2?1:3,points:i<2?67:0,answered:i<2?1:0,unscored:0}))}}:{})
       }});
       if(path===`/storage/v1/object/wine-photos/${game}/${first}.jpg`) {
@@ -112,4 +112,16 @@ for (const host of [false,true]) test(`felfedési kártya kiválasztott borai a 
   await page.reload();
   await expect(page.getByLabel('Felfedett bor',{exact:true})).toHaveValue(second);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('egyedi kérdések felfedésnél: saját tipp és helyes válasz',async({page},info)=>{
+ const f=fixture();f.state.questions=true;await f.attach(page);await page.goto(`/play/${game}`);
+ const result=page.getByRole('region',{name:'Egyedi kérdések eredménye'});
+ await expect(result).toContainText('Helyes válasz: Furmint');await expect(result).toContainText('A tipped: Olaszrizling');await expect(result).toContainText('Nem talált');
+ await result.screenshot({path:info.outputPath('question-result.png')});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('egyedi kérdések kivetítőn: helyes válasz saját tipp nélkül',async({page},info)=>{
+ const f=fixture();f.state.questions=true;await f.attach(page,true);await page.goto(`/present/${game}`);
+ const result=page.getByRole('region',{name:'Egyedi kérdések eredménye'});await expect(result).toContainText('Helyes válasz: Furmint');
+ await expect(result).not.toContainText('A tipped:');await page.screenshot({path:info.outputPath('question-projector.png'),fullPage:true});
 });

@@ -1,3 +1,5 @@
+import { parseQuestions } from '../questions/model';
+import { QuestionEditor } from '../questions/QuestionEditor';
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { lobbyErrorMessage } from '../lobby/api';
@@ -26,6 +28,7 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
     event.preventDefault();
     if (!plan || busy.current) return;
     if (steps.some(s => s.kind === 'reveal' && !(s.reveal_round_ids ?? []).length)) { setError('Minden Felfedés kártyához válassz legalább egy bort.'); return; }
+    try { steps.filter(s=>s.kind==='wine').forEach(s=>parseQuestions(s.questions,true)); } catch (error) { setError((error as Error).message); return; }
     busy.current = true; setPending(true); setError(''); setNotice('');
     try {
       await api.save(gameId, plan.version, request.current, steps);
@@ -61,6 +64,9 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
       {saved.steps.map((s, i) => <li key={s.id} className={`schedule-step schedule-step-${s.kind}`}>
         <div className="schedule-step-heading"><strong>{i+1}. {kindLabel(s)} · {s.title}</strong>
           <span>{s.status === 'pending' ? 'Hátralévő' : s.status === 'open' ? 'Folyamatban' : 'Lezárt'}</span></div>
+        {!!s.questions?.length && <details><summary>Egyedi kérdések ({s.questions.length})</summary>
+          <ul>{s.questions.map(q=><li key={q.id}>{q.prompt} — Helyes válasz: {q.options.find(o=>o.id===q.correctOptionId)?.label}</li>)}</ul>
+        </details>}
         {s.message && <p className="live-break-message">{s.message}</p>}
         {s.kind === 'reveal' && <p>Bemutatott tételek: {(s.reveal_round_ids ?? []).map(id => {
           const wine = saved.steps.find(w => w.id === id);
@@ -104,6 +110,7 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
               {(s.reveal_round_ids ?? []).some(id => ![...history,...steps.slice(0,i)].some(w => w.kind === 'wine' && w.id === id)) && <p role="alert">Egy kijelölt bor hiányzik vagy a kártya utánra került. Állítsd helyre a sorrendet, vagy távolítsd el a kijelölést.</p>}
               {(s.reveal_round_ids ?? []).filter(id => ![...history,...steps.slice(0,i)].some(w => w.kind === 'wine' && w.id === id)).map(id => <button key={id} type="button" className="button-secondary" onClick={() => patch(s.id,{reveal_round_ids:(s.reveal_round_ids ?? []).filter(x => x !== id)})}>Érvénytelen kijelölés eltávolítása</button>)}
             </fieldset>}
+            {s.kind === 'wine' && <QuestionEditor questions={s.questions ?? []} onChange={questions=>patch(s.id,{questions})} />}
             {s.kind === 'wine' && <label className="timer-toggle"><input type="checkbox" checked={s.seconds !== 0} onChange={e => patch(s.id,{seconds:e.target.checked ? 120 : 0})} />Időkorlát használata</label>}
             {(s.kind === 'break' || s.seconds !== 0) && <label>{s.kind === 'wine' ? 'Beküldési idő (másodperc)' : 'Szünet hossza (másodperc, 0 = óra nélkül)'}
               <input type="number" required min={s.kind === 'wine' ? 30 : 0} max={s.kind === 'wine' ? 1800 : 7200} step="1" value={Number.isFinite(s.seconds) ? s.seconds : ''} onChange={e => patch(s.id,{seconds:e.target.value === '' ? NaN : Number(e.target.value)})} /></label>}

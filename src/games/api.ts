@@ -77,9 +77,9 @@ export function createGamesApi(client: SupabaseClient<Database>): GamesApi {
       const args = {
         p_request_id: requestId, p_title: input.title.trim(), p_round_seconds: input.roundSeconds,
         p_reveal_every: input.revealEvery,
-        p_wines: input.wines.map((wine) => ({ name: wine.name.trim(), price_huf: wine.priceHuf, alcohol_tenths: wine.alcoholTenths })),
+        p_wines: input.wines.map((wine) => ({ ...(wine.questions?.length ? {questions:wine.questions.map(q=>({...q,options:q.options.map(o=>({...o}))}))}:{}), name: wine.name.trim(), price_huf: wine.priceHuf, alcohol_tenths: wine.alcoholTenths })),
       };
-      const { data, error } = input.steps ? await client.rpc('create_game_with_schedule', { ...args, p_steps: input.steps }) : await client.rpc('create_game', args);
+      const { data, error } = input.steps || input.wines.some(w=>w.questions?.length) ? await client.rpc('create_game_with_schedule', { ...args, p_steps: input.steps ?? input.wines.map((_,wine_index)=>({kind:'wine',wine_index})) }) : await client.rpc('create_game', args);
       if (error) throw fromServer(error);
       if (!isUuid(data)) throw invalidResponse();
       return data;

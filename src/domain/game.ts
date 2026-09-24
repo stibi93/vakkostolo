@@ -2,6 +2,7 @@ export type GameStatus = 'draft' | 'lobby' | 'tasting' | 'intermission' | 'revea
 export type RoundStatus = 'pending' | 'open' | 'closed' | 'revealed';
 
 export interface Rating {
+  customAnswers?: Record<string,string>;
   /** 1-based index into `priceBuckets`; players guess a range, not an exact price. */
   priceBucket: number;
   alcoholTenths: number;

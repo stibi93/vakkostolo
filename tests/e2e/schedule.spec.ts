@@ -164,3 +164,13 @@ test('a kártyagombok közvetlenül a mentett kóstoló tetején elérhetők',as
   await expect(page.getByRole('list',{name:'Mentett kóstolómenet'})).toContainText('Felfedés');
   expect(f.state.steps.map(s=>s.kind)).toEqual(['wine','wine','break','reveal']);
 });
+
+test('egyedi kérdések mentett bornál: szerkesztés, újratöltés és törlés',async({page},info)=>{
+ const f=fixture();await f.attach(page);await page.goto(`/host/${game}`);await page.getByRole('button',{name:'Menet szerkesztése'}).click();
+ await page.getByRole('button',{name:'Országkérdés'}).first().click();await page.getByLabel('Helyes válasz (felfedésig titkos)').selectOption({label:'Magyarország'});
+ await page.getByRole('button',{name:'Menet mentése',exact:true}).click();await expect(page.getByText('A menet mentve.',{exact:true})).toBeVisible();
+ await page.reload();await page.getByRole('button',{name:'Menet szerkesztése'}).click();await expect(page.getByLabel('Kérdés szövege')).toHaveValue('Melyik országból származik a bor?');
+ await page.getByRole('region',{name:'Egyedi kérdések',exact:true}).first().screenshot({path:info.outputPath('saved-question-editor.png')});
+ await page.getByRole('button',{name:'Kérdés törlése',exact:true}).click();await page.getByRole('button',{name:'Menet mentése',exact:true}).click();await expect(page.getByText('A menet mentve.',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Menet szerkesztése'}).click();await expect(page.getByLabel('Kérdés szövege')).toHaveCount(0);
+});

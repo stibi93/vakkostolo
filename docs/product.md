@@ -160,3 +160,18 @@ A saját kóstolók listáján és a kóstoló részletein elérhető a **Kósto
 A cím és a végleges adatvesztés ismertetése után külön **Végleges törlés**
 gomb indítja. Futó és befejezett kóstoló is törölhető; a meghívó és a
 játékosok hozzáférése megszűnik. A kapcsolt fotók és értékelések is törlődnek.
+
+## Boronkénti egyedi kérdések
+
+A játékmester boronként legfeljebb öt, egyválaszos kérdést adhat meg az új
+kóstoló űrlapján vagy a hátralévő menet szerkesztésekor. A szőlőfajta- és
+országsablon szabadon átírható; saját kérdés is létrehozható. Kérdésenként
+2–6 különböző válaszlehetőség és egy kijelölt helyes válasz szükséges.
+A megkezdett bor kérdései már nem változhatnak.
+
+A játékos minden hozzáadott kérdésre választ ad a meglévő értékelés mellett.
+A teljes tipp együtt mentődik és a kör lezárásáig/időkorlátjáig felülírható.
+Felfedéskor a borlap mutatja a helyes választ és a játékos saját tippjét,
+illetve hogy eltalálta-e. A kivetítő csak a kérdést és a helyes választ
+mutatja. Ezek tanulást segítő kiegészítések, nem adnak versenypontot;
+a meglévő, boronként 100 pontos rangsor változatlan.

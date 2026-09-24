@@ -1,3 +1,4 @@
+import { parseQuestionResults } from '../questions/model';
 import type { GameResults, OwnResult } from './model';
 import { isUuid } from '../games/model';
 import { LobbyError } from '../lobby/api';
@@ -27,7 +28,7 @@ export function parseResults(value: unknown, role: 'host' | 'player'): GameResul
     if(photoUpdatedAt && !Number.isFinite(Date.parse(photoUpdatedAt))) return invalid();
     const responseCount=number(w.response_count,0,50), averageLiking=w.average_liking===null?null:number(w.average_liking,1,10,false);
     if((responseCount===0)!==(averageLiking===null) || (own!==null && responseCount===0)) return invalid();
-    return {id:w.id,position:number(w.position,1,12),name:text(w.name,200),priceHuf:number(w.price_huf,1,1000000),
+    return {...(w.questions === undefined ? {} : {questions:parseQuestionResults(w.questions,role)}),id:w.id,position:number(w.position,1,12),name:text(w.name,200),priceHuf:number(w.price_huf,1,1000000),
       priceBucket:number(w.price_bucket,1,8),alcoholTenths:number(w.alcohol_tenths,0,250),photoUpdatedAt,responseCount,averageLiking,own};
   });
   const leaderboard=r.leaderboard.map(value=>{

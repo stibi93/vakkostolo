@@ -1,3 +1,4 @@
+import { CategoryIcon } from '../rating/CategoryIcon';
 import { useEffect, useRef, useState } from 'react';
 import { ResultsPanel } from '../results/ResultsPanel';
 import { RevealedWinePhoto } from './RevealedWinePhoto';
@@ -120,6 +121,7 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; enabled: boolean;
 }) {
   const [draft, setDraft] = useState<RatingDraft | null>(null);
+  const [answers, setAnswers] = useState<Record<string,string> | null>(null);
   const [ack, setAck] = useState<SavedRating | null>(null);
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -129,15 +131,18 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   const saved = ack && (!snapshot.ownRating || Date.parse(ack.submittedAt) >= Date.parse(snapshot.ownRating.submittedAt)) ? ack : snapshot.ownRating;
   const value = draft ?? draftFromRating(saved);
   const round = snapshot.round!;
+  const choices = answers ?? saved?.customAnswers ?? {};
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy.current || !enabled || secondsLeft(snapshot) <= 0) return;
-    const rating: Rating = ratingFromDraft(value);
-    const invalid = validateRating(rating); setErrors(invalid); if (invalid.length) return;
+    const rating: Rating = {...ratingFromDraft(value), ...(round.questions?.length ? {customAnswers:choices}:{})};
+    const invalid = validateRating(rating);
+    if (round.questions?.some(q=>!q.options.some(o=>o.id===choices[q.id]))) invalid.push('Válaszolj minden egyedi kérdésre.');
+    setErrors(invalid); if (invalid.length) return;
     busy.current = true; setPending(true);
     try {
       const result = await api.submit(round.id, rating);
-      if (mounted.current) { setAck(result); setDraft(null); }
+      if (mounted.current) { setAck(result); setDraft(null); setAnswers(null); }
     } catch (error) { if (mounted.current) setErrors([lobbyErrorMessage(error)]); }
     finally { busy.current = false; if (mounted.current) { setPending(false); void refresh(); } }
   }
@@ -150,9 +155,14 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
       <fieldset disabled={!enabled || pending}>
         <legend>A te tipped</legend>
         <RatingFields value={value} onChange={setDraft} />
+        {round.questions?.map(q=><fieldset className="custom-question" key={q.id}>
+          <legend><CategoryIcon category="question" />{q.prompt}</legend>
+          <p className="small-note">Egy választ jelölj meg. A találat a felfedésnél látszik; versenypontot nem ad.</p>
+          {q.options.map(o=><label className="timer-toggle" key={o.id}><input type="radio" name={`question-${q.id}`} value={o.id} checked={choices[q.id]===o.id} onChange={()=>setAnswers({...choices,[q.id]:o.id})} />{o.label}</label>)}
+        </fieldset>)}
         <button className="button-primary" type="submit">{pending ? 'Beküldés…' : saved ? 'Tipp módosítása' : 'Tipp beküldése'}</button>
       </fieldset>
-      {draft && <p className="small-note">A mezőkben lévő módosítás még nincs visszaigazolva. Újratöltéskor a piszkozat elvész.</p>}
+      {(draft || answers) && <p className="small-note">A mezőkben lévő módosítás még nincs visszaigazolva. Újratöltéskor a piszkozat elvész.</p>}
       {!!errors.length && <div className="auth-message" role="alert" tabIndex={-1} ref={errorBox}>{errors.map(text => <p key={text}>{text}</p>)}</div>}
       {!saved && !enabled && <p>Nincs visszaigazolt tipped ehhez a körhöz.</p>}
     </form>}

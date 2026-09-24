@@ -1,3 +1,4 @@
+import { parseQuestions } from '../questions/model';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Json } from '../lib/database.types';
 import { isUuid } from '../games/model';
@@ -5,6 +6,7 @@ import { LobbyError } from '../lobby/api';
 import { gameStatusLabels } from '../games/model';
 import type { ScheduleApi, ScheduleStep, TastingSchedule } from './model';
 const messages: Record<string, string> = {
+  INVALID_QUESTIONS: 'Ellenőrizd az egyedi kérdéseket: legfeljebb 5 kérdés, kérdésenként 2–6 különböző válasz és egy kijelölt helyes válasz.',
   VERSION_CONFLICT: 'Közben megváltozott a kóstoló. A piszkozatod megmaradt; töltsd be a mentett menetet, és ellenőrizd a változásokat.',
   STEP_LOCKED: 'A már megkezdett tétel nem módosítható. Töltsd be a mentett menetet.',
   INVALID_SCHEDULE: 'Ellenőrizd a menetet: 1–12 bor, legfeljebb 60 lépés; boronként időkorlát nélkül vagy 30–1800 másodperc.',
@@ -35,7 +37,7 @@ export function parseSchedule(value: unknown): TastingSchedule {
         !Number.isInteger(s.alcohol_tenths) || Number(s.alcohol_tenths) < 0 || Number(s.alcohol_tenths) > 250 ||
         !Number.isInteger(s.round_position) || Number(s.round_position) < 1 || Number(s.round_position) > 12 || (s.seconds !== 0 && s.seconds < 30) || s.seconds > 1800))) return failure('INVALID_RESPONSE');
     if (s.kind === 'reveal' && (s.seconds !== 0 || !Array.isArray(s.reveal_round_ids) || s.reveal_round_ids.length < 1 || s.reveal_round_ids.length > 12 || s.reveal_round_ids.some(id => !isUuid(id)) || new Set(s.reveal_round_ids).size !== s.reveal_round_ids.length)) return failure('INVALID_RESPONSE');
-    return { ...(s.reveal_round_ids ? { reveal_round_ids: s.reveal_round_ids } : {}), id: s.id, kind: s.kind, title: s.title, message: s.message, seconds: s.seconds, status: s.status,
+    return { ...(s.questions ? {questions:parseQuestions(s.questions,true)}:{}), ...(s.reveal_round_ids ? { reveal_round_ids: s.reveal_round_ids } : {}), id: s.id, kind: s.kind, title: s.title, message: s.message, seconds: s.seconds, status: s.status,
       price_huf: s.price_huf, alcohol_tenths: s.alcohol_tenths, round_position: s.round_position };
   });
   if (new Set(steps.map(s => s.id)).size !== steps.length) return failure('INVALID_RESPONSE');
