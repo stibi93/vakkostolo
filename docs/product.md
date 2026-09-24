@@ -1,0 +1,116 @@
+# Termékterv
+
+## Cél és induló feltételezések
+
+Baráti, személyes kóstoló, kezdetben 2–30 játékos és 1–12 bor. Tervezési cél,
+nem bemért kapacitás. Magyar felület, HUF palackár (0,75 liter), alkoholtartalom
+% vol, 1–10 egész tetszési érték. A játékmester kezeli a fizikai borokat és
+a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
+
+## Szerepek és útvonalak
+
+| Szerep | Tervezett felület | Feladat |
+| --- | --- | --- |
+| Játékos | `/join/:token`, `/play/:gameId` | Becenév, váró, saját tippek, engedélyezett eredmény |
+| Játékmester | `/host`, `/host/:gameId` | Borok, meghívás, időzítő, körváltás, felfedés |
+| Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
+
+Ezek éles útvonaltervek. A jelenlegi demo három nézetkapcsolóval egy oldalon fut.
+Az MVP-kivetítő a játékmester bejelentkezett böngészőjének másik lapja;
+megosztható, csak olvasható prezentációtoken későbbi bővítés.
+
+## Játékfolyamat
+
+1. A játékmester bejelentkezik (Google vagy később e-mailes megoldás), megadja
+   a kóstoló címét, a titkos boradatokat, sorrendet és az időkeretet.
+2. Megnyitja a várót. A QR legalább 128 bit véletlen entrópiájú meghívó URL-t
+   tartalmaz, nem adminjogot. A kézi belépés az első verzióban ugyanennek a
+   linknek a beillesztése; rövid kód csak külön próbálkozás-korláttal jöhet.
+3. A játékos becenevet ad, anonim Auth-munkamenetet kap, belép a váróba.
+   Nem szükséges e-mail vagy Google. Azonos nevű embereket rövid azonosító
+   különböztet meg. A résztvevőlista és létszám frissül.
+4. A játékmester elindítja az első tételt. Mindenki az aktív értékelőt látja:
+   becsült palackár, becsült alkoholfok, tetszési index. Mindhárom kötelező.
+5. A beküldés szerver-visszaigazolást ad. A játékos a kör lejártáig módosíthat.
+   Nincs kötelező automatikus beküldés, és nincs hamis „mentve” hálózati hibánál.
+6. A határidő lezárja a beküldést. A játékmester korábban is zárhat, vagy
+   lejárat előtt hosszabbíthat. Új tétel mindig tudatos játékmesteri művelet.
+7. Felfedés egyenként, minden N. bor után vagy csak a végén. N alapértéke 2,
+   de csak javasolt UX-beállítás. Az adott blokk összes köre lezárt kell legyen.
+   A felfedés nem automatikus: a jogosult játékmester indítja.
+8. Az utolsó blokk kisebb is lehet N-nél. A zárás előtt minden hátralévő tétel
+   felfedhető; a végeredmény csak az összes értékelt tétel felfedése után végleges.
+
+## Játékmesteri vezérlő
+
+Asztali gépen két oszlop, telefonon egymás alatti panelek. Felül játékállapot és
+kapcsolatjelző. Középen aktuális tétel, hátralévő idő, beküldött/aktív játékosok
+száma. Elsődleges gomb mindig az aktuális állapothoz tartozik: váró megnyitása,
+indítás, kör lezárása, következő tétel. Külön gomb: +30 másodperc, eredmények
+felfedése, prezentáció. A lezárás és felfedés következményét röviden jelzi a UI.
+
+Oldalsáv: sorszámozott borlista (várakozik/kóstolás/lezárt/felfedett),
+létszám, meghívó link és valódi QR. Titkos ár és alkohol csak a host szerkesztőben.
+Eredeti boradat és sorrend a játék elindításával zárolódik. A résztvevőlista
+nem mutat mások tippjeit; a host beküldési darabszámot külön végponton kapja.
+
+Időkeret: 30–1800 másodperc, alapérték 120. Szünet két tétel között van;
+futó kör megállítása nem MVP-funkció. Lejárt kör nem nyitható újra. Későn érkező
+játékos a következő tételtől csatlakozhat, a korábbi körök válasza hiányzó marad.
+
+## Pontozás v1 — javasolt, módosítható termékdöntés
+
+Legfeljebb 100 pont/bor, fele ár, fele alkohol. A mércét indulás előtt mutatjuk.
+
+```text
+árpont = 50 × max(0, 1 − abs(tipp − valódi ár) / valódi ár)
+alkoholpont = 50 × max(0, 1 − abs(tipp − valódi %) / 3)
+összpont = round(árpont + alkoholpont)
+```
+
+Példa: 5000 Ft / 13,5% bornál 6000 Ft / 14,0% tipp → 82 pont.
+0 pont jár legalább 100% árhibánál, illetve legalább 3 százalékpont alkoholhibánál
+az adott részre. A valós ár pozitív. Az alkoholt egész tizedekben tároljuk:
+13,5% = 135. A kerekítés egyszer, az összeg végén történik.
+
+Tetszés: közönségkedvenc és átlag (kijelzésnél 1 tizedes), nincs „helyes” érték.
+Hiányzó válasz versenypontja 0, de a kedveltségi átlag nevezőjébe nem kerül.
+Ranglista összesített pont szerint, holtverseny azonos helyezéssel (1, 1, 3).
+Felfedés előtt pontszám sem szivároghat ki: abból a valós érték következtethető.
+
+## Eredmények és prezentáció
+
+Boronként: név/évjárat, valódi ár és alkoholfok, saját tipp és pont, átlagos
+tetszés, a beküldések száma. A következő lépésben tippeloszlás és a játékosok
+válaszainak táblája. Összesítő: ranglista, teljesített körök, közönségkedvenc.
+A projektben megjelenő mintaszámok demonstrációs adatok, nem valódi esemény adatai.
+
+## Mobil és hozzáférhetőség
+
+360 px szélességtől nincs vízszintes görgetés; 44 px-es érintési célok,
+címkézett űrlapok, billentyűzet-fókusz, legalább WCAG AA színkontraszt mint cél.
+Natív numerikus beviteli mezők, sem appletöltés, sem saját kamera-hozzáférés nem kell:
+a telefon kamerája olvassa a QR-t. Android Chrome, iOS Safari, asztali böngészők.
+Az MVP elfogadása valós iPhone és Android próbát is igényel.
+
+## Hálózat és visszatérés
+
+Frissítés és mobil háttérből visszatérés után teljes jogosult állapot újralekérése.
+A Realtime esemény frissítési jel, nem az egyetlen igazságforrás. Kimaradáskor
+15 másodperces ritka poll, visszatérő kapcsolatnál ismételt lekérés. Nincs
+offline többjátékos mód. A helyi piszkozat nem minősül beküldött válasznak.
+Anonim munkamenet elvesztése/új eszköz új résztvevőt jelent az MVP-ben; a
+játékmester későbbi helyreállító folyamata külön feladat.
+
+## MVP elfogadási feltételek
+
+- 10 külön eszköz QR-ról belép, váróban megjelenik, egyszerre kapja meg a kört.
+- Újratöltés után saját tagság és mentett válasz visszatér.
+- Határidőn túli és idegen játékhoz tartozó beküldést a DB elutasít.
+- Következő tétel és blokkos felfedés két hostlap párhuzamos kattintásánál is helyes.
+- Egy játékos közvetlen API-val sem olvas rejtett bort vagy idegen rejtett választ.
+- Hálózatszakadás után nem vész el visszaigazolt válasz, a UI helyreáll.
+- A végső pontok újraszámolhatók a zárolt boradatokból és válaszokból.
+
+Nem MVP: fizetés, nyilvános közösségi háló, borfelismerő AI, offline szerver,
+natív mobilapp, globális ranglista vagy korlátlan nagyrendezvény.
