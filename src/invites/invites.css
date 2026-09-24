@@ -21,3 +21,8 @@
 .projector-view .participant-list h4 { font-size: clamp(24px, 2.4vw, 36px); margin: 0; }
 .projector-notice { max-width: 640px; }
 @media (max-width: 760px) { .projector-view { grid-template-columns: 1fr; } }
+
+.invite-panel { background: var(--blue); padding: 24px; border-top: 3px solid var(--ink); }
+.qr-code { background: white; border-color: var(--control-border); }
+.join-status { border-left: 4px solid var(--accent); padding: 18px; background: var(--blue); }
+@media (max-width: 600px) { .invite-panel { padding: 18px 14px; } }

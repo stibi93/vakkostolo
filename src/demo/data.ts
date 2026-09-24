@@ -4,5 +4,5 @@ import type { WineTruth } from '../domain/game';
 export const demoWines: readonly WineTruth[] = [
   { name: 'Dűlőjáró · Furmint 2024', priceHuf: 4900, alcoholTenths: 125 },
   { name: 'Esti kert · Kékfrankos 2023', priceHuf: 6500, alcoholTenths: 135 },
-  { name: 'Aranyóra · Olaszrizling 2024', priceHuf: 3800, alcoholTenths: 120 },
+  { name: 'Nyári tétel · Rosé 2024', priceHuf: 3800, alcoholTenths: 120 },
 ];

@@ -1,5 +1,43 @@
 # Aktuális munkamenet
 
+## Kész változások rögzítése — 2026-09-24
+
+- Felhasználói kérésre a közös munkapéldány kész változásai a main ágon
+  rögzítve: arculati prototípus (`2012029`), majd alkalmazásarculat,
+  helyi demófotók és szüreti kezdőlap külön commitban. A közös váró
+  korábbi három commitja változatlanul megmaradt.
+- Friss `npm run check`: 169/169 teszt, DB-típusok, TypeScript, lint és build
+  sikeres. Alkalmazáskódot ebben a commitolási körben nem változtattam.
+  Korábbi böngészős bizonyíték: közös váró integráció 50/50, az utána készült
+  szüreti kezdőlap célzott próbái 10/10; most nem volt új böngészős futtatás.
+- Következő termékfeladat az első élő kör szerveroldali indítása és a
+  játékos kóstolólapja. Fizikai telefonos és Google OAuth-próba hátravan.
+- Az alábbi átadások történeti állapotok; a „nem commitolt” megjegyzéseiket
+  ez a rögzítés felülírja. Push és deploy nem történt.
+
+## Kezdőlapi szüreti illusztráció — 2026-09-24
+
+- Felhasználói kérésre a kezdőlapi nagy címke helyére saját SVG-csendélet
+  került: szőlőfürt, levelek, számozott palack, pohár és finom dűlősorok.
+  A meglévő palettát és tipográfiát követi; mobilon a főművelet alatt látható.
+  Forrás: `src/ui/HarvestArtwork.tsx`, `src/ui/harvest.css`; HomePage import.
+- Két lassú CSS-transform animáció, új csomag, videó, blur és JS-framehurok
+  nélkül. Gombbal fázistartó szünet/folytatás; reduced-motion esetén nincs
+  animáció. Képernyőn kívül és rejtett böngészőlapon automatikusan szünetel.
+- A többi arculati és közösváró-változás megmaradt. A demó grafika, játéklogika
+  és képkezelés változatlan. A korábbi nagy címke a tanulmány történeti része.
+- `npm run check`: 169 teszt, típusok, lint és build sikeres. Érintett
+  Playwright apppróbák 10/10: navigáció, billentyűzetes pause, reduced-motion
+  és képernyőn kívüli szüneteltetés. 360/768/1440 px renderelt képek átnézve,
+  nincs túlcsordulás. Kimenet: `test-results/harvest-review/`, `harvest-e2e/`.
+- Production Chromium, 360/1440 px, 3–3 s aktív animáció: 0 layout, 0 paint,
+  0 ms script, kb. 66–67 ms főszálfeladat. Ez rövid helyi mérés, nem fizikai
+  telefonbenchmark. A Page Visibility kezelő szintetikus eseménnyel próbálva;
+  a pause után a transzformáció állandó. Részletek: `performance.json` a képek mellett.
+- A kért kezdőlapi bővítés kész; nem történt commit vagy deploy. Következő
+  termékfeladat továbbra is az élő kör, külön munkamenetben. Új kezdőlapi
+  díszítésnél a mostani két mozgó réteg és leállítási szabály maradjon az alap.
+
 ## Közös váró elkészült — 2026-09-24
 
 - A közös váró a main ágon: `2d24cee`, kivetítő-integráció `cf69278` és az
@@ -21,6 +59,81 @@
   verzióellenőrzés, határidő), majd védett játékossnapshot és kóstolólap.
   A lentebbi közösváró-tervek korábbi állapotot írnak le.
 
+## Számozott címkés arculat az alkalmazásban — 2026-09-24
+
+- Az elfogadott frontend-design profil átvezetve a közös alkalmazásba:
+  törtfehér–borvörös–halványkék paletta, helyben betöltött Bricolage,
+  számozott címkemotívum, új kezdőlap és tömör értékelőlap. A host-, belépési,
+  mentett kóstoló-, meghívó- és kivetítőfelületek közös arculatot használnak.
+- Három AI-mintafotó a `public/demo/` könyvtárban; a demó játékmesteri
+  képszerkesztőjében helyi csere, törlés és visszaállítás. Hibás/rossz típusú/
+  túl nagy képnél az előző megmarad. Felfedés előtt a játékos és prezentáció
+  nem kap képelemet. Ez nem online feltöltés, frissítéskor a saját kép elvész.
+- Kezdőlapi megállítható háttérmozgás, élő reduced-motion követés. Online
+  játéklogika és DB nem módosult. A létrehozó súgója már jelzi a kész meghívást.
+- Külön worktree-ben készült (`/tmp/vakkostolo-numbered-design-20260924`,
+  alap `ef15b1f`), saját diffből integrálva a `613e52d` utáni közös forrásba.
+  A LAN/kivetítő változások megmaradtak. Nincs új commit/push/deploy.
+  Átadás: `memory/numbered-design-handoff.md`; arculat: `docs/design.md`.
+- Közös forráson `npm run check` sikeres: típusok, lint, 141 teszt és build.
+  Teljes Playwright: 44/44. Az utolsó hostlista/súgó finomítás után
+  további 10/10 célzott játék-E2E és lint sikeres. Auth/RPC szintetikus, nem élő Google-próba.
+- 360/768/1440 px-en hét renderelt állapot: kezdőlap, létrehozás, QR-váró,
+  kivetítő, képszerkesztő, játékoslap és eredmények. Fontok/képek betöltődtek,
+  nincs túlcsordulás vagy JS-oldalhiba; a képernyőképek átnézve.
+  Képek: `test-results/numbered-design-review/` (Gitből kizárt).
+- Az arculat alkalmazásba integrálása kész. A közös váró továbbra is a külön
+  agent feladata (`memory/shared-lobby-handoff.md`); új nézetei a közös
+  tokeneket kövessék. Borfotók következő önálló feladata: privát tartós tárolás
+  és felfedéshez kötött kiszolgálás, backend-jogosultsági ellenőrzéssel.
+
+A lentebbi bejegyzések korábbi munkamenetek állapotát rögzítik.
+
+## Frontend-skill bővítve — 2026-09-24
+
+- Felhasználói kérésre a személyes `frontend-design` skill általános része
+  bővült: saját vizuális koncepció, referenciaelemzés, karakterellenőrzés,
+  prototípus és implementáció elválasztása, párhuzamos munka megőrzése.
+- Új, a fő skillből hivatkozott útmutatók: `references/art-direction.md` és
+  `references/images-and-motion.md`. Fotók, feltöltési állapotok, hibák,
+  aszinkron képcsere, megállítható mozgás és tényleges vizuális ellenőrzés.
+- A Vakkóstoló arculata továbbra is külön projektprofil. Az automatikus
+  kiválasztás és a globális AGENTS-előírás megmaradt.
+- Skillvalidátor, belső hivatkozások és felfedezési symlink ellenőrzése sikeres.
+  Új alkalmazáskód vagy UI-változás nem készült; böngészős apppróba nem kellett.
+- Skillteendő nincs. Következő felületi munkánál már ez az útmutató alkalmazandó.
+
+## Elfogadott irány, fotós bővítés — 2026-09-24
+
+- A felhasználó elfogadta a számozott címkés irányt, borfotós mintákat és
+  stílushoz illő hátteret/mozgást kért. Az interaktív tanulmány bővült:
+  `docs/design-proposals/numbered-label/index.html`.
+- Három AI-mintafotó, boronkénti helyi fájlválasztás, csere/törlés/visszaállítás,
+  fotós felfedés. Csak a mintalap első borához tartozik tipp. A kezdőlapon
+  lassú, megállítható fénykarika-animáció, reduced-motion esetén statikus.
+- 360/768/1440 px négy nézet ellenőrizve; feltöltés-előnézet és hibák, képtörlés,
+  billentyűzet és mozgásbeállítás sikeres; renderelt képek átnézve. Prototípus-lint
+  és JS szintaxisellenőrzés sikeres. Az alkalmazáskódot nem módosítottam.
+- A személyes frontend-skill projektprofilja aktualizálva és validálva.
+- Következő: az elfogadott tanulmány alkalmazásba integrálása. Tartós, privát
+  képfeltöltés még nincs; a mostani fájlválasztás kizárólag helyi előnézet.
+
+## Új arculati javaslat — 2026-09-24
+
+- A felhasználó a megvalósított Halves-adaptációt túl jellegtelennek találta;
+  a Siteinspire borászati válogatásából inspirálódó új irány kidolgozását kérte.
+- Elkészült a „számozott címke” interaktív tanulmány:
+  `docs/design-proposals/numbered-label/index.html`, részletes indoklás ugyanott
+  a README-ben. Saját címkegrafika, erős groteszk tipográfia, borvörös–halványkék.
+- Kezdőlap, kitölthető kóstolólap és felfedés, egyértelmű mintaadatokkal.
+  Mindhárom nézet 360/768/1440 px-en ellenőrizve; billentyűzetes bevitel és
+  helyi mintamentés sikeres, renderelt képek átnézve.
+- Ez a feljegyzés a korábbi bemutatás állapota; az irány azóta elfogadott (lásd fent). Az alkalmazás forráskódja és a
+  személyes skill profilja ebben a munkamenetben nem változott. Következő lépés
+  a felhasználó visszajelzése alapján az irány finomítása vagy átvezetése.
+- A párhuzamos játék/meghívó munka megmaradt; csak az új tanulmánykönyvtár és
+  e projektjegyzetek módosultak.
+
 Dátum: 2026-09-24. A felhasználó kérésére a közös munkapéldány elkészült
 változásai a `main` ágon, két logikus egységben rögzítve.
 
@@ -30,7 +143,7 @@ változásai a `main` ágon, két logikus egységben rögzítve.
   `create_game`, hostlista és részletes boradatok, generált DB-típusok, adapter,
   magyar űrlap és `/host/:gameId`. A feature-ág saját commitjai összevonva kerültek
   a mainre; nem szabad őket ismét alkalmazni. Átadás: `memory/game-creation-handoff.md`.
-- A következő commit a Vakkóstoló nevet, jóváhagyott bordó–törtfehér arculatot,
+- `72acc49`: a Vakkóstoló nevet, az akkori jóváhagyott bordó–törtfehér arculatot,
   természetes magyar szövegeket, designelőnézeteket és összefésült projektjegyzeteket
   rögzíti. Georgia címek, Arial UI, közös CSS-tokenek; mobilon teljes szélességű
   mentés, másodlagos kijelentkezés. Átadások: `memory/design-handoff.md`,
@@ -38,8 +151,9 @@ változásai a `main` ágon, két logikus egységben rögzítve.
 - A korábbi host Google Auth, PKCE, munkamenet-visszaállítás és háttérellenőrzési
   javítás megmaradt. A demo továbbra is helyi, az online játéktól elkülönített próba.
 - A párhuzamos agentek külön worktree-jeit és ágait ez a commitolás nem módosítja.
-  A meghívó/QR implementáció külön `feat/invite-join` ágon kész (`b3d368a`),
-  még nincs a közös mainben. Átadás: `memory/invite-join-handoff.md`.
+  A meghívó/QR és anonim vendégbelépés már a közös mainben van: `860ae12`.
+  A külön invite-worktree tiszta, ugyanazon a commiton áll. Az invite-handoff
+  beolvasztásra váró állítása elavult; itt a Git és a forráskód az irányadó.
 
 ## Ellenőrzések és korlátok
 
@@ -57,9 +171,15 @@ változásai a `main` ágon, két logikus egységben rögzítve.
 
 ## Következő konkrét lépés
 
-A kész meghívó/QR és anonim vendégbelépés saját változását kell átvinni a friss
-mainre, az alap játékcommitok megismétlése nélkül. Új integráció után típusgenerálás,
-check, böngészős és mobilos ellenőrzés. Utána közös váró: validált snapshot,
-Realtime és visszatérés. Ne induljon második meghívó-implementáció.
-A valódi Supabase tesztprojektben migráció, Google/anonim Auth, RLS és két kliens
-közös próbája továbbra is kiadási kapu.
+A 2026-09-24-i friss Git/forrásellenőrzés alapján a következő fejlesztési egység
+az élő közös váró: tagságot ellenőrző snapshot RPC, host- és vendéglista, Realtime,
+újratöltés és hálózati visszatérés. Jelenleg a host lista 10 másodperces lekéréssel
+frissül, a vendégoldal a belépést igazolja vissza; közös élő állapot még nincs.
+
+Párhuzamos változások: az új numbered-label designjavaslat és a helyi Google
+provider konfigurációja módosítás alatt látható. Ezekhez külön feladatkör tartozzon;
+a váró fejlesztése saját ágon/worktree-ben történjen. A számozott címkés irány
+azóta elfogadott; az alkalmazásbeli átvezetése még hátravan. A helyi konfiguráció módosítása önmagában nem igazol
+sikeres Google-belépést. A valódi Supabase migráció/Auth/RLS és két kliens próbája
+párhuzamos integrációs feladat marad. Utána élő kör indítása és válaszadás következik.
+Ebben az állapotfelmérő munkamenetben új tesztfuttatás és alkalmazáskód-módosítás nem volt.

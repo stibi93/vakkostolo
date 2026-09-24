@@ -1,57 +1,78 @@
 # Arculat — Vakkóstoló
 
-A felhasználó 2026-09-24-én jóváhagyta a Halves alapján készült, saját
-bordó–törtfehér irányt. Az alkalmazás neve **Vakkóstoló**, dekoratív pont nélkül.
-A korábbi sárga arculatot elutasította.
+A 2026-09-24-én elfogadott irány a **számozott, letakart borcímke**.
+A termék neve minden felületen **Vakkóstoló**. A sárga és a későbbi, túl
+jellegtelennek ítélt Halves-adaptáció helyét ez az arculat veszi át.
 
-## Jóváhagyott irány
+## Vizuális elvek
 
-Vizuális referencia: [Halves Design System](https://www.halves.wine/system).
-Saját, jóváhagyott előnézet: [kóstolólap](design-proposals/halves/index.html).
-A Halves márkáját és komponenskódját nem vesszük át; a rendszer szerkesztési
-elvei szolgálnak alapul. Új frontendfüggőség nem szükséges.
+Az inspiráció a [Siteinspire Winery & Vineyard válogatása](https://www.siteinspire.com/websites/category/winery-vineyard),
+különösen a Brau, Black Estate, Low Intervention és Dix Hectares szerkesztése.
+A [jóváhagyott tanulmány](design-proposals/numbered-label/index.html) és annak
+[indoklása](design-proposals/numbered-label/README.md) megőrzi a referenciákat.
+Saját címkemotívumot használunk, nem más borászat arculatát másoljuk.
 
-- Törtfehér háttér (`#F7F5F2`), fehér űrlapfelület.
-- Mély bordó főművelet (`#713336`), sötétebb hover (`#58262A`).
-- Tintaszínű szöveg (`#24211F`), másodlagos szöveg (`#6A635F`),
-  halvány kőszürke elválasztók (`#DDD7D1`).
-- Georgia címek és márkafelirat, Arial mezők és súgók. Rendszerbetűk,
-  magyar ékezetekkel, külön fontletöltés nélkül.
-- Vékony elválasztók, enyhe lekerekítés, egyértelmű főgomb és tömör kóstolólap.
-- A felületi szín és illusztráció felfedésig nem utalhat a rejtett borra.
-  Minden tétel azonos vizuális kezelést kap, csak a tételszám különbözik.
+- Törtfehér papír `#F4F1ED`, világos felület `#FFFDFB`, tintaszöveg `#30202E`.
+- Borvörös főművelet és címke `#61263F`, halványkék ellenpont `#D9E6EB`.
+- Másodlagos szöveg `#675A62`; a mező, hiba és fókusz külön tokeneket kap.
+- Bricolage Grotesque címek, márkanév és számok; Arial a feliratokhoz és mezőkhöz.
+  Georgia kurzív csak néhány hangsúlynál, Georgia a felfedett borok neveinél.
+- Nagy tételszám, világos takarócsík, erős elválasztók, alig lekerekített felületek.
+  Az értékelőlapon a bevitel az elsődleges, a dekoratív nyitóblokk rejtett.
+- Felfedésig az absztrakt címke minden bornál azonos színt és motívumot használ.
+  A kép, címke vagy palackszín nem utalhat a rejtett borra.
 
 A személyes `frontend-design` skill `references/wine-tasting.md` profilja
-rögzíti az alkalmazandó elveket. A profil ehhez a termékhez jóváhagyott;
-más projektre nem jelent automatikus szín- vagy stíluselőírást.
+ugyanezt az irányt rögzíti; más projektekre nem írja elő ezeket a színeket.
 
-## Megvalósítás állapota
+## Megvalósítás
 
-A jóváhagyott arculat az alkalmazásban is megvalósult: kezdőlap, belépési és
-hibaállapotok, demó játékmesteri, játékos- és kivetítőnézet, értékelés és eredmények.
-A kezdőlapon egyértelműen jelölt kóstolólap-minta mutatja a becsléseket.
-A játékosnézetben a feladat kerül előre; a dekoratív nyitóblokk rejtett.
+A közös tokenek a `src/styles.css`-ben, a kezdőlap és belépés stílusai a
+`src/app/app.css`-ben vannak. A címkegrafika, fotókeret és háttérmozgás a
+`src/ui/` közös komponenseiben és `visuals.css` fájljában található.
+A Bricolage latin és latin-ext WOFF2 fájljai helyben, a `src/ui/fonts/`
+könyvtárból töltődnek, OFL licencükkel együtt. Külső fontszolgáltató nem kell.
 
-A közös tokenek a `src/styles.css` elején találhatók. A vezérlők körvonala
-`--control-border` (`#968B84`), a hibajelzés `--error` (`#9F2727`), a fókusz
-bordó körvonal. Az új online játékfelületek ugyanezeket a tokeneket használják.
-Az oldalspecifikus kezdőlap- és belépési stílusok a `src/app/app.css`-ben vannak.
+Az arculat a kezdőlapon, a demó három nézetében, a belépésnél, a kóstoló
+létrehozásánál és mentett adatainál, valamint a meghívó és kivetítő oldalain
+jelenik meg. A játékszabály, Auth és adatbázis működése ettől nem változik.
 
-## Felületi hang
+## Képek és mozgás
 
-Természetes, tárgyilagos magyar szövegek, tegezéssel. A cím a funkciót vagy az
-állapotot nevezi meg, a gomb a műveletet, a súgó a következő lépést. Erőltetett
-szlogenek és szóviccek helyett konkrét feliratok szerepelnek. Ez a 2026-09-24-i
-felhasználói kérés felülírja a korábbi társasági szlogeneket.
-Az állapot, határidő és visszaigazolt beküldés jelentése maradjon pontos.
+Három kitalált bor AI-val készített mintafotója a `public/demo/` könyvtárban
+van. Eredetük és promptjaik: `public/demo/IMAGE-SOURCES.md`.
+A demó játékmesteri „Mintaborok képei” részében a kép cserélhető, törölhető,
+és a minta visszaállítható. JPEG, PNG és WebP választható, legfeljebb 8 MB
+és 40 megapixel méretig. Hibás kép esetén az előző marad meg. A kép arányait
+megőrizzük, a teljes palack látszik; betöltési, hiányzó és hibaállapot is van.
 
-## Mobil és ellenőrzés
+Ez **helyi demófunkció**: nincs feltöltés és tartós mentés, frissítéskor a
+saját képek elvesznek. Fotó csak a nyitott játékmesteri képszerkesztőben és a
+felfedett eredménynél kerül a DOM-ba. A publikus, kitalált minták nem jelentenek
+éles adatvédelmi megoldást. Online borfotóhoz privát tárolás és szerveroldali,
+felfedéshez kötött hozzáférés szükséges; ez külön fejlesztési egység.
 
-360 px szélességtől ne legyen vízszintes túlcsordulás. A márkafelirat és az
-állapotjelző rendezett tördelést kapjon. Legalább 44 px-es érintési célok,
-olvasható mezők és látható billentyűzetfókusz szükséges. Az értékelés maradjon
-elöl a játékosnézetben; dekoráció ne szorítsa ki a feladatot.
+A kezdőlap saját, közvetlenül SVG-ben rajzolt szüreti csendéletet használ:
+szőlőfürt és levelek, számozott/letakart címkéjű palack, pohár és dűlősorok.
+Forrás: `src/ui/HarvestArtwork.tsx`, stílus: `src/ui/harvest.css`. Nincs külső
+illusztráció vagy képszolgáltatás; ez dekoráció, nem egy játékbeli bor képe.
+A demó kis címkegrafikája megmarad, a csendélet csak a kezdőlapon látható.
 
-A jóváhagyott előnézet nem helyettesíti az átvezetett alkalmazás asztali és
-mobilos vizuális ellenőrzését. A demó jelölése, a pontozás, az időzítés és az
-adatbiztonsági szabályok a designváltás során is megmaradnak.
+Két réteg mozog: a szőlőág finoman leng, mögötte a világos kör lassan eltolódik.
+Kizárólag CSS `transform` animáció, JavaScript képkockahurok, videó, blur és
+új függőség nélkül. A szöveg, palack és pohár stabil. A megállító gomb a
+jelenlegi fázisban szüneteltet; újraindításkor onnan folytatja. Képernyőn kívül
+IntersectionObserver, háttérlapon Page Visibility állítja le a mozgást.
+A rendszer csökkentett mozgás beállítását induláskor és változáskor is követjük.
+Kóstolás és adatbevitel közben nincs háttéranimáció.
+
+## Szöveg és ellenőrzés
+
+Természetes, tárgyilagos magyar szövegek, tegezéssel. A cím a funkciót vagy
+állapotot nevezi meg, a gomb a műveletet, a súgó a következő lépést.
+Nincsenek erőltetett szlogenek és boros szóviccek. A demó, online előkészítés,
+határidő és visszaigazolt beküldés jelentése maradjon pontos.
+
+360, 768 és 1440 px szélességen a ténylegesen renderelt nézeteket ellenőrizzük.
+Legalább 44 px érintési cél, olvasható mező, látható fókusz és túlcsordulás
+nélküli tördelés kell. A sikeres build önmagában nem vizuális ellenőrzés.

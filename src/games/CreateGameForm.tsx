@@ -87,7 +87,7 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
         <p>A kóstoló mentését nem igazoltuk vissza.</p><ul>{errors.map((error) => <li key={error}>{error}</li>)}</ul>
         <p>Hálózati hiba után ugyanazokkal az adatokkal újrapróbálhatod a mentést.</p>
       </div>}
-      <p className="game-hint">Ez már szerverre mentett kóstoló lesz. A meghívás és a játék indítása még fejlesztés alatt áll.</p>
+      <p className="game-hint">A kóstolót elmentjük. Ezután megnyithatod a várót és meghívhatod a résztvevőket. Az online körök indítása még készül.</p>
       <button type="submit" className="button-primary" disabled={pending}>{pending ? 'Kóstoló mentése…' : 'Kóstoló létrehozása'}</button>
       {pending && <p role="status">Várakozás a szerver visszaigazolására…</p>}
     </form>

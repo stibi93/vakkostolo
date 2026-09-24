@@ -23,6 +23,11 @@
   `~/.codex/skills/frontend-design/SKILL.md`, felfedezési linkje
   `~/.agents/skills/frontend-design`. Célja az átgondolt design és a feladathoz
   igazított tényleges vizuális ellenőrzés, a projekt arculatának megtartásával.
+- A személyes frontend-skill általános része külön útmutatót tartalmaz a
+  vizuális koncepcióhoz/referenciákhoz és a képekhez/mozgáshoz. Indok: a
+  technikailag helyes, rendezett felület lehet jellegtelen; az arculatot a
+  termékhez illő ötlettel és tényleges használati állapotokban kell igazolni.
+  Konkrét boros színek és motívumok csak a Vakkóstoló projektprofiljában élnek.
 - Felhasználói kérés: természetes, tárgyilagos magyar feliratok. Ne kerüljenek
   a felületre erőltetett szlogenek, boros szóviccek, színlelt bizalmaskodás vagy
   frappánsnak szánt kiszólások. A cím nevezze meg a funkciót vagy állapotot;
@@ -49,10 +54,31 @@
   változat sárga színét 2026-09-24-én elutasította. Új, boros designrendszer
   keresését kérte, bemutatással a skillbe építés előtt. A bordó–törtfehér
   Halves-adaptációt ugyanazon a napon jóváhagyta; a skill boros profiljába bekerült.
-- A jóváhagyott arculat az alkalmazásban is megvalósult. Közös CSS-tokenek:
-  `src/styles.css`; Georgia címek és Arial UI. A játékosnézetben az értékelés
-  az elsődleges, dekoratív nyitóblokk nélkül. Indok: mobilon a kóstolás
-  közbeni bevitel kapjon helyet. Új online felület ezeket a tokeneket kövesse.
+- Későbbi, 2026-09-24-i visszajelzés: a megvalósított Halves-adaptáció túl
+  jellegtelen. Karakteresebb, izgalmas, ugyanakkor könnyen érthető irány kell;
+  inspiráció a Siteinspire Winery & Vineyard válogatása. A számozott, letakart
+  címkére épülő új tanulmányt a felhasználó ezt követően elfogadta.
+  Borfotókat és stílushoz illő háttérmozgást is kért: a fotó a hostnál és
+  felfedéskor látható; kezdőlapi háttérmozgás megállítható, reduced-motion
+  esetén statikus. A személyes skill projektprofilja már ezt rögzíti.
+- A számozott címkés arculat az alkalmazásban is megvalósult 2026-09-24-én.
+  Közös CSS-tokenek: `src/styles.css`; Bricolage címek és számok, Arial UI,
+  visszafogott Georgia hangsúly. A helyi latin/latin-ext WOFF2 és OFL licence
+  a `src/ui/fonts/` alatt van; nincs külső fontszolgáltatás. Új online felület
+  ezeket a tokeneket és a `docs/design.md` útmutatását kövesse.
+  A játékosnézetben az értékelés az elsődleges, dekoratív nyitóblokk nélkül.
+  Indok: mobilon a kóstolás közbeni bevitel kapjon helyet.
+- A demó borfotói kitalált AI-minták, helyi képcserével; nem online tárolás.
+  Frissítéskor a saját kép elvész. Felfedésig a játékosnézet nem szerel fel
+  borfotót, a host csak a képszerkesztő megnyitásakor látja. Éles képekhez
+  privát tárhely és szerveroldali hozzáférés kell; a publikus minták nem
+  jogosultsági referencia. Kezdőlapon megállítható absztrakt háttérmozgás,
+  reduced-motion esetén statikus; az értékelés mozgásmentes.
+- A kezdőlaphoz a felhasználó szőlős/szüreti rajzokat és könnyű animációt kért.
+  Saját SVG-csendélet készült a márkapalettával, számozott palackkal. Indok:
+  kis méret, skálázhatóság, külső képletöltés nélkül. Két transform-réteg
+  mozog; pause, reduced-motion, IntersectionObserver és Page Visibility
+  szabályozza. A részleteket a `docs/design.md` rögzíti; a játékfelület statikus.
 - A termék neve 2026-09-24-től **Vakkóstoló**, minden felületen azonos írásmóddal,
   dekoratív pont nélkül. A technikai projektazonosító `vakkostolo`.
 
