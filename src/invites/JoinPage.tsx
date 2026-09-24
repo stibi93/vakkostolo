@@ -5,7 +5,7 @@ import { PageFrame } from '../app/PageFrame';
 import { authRuntime } from '../auth/runtime';
 import { inviteErrorMessage } from './api';
 import { isInviteToken, nicknameError } from './model';
-import type { InvitesApi, Membership } from './model';
+import type { InvitePreview, InvitesApi, Membership } from './model';
 import './invites.css';
 
 export function JoinPage() {
@@ -25,7 +25,7 @@ export function JoinPage() {
   </PageFrame>;
 }
 
-type JoinState = { status: 'checking' } | { status: 'form' } | { status: 'joined'; membership: Membership } |
+type JoinState = { status: 'checking' } | { status: 'form'; preview: InvitePreview } | { status: 'joined'; membership: Membership } |
   { status: 'error'; message: string };
 
 function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
@@ -36,9 +36,10 @@ function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
   const [message, setMessage] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
-    api.resume(token).then((membership) => {
-      if (active) setState(membership ? { status: 'joined', membership } : { status: 'form' });
-    }, (error: unknown) => { if (active) setState({ status: 'error', message: inviteErrorMessage(error) }); });
+    api.resume(token).then(async (membership) => {
+      const next: JoinState = membership ? { status: 'joined', membership } : { status: 'form', preview: await api.preview(token) };
+      if (active) setState(next);
+    }).catch((error: unknown) => { if (active) setState({ status: 'error', message: inviteErrorMessage(error) }); });
     return () => { active = false; };
   }, [api, token, attempt]);
 
@@ -65,9 +66,16 @@ function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
       Újrapróbálás</button>
   </>;
   if (state.status === 'joined') return <Navigate to={`/play/${state.membership.gameId}`} replace />;
+  const { preview } = state;
+  if (!preview.joinable) return <>
+    <h1 id="join-title">{preview.title}</h1>
+    <p role="alert" className="auth-message">Ebbe a kóstolóba már nem lehet belépni.</p>
+  </>;
   return <>
-    <h1 id="join-title">Belépés a kóstolóba</h1>
-    <p>Adj meg egy becenevet. Ezt látja a játékmester és a többi játékos. Regisztráció nem kell.</p>
+    <p className="join-invited">Erre a kóstolóra hívtak meg:</p>
+    <h1 id="join-title">{preview.title}</h1>
+    <p>Ellenőrizd, hogy a kivetítőn vagy a játékmesternél is ez a cím látszik. Adj meg egy becenevet:
+      ezt látja a játékmester és a többi játékos. Regisztráció nem kell.</p>
     <form className="join-form" onSubmit={(event) => void submit(event)} noValidate>
       <label htmlFor="nickname">Becenév</label>
       <input id="nickname" name="nickname" value={nickname} onChange={(event) => setNickname(event.target.value)}

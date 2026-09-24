@@ -5,8 +5,11 @@ export interface Invite { token: string; expiresAt: string }
 export interface IssuedInvite extends Invite { status: GameStatus }
 export interface Membership { gameId: string; participantId: string; nickname: string; title: string; status: GameStatus }
 export interface Participant { id: string; nickname: string; joinedAt: string }
+export interface InvitePreview { title: string; joinable: boolean }
 export interface InvitesApi {
   issue(gameId: string): Promise<IssuedInvite>;
+  /** Title of the invited tasting without signing in; rejects unknown, rotated or expired links. */
+  preview(token: string): Promise<InvitePreview>;
   participants(gameId: string): Promise<Participant[]>;
   /** Existing membership for this browser's session, or null when a nickname is still needed. */
   resume(token: string): Promise<Membership | null>;

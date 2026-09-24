@@ -4,7 +4,7 @@ import type { GameStatus } from '../domain/game';
 import type { Database } from '../lib/database.types';
 import { gameStatusLabels, isUuid } from '../games/model';
 import { isInviteToken, nicknameError } from './model';
-import type { InvitesApi, IssuedInvite, Membership, Participant } from './model';
+import type { InvitePreview, InvitesApi, IssuedInvite, Membership, Participant } from './model';
 
 export class InviteServiceError extends Error {}
 const invalidResponse = () => new InviteServiceError('A szerver válasza nem értelmezhető. Próbáld újra.');
@@ -30,6 +30,11 @@ export function parseMembership(value: unknown): Membership {
   if (!isUuid(row.game_id) || !isUuid(row.participant_id)) throw invalidResponse();
   return { gameId: row.game_id, participantId: row.participant_id, nickname: text(row.nickname, 30),
     title: text(row.title, 100), status: status(row.status) };
+}
+export function parseInvitePreview(value: unknown): InvitePreview {
+  const row = record(value);
+  if (typeof row.joinable !== 'boolean') throw invalidResponse();
+  return { title: text(row.title, 100), joinable: row.joinable };
 }
 export function parseIssuedInvite(value: unknown): IssuedInvite {
   const row = record(value);
@@ -79,6 +84,12 @@ export function createInvitesApi(client: SupabaseClient<Database>): InvitesApi {
       const { data, error } = await client.rpc('issue_invite', { p_game_id: gameId });
       if (error) throw fromServer(error);
       return parseIssuedInvite(data);
+    },
+    async preview(token) {
+      if (!isInviteToken(token)) throw new InviteServiceError(serverMessages.INVITE_INVALID);
+      const { data, error } = await client.rpc('preview_invite', { p_token: token });
+      if (error) throw fromServer(error);
+      return parseInvitePreview(data);
     },
     async participants(gameId) {
       if (!isUuid(gameId)) throw new InviteServiceError('A kóstoló címe érvénytelen.');

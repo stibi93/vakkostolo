@@ -119,9 +119,13 @@ test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async 
 });
 
 test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagság', async ({ page }) => {
-  const calls = { signups: 0, joins: [] as Record<string, unknown>[] };
+  const calls = { signups: 0, previews: 0, joins: [] as Record<string, unknown>[] };
   const unexpected = await mockSupabase(page, async (route, url) => {
-    if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+    if (url.pathname === '/rest/v1/rpc/preview_invite') {
+      calls.previews++;
+      expect(route.request().postDataJSON()).toEqual({ p_token: token });
+      await route.fulfill({ json: { title: 'Péntesti kóstoló', joinable: true } });
+    } else if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
       await route.fulfill({ json: lobbyResponse(gameId, [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z', seat: 1 }], 'player', membership.participant_id) });
     } else if (url.pathname === '/auth/v1/signup') {
       calls.signups++;
@@ -137,7 +141,10 @@ test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagsá
   await page.goto(`/join/${token}`);
   const nickname = page.getByLabel('Becenév');
   await expect(nickname).toBeVisible();
+  await expect(page.getByText('Erre a kóstolóra hívtak meg:')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Péntesti kóstoló' })).toBeVisible();
   expect(calls.signups).toBe(0);
+  expect(calls.previews).toBeGreaterThan(0);
   await page.getByRole('button', { name: 'Belépés a váróba' }).click();
   await expect(page.getByRole('alert')).toContainText('Adj meg egy becenevet.');
   expect(calls.signups).toBe(0);
@@ -158,9 +165,11 @@ test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagsá
   expect(unexpected).toEqual([]);
 });
 
-test('vendég: érvénytelen vagy lecserélt meghívó', async ({ page }) => {
+test('vendég: érvénytelen, lezárt vagy közben lecserélt meghívó', async ({ page }) => {
+  let preview: Parameters<Route['fulfill']>[0] = postgrestError('INVITE_INVALID');
   const unexpected = await mockSupabase(page, async (route, url) => {
-    if (url.pathname === '/auth/v1/signup') await route.fulfill({ json: authSession(guestUser) });
+    if (url.pathname === '/rest/v1/rpc/preview_invite') await route.fulfill(preview);
+    else if (url.pathname === '/auth/v1/signup') await route.fulfill({ json: authSession(guestUser) });
     else if (url.pathname === '/rest/v1/rpc/join_game') await route.fulfill(postgrestError('INVITE_INVALID'));
     else return false;
     return true;
@@ -168,6 +177,17 @@ test('vendég: érvénytelen vagy lecserélt meghívó', async ({ page }) => {
   await page.goto('/join/rovid');
   await expect(page.getByRole('heading', { name: 'Ez a meghívó nem érvényes.' })).toBeVisible();
   await page.goto(`/join/${token}`);
+  await expect(page.getByRole('alert')).toContainText('Kérj új linket vagy QR-kódot.');
+  await expect(page.getByLabel('Becenév')).toHaveCount(0);
+
+  preview = { json: { title: 'Péntesti kóstoló', joinable: false } };
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'Péntesti kóstoló' })).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('már nem lehet belépni');
+  await expect(page.getByLabel('Becenév')).toHaveCount(0);
+
+  preview = { json: { title: 'Péntesti kóstoló', joinable: true } };
+  await page.reload();
   await page.getByLabel('Becenév').fill('Anna');
   await page.getByRole('button', { name: 'Belépés a váróba' }).click();
   await expect(page.getByRole('alert')).toContainText('Kérj új linket vagy QR-kódot.');

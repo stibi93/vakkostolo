@@ -232,6 +232,7 @@ export type Database = {
       issue_invite: { Args: { p_game_id: string }; Returns: Json };
       join_game: { Args: { p_token: string; p_nickname?: string }; Returns: Json };
       list_host_games: { Args: Record<never, never>; Returns: Json };
+      preview_invite: { Args: { p_token: string }; Returns: Json };
       submit_rating: { Args: { p_round_id: string; p_price_huf: number; p_alcohol_tenths: number; p_liking: number }; Returns: Database['public']['Tables']['ratings']['Row'] };
     };
     Enums: { [_ in never]: never };

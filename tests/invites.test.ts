@@ -2,7 +2,7 @@ import { AuthApiError } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
 import type { Database } from '../src/lib/database.types';
-import { createInvitesApi, inviteErrorMessage, parseMembership } from '../src/invites/api';
+import { createInvitesApi, inviteErrorMessage, parseInvitePreview, parseMembership } from '../src/invites/api';
 import { inviteUrl, isInviteToken, nicknameError, readStoredInvite, storeInvite } from '../src/invites/model';
 import { authSession } from './fixtures/auth';
 
@@ -107,6 +107,20 @@ describe('vendégbelépés adapter', () => {
     await expect(api.join(token, 'Anna')).rejects.toThrow('ismered a borokat');
     rpc.mockResolvedValue({ data: null, error: { message: 'boom' } });
     await expect(api.join(token, 'Anna')).rejects.toThrow('nem igazolta vissza');
+  });
+  it('belépés előtt munkamenet nélkül lekéri a kóstoló címét, anonim felhasználó nélkül', async () => {
+    const { api, auth, rpc } = setup(false);
+    rpc.mockResolvedValue({ data: { title: 'Péntesti kóstoló', joinable: true }, error: null });
+    expect(await api.preview(token)).toEqual({ title: 'Péntesti kóstoló', joinable: true });
+    expect(rpc).toHaveBeenCalledExactlyOnceWith('preview_invite', { p_token: token });
+    expect(auth.signInAnonymously).not.toHaveBeenCalled();
+    rpc.mockResolvedValue({ data: null, error: { message: 'INVITE_INVALID' } });
+    await expect(api.preview(token)).rejects.toThrow('új linket');
+    await expect(api.preview('rövid')).rejects.toThrow('nem érvényes');
+    for (const data of [null, { title: 'x' }, { title: '', joinable: true }, { title: 'x'.repeat(101), joinable: true },
+      { title: 'x', joinable: 'yes' }]) {
+      expect(() => parseInvitePreview(data)).toThrow('nem értelmezhető');
+    }
   });
   it('a szerver válaszát futásidőben ellenőrzi', () => {
     expect(() => parseMembership({ ...membership, status: 'unknown' })).toThrow('nem értelmezhető');

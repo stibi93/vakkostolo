@@ -173,3 +173,33 @@ describe('join_game: vendégbelépés meghívóval', () => {
     expect((await join(other.token, 'Anna')).game_id).toBe(otherGame);
   });
 });
+
+describe('preview_invite: kóstoló azonosítása belépés előtt', () => {
+  async function preview(token: string) {
+    return (await db.query<{ data: Record<string, unknown> }>('select public.preview_invite($1) as data', [token])).rows[0].data;
+  }
+  it('bejelentkezés nélkül csak a címet és a belépés lehetőségét adja vissza', async () => {
+    const { token } = await issue();
+    await asUser('', 'anon');
+    expect(await preview(token)).toEqual({ title: 'Péntesti kóstoló', joinable: true });
+    expect(await asAdmin('select count(*)::int as n from public.participants')).toEqual([{ n: 0 }]);
+    expect(await asAdmin('select count(*)::int as n from auth.users')).toEqual([{ n: 4 }]);
+  });
+  it('hibás, lecserélt vagy lejárt linket egyformán elutasít', async () => {
+    const first = await issue();
+    const second = await issue();
+    await asUser('', 'anon');
+    for (const token of ['rovid', 'A'.repeat(43), first.token]) {
+      await expect(preview(token)).rejects.toThrow(/INVITE_INVALID/);
+    }
+    await asAdmin("update public.game_invites set expires_at = now() - interval '1 second', created_at = now() - interval '1 day'");
+    await asUser('', 'anon');
+    await expect(preview(second.token)).rejects.toThrow(/INVITE_INVALID/);
+  });
+  it('befejezett kóstolónál jelzi, hogy új játékos már nem léphet be', async () => {
+    const { token } = await issue();
+    await asAdmin("update public.games set status = 'finished'");
+    await asUser(guest);
+    expect(await preview(token)).toEqual({ title: 'Péntesti kóstoló', joinable: false });
+  });
+});

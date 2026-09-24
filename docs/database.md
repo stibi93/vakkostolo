@@ -86,6 +86,12 @@ Legfeljebb 50 résztvevő (`GAME_FULL`): visszaélés elleni korlát, nem termé
 Ismételt belépés nem hoz létre új résztvevőt és nem írja át a becenevet. A játék sorát
 zárolja, így a létszámkorlát párhuzamos belépésnél is tart.
 
+`preview_invite(p_token text) → { title, joinable }` (`202609240004_invite_preview.sql`):
+bejelentkezés nélkül (`anon`) is hívható, hogy a vendég a becenév megadása és az anonim
+felhasználó létrehozása előtt lássa, melyik kóstolóba hívták. Ugyanúgy `INVITE_INVALID`
+az ismeretlen, lecserélt és lejárt linkre; játékazonosítót, hostadatot, állapotot vagy
+boradatot nem ad ki, csak azt, hogy új játékos még beléphet-e.
+
 A 244 bites token mellett a találgatás nem reális, ezért külön DB-rate limit nincs;
 rövid kód bevezetésekor kötelező. Az anonim Auth IP-alapú limitje (közös Wi-Fi!)
 továbbra is az üzemeltetési ellenőrzés része. Nem tesztelt élesben: valódi Supabase

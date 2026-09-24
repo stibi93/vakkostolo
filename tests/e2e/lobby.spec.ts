@@ -27,6 +27,10 @@ function mockGame() {
           id: gameId, title: 'Péntesti kóstoló', status, round_seconds: 120, reveal_every: 2,
           created_at: new Date().toISOString(), wines: [{ position: 1, name: 'Titkos pincészet', price_huf: 4567, alcohol_tenths: 137 }],
         } });
+        if (path === '/rest/v1/rpc/preview_invite') {
+          return route.fulfill(route.request().postDataJSON().p_token === token
+            ? { json: { title: 'Péntesti kóstoló', joinable: true } } : { status: 400, json: { message: 'INVITE_INVALID' } });
+        }
         if (path === '/rest/v1/rpc/join_game') {
           const data = route.request().postDataJSON();
           if (data.p_token !== token) return route.fulfill({ status: 400, json: { message: 'INVITE_INVALID' } });
