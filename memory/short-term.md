@@ -1,5 +1,17 @@
 # Aktuális munkamenet
 
+## Commitolási állapot — 2026-09-24
+
+- A commitolási kérés közben a párhuzamos munkamenet létrehozta az `a1f04a0`
+  commitot a mainen: háttér, képek és az új galéria/játékmesteroldal alapjai.
+  Az élőkör négy korábbi commitja változatlanul megmaradt.
+- Az arculati folytatás továbbra is aktív: szélfuvallatok, gyorsabb animáció,
+  fotókomponens és stílusok változnak. Ezeket nem rögzítettem félkész állapotban.
+  A munkafát megőriztem; csak ezt az állapotjegyzetet commitolom külön.
+- A 199 tesztes és 30 célzott böngészős ellenőrzés a korábbi kész állapotra
+  vonatkozik. Az új galéria/játékmesteroldal lezárásához friss ellenőrzés kell.
+  Következő termékegység a körvezérlés. Ebben a munkamenetben push/deploy nincs.
+
 ## Első online kör elkészült — 2026-09-24
 
 - Mainbe integrálva, külön commitokban: szerveroldali indítás és privát snapshot
