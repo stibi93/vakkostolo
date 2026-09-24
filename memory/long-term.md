@@ -2,10 +2,13 @@
 
 ## Kezdőlapi képek szerepe — 2026-09-24
 
-- Felhasználói kérésre a kezdőlapi fotókhoz konkrét segítség és továbblépés
-  tartozzon, ne pusztán képcím. A jelenlegi blokk: borsor/szervezői útmutató,
-  vak előkészítés/nyitható ellenőrzőlista, kóstolás/demó. A mobil szöveges részek
-  teljes szélességűek. Indok: a képek a feladat megértését és elvégzését segítsék.
+- A felhasználó legújabb kérése szerint a három fotó infotainment szekció:
+  mit adhat a vakkóstolás érzékelésben, tanulásban és közös élményként.
+  A korábbi szervezési lépéseket felváltja a közérthető magyarázat, kipróbálható
+  ötlet és lenyitható kutatási háttér. Indok: a képhez érdemi tudás társuljon.
+- Tudományos állítás csak ellenőrzött eredeti kutatásra és annak mért kimenetére
+  támaszkodjon; vásárlási döntés nem azonos ízérzet-változással. Az app hatásossága
+  nem vizsgált. Források/korlátok: docs/tasting-insights.md.
 - A fejlécben csak a Vakkóstoló márkanév szerepeljen, ismétlődő kategórianév
   nélkül; a láblécben ne ismételjük a márkát.
 

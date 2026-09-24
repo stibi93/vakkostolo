@@ -84,7 +84,7 @@ test('a szüreti háttér képernyőn kívül megáll, visszatéréskor folytat�
   const artwork = page.locator('.harvest-artwork');
   await artwork.scrollIntoViewIfNeeded();
   await expect(artwork).toHaveClass(/harvest-running/);
-  await page.getByRole('link', { name: 'Demó kipróbálása' }).scrollIntoViewIfNeeded();
+  await page.locator('.insight-research summary').last().scrollIntoViewIfNeeded();
   await expect(artwork).not.toHaveClass(/harvest-running/);
   await expect.poll(() => page.locator('.harvest-vine').evaluate(element => getComputedStyle(element).animationPlayState)).toBe('paused');
   await artwork.scrollIntoViewIfNeeded();
@@ -102,27 +102,35 @@ test('a kezdőlapi fotó betöltődik, képhibánál is használható a belépé
   await expect(page.locator('.editorial-photo').first().locator('img')).toHaveCount(0);
   await expect(page.getByText('A kép nem érhető el.')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByRole('link', { name: 'Szervezői útmutató', exact: true }).click();
+  await page.getByRole('link', { name: 'Játékmestereknek', exact: true }).click();
   await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).click();
   await expect(page).toHaveURL(/\/host$/);
   await expect(page.locator('.home-ambient')).toHaveCount(0);
 });
 
-test('a képes útmutató ellenőrzőlistát és működő továbblépéseket ad', async ({ page }, testInfo) => {
+test('a képes ismeretterjesztő blokk kutatásai billentyűzettel elérhetők', async ({ page }, testInfo) => {
   await page.goto('/');
-  const guide = page.getByRole('region', { name: 'Készülj a kóstolóra' });
-  const checklist = guide.locator('summary');
-  await checklist.focus();
-  await page.keyboard.press('Enter');
-  await expect(guide.getByText('Számozd meg őket a kóstolás sorrendjében.')).toBeVisible();
+  const insights = page.getByRole('region', { name: 'Mit adhat a vakkóstolás?' });
+  await expect(insights.getByRole('heading', { level: 3 })).toHaveCount(3);
+  const sources = [
+    'https://pubmed.ncbi.nlm.nih.gov/18622887/',
+    'https://pubmed.ncbi.nlm.nih.gov/19501777/',
+    'https://doi.org/10.1017/age.2023.11',
+  ];
+  for (let i = 0; i < sources.length; i++) {
+    const detail = insights.locator('details').nth(i);
+    const source = detail.getByRole('link');
+    await expect(source).not.toBeVisible();
+    await detail.locator('summary').focus();
+    await page.keyboard.press('Enter');
+    await expect(source).toBeVisible();
+    await expect(source).toHaveAttribute('href', sources[i]);
+    await page.keyboard.press('Tab');
+    await expect(source).toBeFocused();
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await guide.screenshot({ path: testInfo.outputPath('guide-expanded.png') });
+  await insights.screenshot({ path: testInfo.outputPath('insights-expanded.png') });
+  await insights.locator('summary').first().focus();
   await page.keyboard.press('Enter');
-  await expect(guide.getByText('Számozd meg őket a kóstolás sorrendjében.')).not.toBeVisible();
-  await guide.getByRole('link', { name: 'Szervezői útmutató' }).click();
-  await expect(page.getByRole('heading', { name: 'Kóstoló szervezése' })).toBeVisible();
-  await page.goBack();
-  await guide.getByRole('link', { name: 'Demó kipróbálása' }).focus();
-  await page.keyboard.press('Enter');
-  await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
+  await expect(insights.locator('details').first().getByRole('link')).not.toBeVisible();
 });

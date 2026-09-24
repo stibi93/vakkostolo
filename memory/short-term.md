@@ -1,5 +1,18 @@
 # Aktuális munkamenet
 
+## Kezdőlapi infotainment elkészült — 2026-09-24
+
+- Új TastingInsights komponens: érzékelés/emlékezet, elvárások, társas vélemény.
+  Három meglévő fotó, rövid ismertetők, kipróbálható ötletek és lenyitható
+  kutatási háttér 3 eredeti forráslinkkel. Forrásellenőrzés: docs/tasting-insights.md.
+- A korábbi home-guide szervezési blokkot és CSS-t leváltotta. A párhuzamos
+  /join főgomb és belépési munka megmaradt; csak saját diff kerül a commitba.
+- Integrált check: 210/210, típusok/lint/build sikeres; app E2E 14/14.
+  Mobil/asztali nézet, lenyitott részletek, billentyűzet és képhiba ellenőrizve;
+  képek: test-results/tasting-insights/. Az alkalmazás hatásosságára nincs ígéret.
+- E kérés kész; következő termékegység továbbra is körvezérlés. A párhuzamos
+  belépési/Auth-munka saját átadás szerint folytatandó. Push/deploy nem történt.
+
 ## Kezdőlapi képek funkciója és feliratok — 2026-09-24
 
 - A közös és demófejléc külön VAKBORKÓSTOLÓ felirata, valamint a lábléc

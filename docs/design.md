@@ -25,13 +25,16 @@ Saját címkemotívumot használunk, nem más borászat arculatát másoljuk.
 A személyes `frontend-design` skill `references/wine-tasting.md` profilja
 ugyanezt az irányt rögzíti; más projektekre nem írja elő ezeket a színeket.
 
-## Kezdőlapi eligazítás
+## Kezdőlapi ismeretterjesztés
 
-A képek a kóstoló előkészítését segítik: borsor összeállítása szervezői
-útmutatóval, az eredet elrejtése nyitható ellenőrzőlistával, majd a demó
-kipróbálása. A korábbi külön lépéssor ezzel összevonva; nincs öncélú képcím.
-Mobilon a három képes magyarázat egymás alatt, teljes szélességben jelenik meg.
-A fejlécben nincs külön VAKBORKÓSTOLÓ felirat, a lábléc nem ismétli a márkanevet.
+A három fotó a vakkóstolás érzékelési és társas oldalát mutatja be:
+benyomások megfogalmazása és emlékezet, előzetes információ hatása, önálló
+vélemény és közös beszélgetés. Rövid magyarázat, kipróbálható ötlet és natív,
+billentyűzettel nyitható kutatási részletek tartoznak hozzájuk, eredeti forráslinkkel.
+A korábbi szervezési útmutatót váltja fel, nem új belépési vagy játékmenet.
+Források és állítási korlátok: [tasting-insights.md](tasting-insights.md).
+Mobilon a képes részek teljes szélességűek. A fejlécben nincs külön
+VAKBORKÓSTOLÓ felirat, a lábléc nem ismétli a márkanevet.
 
 ## Megvalósítás
 
