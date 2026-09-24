@@ -1,5 +1,16 @@
 # Aktuális munkamenet
 
+## Superadmin játékmester-belépés kész — 2026-09-24
+
+- /host: felhasználónév + jelszó + TOTP (hitelesítő app). Jog: `app_metadata`
+  superadmin szerep + aal2 szerveroldalon (0006); nyilvános jelszavas regisztráció
+  Auth hookkal tiltva (0007). Google-belépés csak játékosoknak a /join/:token oldalon.
+- Kezelés: `npm run superadmin -- create|reset-password|reset-mfa|revoke|list`.
+  A felhasználó saját superadminja és tartalékfiókja még nincs létrehozva.
+- Ellenőrzés: check 228/228, e2e 72/72, valódi helyi Supabase- és böngészőpróba.
+  Hiányzik: valódi Google-játékos kézi próba; hosztolt projektben hook + MFA beállítása.
+- Következő: eredmény e-mailben (roadmap 6.) később; termékben továbbra is körvezérlés.
+
 ## Kezdőlapi infotainment elkészült — 2026-09-24
 
 - Új TastingInsights komponens: érzékelés/emlékezet, elvárások, társas vélemény.
