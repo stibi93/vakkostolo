@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { HostControls } from '../schedule/HostControls';
+import { newRequestId } from '../schedule/model';
 import type { FormEvent } from 'react';
 import type { GameStatus, Rating } from '../domain/game';
 import { priceBucketLabel, validateRating } from '../domain/game';
@@ -20,9 +22,11 @@ export function LiveGamePanel({ api, gameId, showTitle = true, presentation = fa
   const snapshot = state.snapshot;
   const presence = usePresence(api.presence, gameId, snapshot);
   useEffect(() => { if (snapshot) onStatusChange?.(snapshot.game.status); }, [snapshot, onStatusChange]);
-  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!snapshot?.round} presence={presence}>
+  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!(snapshot?.round || snapshot?.pause)} presence={presence}>
     {snapshot && <RoundPanel key={`${snapshot.role}:${snapshot.selfParticipantId ?? 'host'}:${snapshot.round?.id ?? 'lobby'}`}
       api={api} snapshot={snapshot} refresh={refresh} presentation={presentation}
+      available={!state.stale && state.connection !== 'offline'} />}
+    {snapshot && <TastingExtras api={api} snapshot={snapshot} refresh={refresh} presentation={presentation}
       available={!state.stale && state.connection !== 'offline'} />}
   </LobbyView>;
 }
@@ -31,12 +35,13 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
 }) {
   const [now, setNow] = useState(() => performance.now());
   useEffect(() => { const timer = setInterval(() => setNow(performance.now()), 250); return () => clearInterval(timer); }, []);
-  const seconds = secondsLeft(snapshot, now);
+  const seconds = snapshot.round?.status === 'open' ? secondsLeft(snapshot, now) : 0;
   const round = snapshot.round;
   if (!round) return snapshot.role === 'host' && snapshot.game.status === 'lobby' && !presentation
     ? <StartRound key={snapshot.game.version} api={api} snapshot={snapshot} refresh={refresh} available={available} /> : null;
+  if (round.status === 'revealed') return null;
   const open = snapshot.game.status === 'tasting' && round.status === 'open' && seconds > 0;
-  return <section className="live-round" aria-label="Aktuális kör">
+  return <section className={`live-round${snapshot.role === 'player' ? ' live-round-player' : ''}`} aria-label="Aktuális kör">
     <div className="live-round-heading">
       <div><p className="eyebrow">AKTUÁLIS TÉTEL</p><h3>{String(round.position).padStart(2, '0')}. tétel</h3></div>
       <span className="live-timer" role="timer" aria-label="Hátralévő idő">
@@ -47,20 +52,36 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
       ? <LiveRatingForm api={api} snapshot={snapshot} refresh={refresh}
           enabled={available && open && round.canSubmit} />
       : <p className="small-note">{open ? 'A játékosok a határidőig módosíthatják a tippjüket.'
-        : 'A következő kör és a felfedés vezérlése még nem érhető el.'}</p>}
+        : 'A lenti vezérlőn indíthatod a következő lépést vagy a blokk felfedését.'}</p>}
   </section>;
 }
-// getRandomValues also works on same-network HTTP; randomUUID requires a secure context.
-function requestId() {
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  bytes[6] = (bytes[6] & 15) | 64; bytes[8] = (bytes[8] & 63) | 128;
-  const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
-  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+function TastingExtras({ api, snapshot, refresh, available, presentation }: {
+  api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean; presentation: boolean;
+}) {
+  const [now, setNow] = useState(() => performance.now());
+  useEffect(() => { const timer = setInterval(() => setNow(performance.now()), 1000); return () => clearInterval(timer); }, []);
+  const pause = snapshot.pause;
+  const remaining = pause?.endsAt ? Math.max(0, Math.ceil((Date.parse(pause.endsAt)-snapshot.serverTime-Math.max(0,now-snapshot.receivedAt))/1000)) : null;
+  return <>
+    {pause && <section className="live-break" aria-label="Szünet">
+      <p className="eyebrow">SZÜNET / ÁTVEZETÉS</p><h3>{pause.title}</h3>
+      <p className="live-break-message">{pause.message}</p>
+      {remaining !== null && <p role="timer" aria-label="Szünetből hátralévő idő" className="live-timer">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</p>}
+      <p className="small-note">A folytatást a játékmester indítja.</p>
+    </section>}
+    {snapshot.game.status === 'finished' && <h3>A kóstoló befejeződött.</h3>}
+    {snapshot.role === 'host' && !presentation && api.schedule && <HostControls api={api.schedule} snapshot={snapshot} refresh={refresh} available={available} secondsLeft={secondsLeft(snapshot,now)} />}
+    {!!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
+      <summary>Felfedett borok ({snapshot.revealed.length})</summary><ol className="live-revealed">
+        {snapshot.revealed.map(w => <li key={w.id}><h3>{String(w.position).padStart(2,'0')}. {w.name}</h3>
+          <p>{w.priceHuf.toLocaleString('hu-HU')} Ft · {(w.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p></li>)}
+      </ol></details>}
+  </>;
 }
 function StartRound({ api, snapshot, refresh, available }: {
   api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean;
 }) {
-  const [id] = useState(requestId);
+  const [id] = useState(newRequestId);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = useRef(false), mounted = useRef(false);
@@ -73,7 +94,7 @@ function StartRound({ api, snapshot, refresh, available }: {
     finally { busy.current = false; if (mounted.current) { setPending(false); void refresh(); } }
   }
   return <div className="live-start">
-    <p>Ha mindenki készen áll, indítsd el az első tételt. A beküldési idő azonnal elindul.</p>
+    <p>Ha mindenki készen áll, indítsd el a mentett menet első lépését: a legelső bort vagy szünetet.</p>
     <button className="button-primary" disabled={pending || !available} onClick={() => void start()}>
       {pending ? 'Indítás…' : 'Első kör indítása'}</button>
     {error && <p className="auth-message" role="alert">{error}</p>}

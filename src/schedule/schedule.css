@@ -1,0 +1,29 @@
+.schedule-section { margin: 32px 0; padding: 24px 0; border-block: 1px solid var(--line); }
+.schedule-heading, .schedule-step-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.schedule-heading h3 { margin: 0; font: 600 28px var(--display); }
+.schedule-heading .eyebrow { margin-top: 0; }
+.schedule-fields { border: 0; padding: 0; margin: 20px 0 0; min-width: 0; }
+.schedule-fields > legend { font-weight: 600; margin-bottom: 16px; }
+.schedule-list { padding: 0; margin: 0; list-style: none; }
+.schedule-step { padding: 20px; border: 1px solid var(--line); border-left: 4px solid var(--accent); background: var(--paper); margin-bottom: 16px; }
+.schedule-step-break { border-left-color: var(--ink); background: var(--blue); }
+.schedule-step-heading { margin-bottom: 16px; }
+.schedule-step-heading strong { font: 500 14px 'IBM Plex Mono', monospace; }
+.schedule-order, .schedule-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.schedule-order button { min-width: 44px; min-height: 44px; padding: 8px 12px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); cursor: pointer; }
+.schedule-order button:disabled { opacity: .4; cursor: default; }
+.schedule-section label, .schedule-time label { display: grid; gap: 8px; margin-bottom: 16px; font-weight: 500; }
+.schedule-section input, .schedule-section textarea, .schedule-time input { width: 100%; min-width: 0; padding: 12px; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; }
+.schedule-section textarea { resize: vertical; }
+.schedule-history { margin: 20px 0; padding: 16px; background: var(--paper); }
+.schedule-history summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.host-controls { padding: 24px 0; border-block: 1px solid var(--line); }
+.schedule-time { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.schedule-time label { margin: 0; flex: 1 1 220px; }
+.live-break { padding: clamp(24px,5vw,56px); margin: 24px 0; background: var(--paper); border-block: 2px solid var(--accent); }
+.live-break h3 { font: 600 clamp(32px,5vw,52px)/1.1 var(--display); overflow-wrap: anywhere; }
+.live-break-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.live-revealed { padding: 0; list-style: none; }
+.live-revealed li { border-top: 1px solid var(--line); padding: 16px 0; }
+@media(min-width:760px) { .schedule-wine-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } }
+.schedule-section textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }

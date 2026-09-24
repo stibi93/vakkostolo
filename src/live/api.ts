@@ -1,3 +1,4 @@
+import { createScheduleApi } from '../schedule/api';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import { validateRating } from '../domain/game';
@@ -40,7 +41,25 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
   }
   const ownRating = row.own_rating === null ? null : round ? parseSavedRating(row.own_rating, round.id) : invalid();
   if (ownRating && base.role !== 'player') return invalid();
-  return { ...base, round, ownRating, receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
+  let pause: GameSnapshot['pause'];
+  if (row.break !== undefined) {
+    const b = record(row.break);
+    if (!isUuid(b.id) || typeof b.title !== 'string' || typeof b.message !== 'string' ||
+      b.title.length > 100 || b.message.length > 2000 || round !== null || base.game.status !== 'intermission') return invalid();
+    pause = { id: b.id, title: b.title, message: b.message, endsAt: b.ends_at === null ? null : timestamp(b.ends_at) };
+  }
+  let revealed: GameSnapshot['revealed'];
+  if (row.revealed !== undefined) {
+    if (!Array.isArray(row.revealed) || row.revealed.length > 12) return invalid();
+    revealed = row.revealed.map(value => {
+      const w = record(value);
+      if (!isUuid(w.id) || typeof w.name !== 'string' || !Number.isInteger(w.position) || Number(w.position) < 1 || Number(w.position) > 12 ||
+        !Number.isInteger(w.price_huf) || Number(w.price_huf) < 1 || Number(w.price_huf) > 1000000 ||
+        !Number.isInteger(w.alcohol_tenths) || Number(w.alcohol_tenths) < 0 || Number(w.alcohol_tenths) > 250) return invalid();
+      return { id: w.id, name: w.name, position: Number(w.position), priceHuf: Number(w.price_huf), alcoholTenths: Number(w.alcohol_tenths) };
+    });
+  }
+  return { ...base, round, ownRating, ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
 }
 function fromServer(error: { message: string; code?: string }, status?: number): LiveError {
   const accessLost = ['AUTH_REQUIRED', 'GAME_NOT_FOUND', 'NOT_A_PARTICIPANT'].includes(error.message) || status === 401 || status === 403;
@@ -67,6 +86,7 @@ export function createLiveApi(client: SupabaseClient<Database>): LiveApi {
   return {
     watch: createLobbyApi(client).watch,
     presence: createPresenceApi(client),
+    schedule: createScheduleApi(client),
     async get(gameId) {
       if (!isUuid(gameId)) throw new LiveError('A kóstoló címe érvénytelen.', true);
       const began = performance.now();

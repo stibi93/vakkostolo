@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
+import { ScheduleEditor } from '../schedule/ScheduleEditor';
 import { CreateGameForm } from './CreateGameForm';
 import { gameErrorMessage } from './api';
 import { gameStatusLabels } from './model';
@@ -21,7 +22,7 @@ function useGameQuery<T>(load: () => Promise<T>) {
       (error: unknown) => { if (active) setState({ status: 'error', message: gameErrorMessage(error) }); });
     return () => { active = false; };
   }, [load, attempt]);
-  return { state, retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
+  return { state, refresh: () => setAttempt(value => value+1), retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
 }
 
 export function HostWorkspace({ api, invites, lobby }: { api: GamesApi; invites: InvitesApi; lobby: LiveApi }) {
@@ -48,7 +49,7 @@ function HostGameList({ api }: { api: GamesApi }) {
 }
 function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invites: InvitesApi; lobby: LiveApi; gameId: string }) {
   const load = useCallback(() => api.get(gameId), [api, gameId]);
-  const { state, retry } = useGameQuery(load);
+  const { state, retry, refresh } = useGameQuery(load);
   const [statusOverride, setStatusOverride] = useState<GameStatus | null>(null);
   const location = useLocation();
   return <section className="game-section" aria-labelledby="saved-game-title">
@@ -61,6 +62,7 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
       <h2 id="saved-game-title" className="saved-game-title">{state.data.title}</h2>
       <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds} másodperc/bor · Felfedés {state.data.revealEvery} boronként</p>
       <LiveGamePanel showTitle={false} api={lobby} gameId={gameId} onStatusChange={setStatusOverride} />
+      {lobby.schedule && <ScheduleEditor api={lobby.schedule} gameId={gameId} onSaved={refresh} />}
       <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok nem láthatók a játékosoknak felfedés előtt.</p>
       <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.position}>
         <h3>{wine.position}. {wine.name}</h3>
@@ -68,7 +70,6 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
       </li>)}</ol>
       <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
         onStatusChange={setStatusOverride} />
-      <p>A boradatok mentve vannak. A borok szerkesztése még nem érhető el.</p>
     </>}
   </section>;
 }

@@ -61,3 +61,14 @@ it('RPC-k típusos argumentumokat küldenek; hibás értékhez nincs hálózati 
   await expect(api.submit(round, { priceBucket: 0, alcoholTenths: 135, liking: 8 })).rejects.toThrow();
   expect(fetch).toHaveBeenCalledTimes(4);
 });
+it('aktuális szünet és felfedett adatok célzott projekciója; rejtett extra mezők nem jutnak tovább', () => {
+  const value={...raw,game:{...raw.game,status:'intermission'},round:null,
+    break:{id:round,title:'Szünet',message:'Víz és kenyér',ends_at:null,future:'secret'},
+    revealed:[{id:round,position:1,name:'Felfedett bor',price_huf:4500,alcohol_tenths:130,answers:['secret']}]};
+  const result=parseGameSnapshot(value,game);
+  expect(result.pause).toEqual({id:round,title:'Szünet',message:'Víz és kenyér',endsAt:null});
+  expect(result.revealed?.[0].name).toBe('Felfedett bor');
+  expect(JSON.stringify(result)).not.toContain('secret');
+  expect(()=>parseGameSnapshot({...value,round:raw.round},game)).toThrow();
+  expect(()=>parseGameSnapshot({...value,break:{...value.break,ends_at:'invalid'}},game)).toThrow();
+});

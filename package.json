@@ -23,7 +23,8 @@
     "db:types:check": "node scripts/generate-db-types.mjs --check",
     "test:lobby:local": "node scripts/test-lobby-local.mjs",
     "test:presence:local": "node scripts/test-presence-local.mjs",
-    "test:live:local": "node scripts/test-live-local.mjs"
+    "test:live:local": "node scripts/test-live-local.mjs",
+    "test:schedule:local": "node scripts/test-schedule-local.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",

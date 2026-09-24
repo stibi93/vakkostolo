@@ -1,5 +1,31 @@
 # Aktuális munkamenet
 
+## Szerkeszthető kóstolómenet és élő vezérlés kész — 2026-09-24
+
+- Host → Borok és szünetek → Menet szerkesztése: mentett draft és futó kóstoló
+  hátralévő borainak hozzáadása/törlése/sorrendje/adatainak/idejének módosítása.
+  Egyedileg elhelyezhető szünetek, cím/szöveg, opcionális óra; mindig kézi folytatás.
+- Élő vezérlés: idő rövidítése/hosszabbítása a mentéstől, korai zárás, következő
+  lépés, blokkos boradatfelfedés és befejezés. A lejárt kör nem nyitható újra.
+  A megkezdett boradatok és tippek megmaradnak. Játékos: egyetlen sticky óra,
+  időállításkor piszkozatmegőrzés; lezáráskor 00:00 és tiltott beküldés.
+- 0011 migráció privát menettel/kérésnaplóval; host+aal2, verzió és játék→kör
+  sorzár, idempotens műveletek. Játékosnak csak aktuális szünet és felfedett borok.
+  Helyi Supabase-en alkalmazva. A másik worktree fotós 0010 száma szabadon maradt;
+  annak integrációja `migration up --local --include-all`-t és típusgenerálást kér.
+- `npm run check`: 257/257, típusok/lint/build sikeres. Érintett games/live/schedule
+  E2E: 28/28; utolsó órakijelzés-javítás után a két élő mobil/asztali próba 2/2
+  és új build sikeres. Renderelt editor, óra és szünet átnézve; képek:
+  `test-results/tasting-schedule-final/`, `test-results/tasting-schedule-clock/`.
+- `npm run test:schedule:local`: valódi helyi Auth/Realtime, párhuzamos mentés és
+  mentés–lezárás versengés, élő átrendezés, saját tipp megőrzése, időváltozás,
+  szünet és befejezés sikeres; saját szintetikus adatok törölve.
+- A 5173-as fejlesztői szerver elérhető, a 4457/4458 tesztszerverek leálltak.
+  Fizikai telefonpróba és hosztolt deploy nem volt; commit nem készült.
+  Következő termékegység: szerverpontozás/ranglista. A borfotó-agent külön
+  worktree-ben folytatja. Dokumentáció: docs/tasting-schedule.md;
+  együttműködési részletek: memory/tasting-schedule-handoff.md.
+
 ## Tippelőlap: árkategóriák, alkoholléptető, tetszéskártyák kész — 2026-09-24
 
 - `main` `59f86c7`: 0009 migráció (`ratings.price_bucket` 1–8, új `submit_rating`

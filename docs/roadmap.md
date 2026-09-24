@@ -9,7 +9,7 @@ várakozás nincs bennük. AI-támogatott fejlesztés mellett is szükséges ell
 | 0. Projektalap | termékterv, architektúra, frontend-váz, CI, DB-alap és tesztek | 8–12 | helyi alap kész |
 | 1. Fejlesztői AI és memória | AGENTS, skillek, rövid/hosszú memória, átadás | 3–5 | alap kész |
 | 2. Belépés és váró | host Auth, vendég Auth, meghívó/QR, tagság, visszatérés | 8–12 | helyi Auth, meghívó és közös váró kész; fizikai eszközpróba hátravan |
-| 3. Élő játék | host szerkesztő, RPC állapotgép, Realtime, időzítés, értékelő | 14–22 | tervezett |
+| 3. Élő játék | host szerkesztő, RPC állapotgép, Realtime, időzítés, értékelő | 14–22 | helyi implementáció és valódi Supabase-próba kész; telefonos pilot hátravan |
 | 4. Felfedés és eredmények | blokkos felfedés, szerverpontozás, kivetítő, ranglista | 10–16 | tervezett |
 | 5. Pilot és kiadás | jogosultsági integráció, eszközök, hálózati hibák, deploy, mentés | 10–16 | tervezett |
 | 6. Eredmény e-mailben | kóstoló végén a Google-fiókos (vagy e-mailt megadó) játékos kérheti az eredményét; külön hozzájárulás, e-mail-szolgáltató | 3–5 | tervezett |
@@ -34,8 +34,8 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Kivetítő váró | `/present/:gameId`: cím, QR, link, becenevek, boradat nélkül | kész (host böngészőjének másik lapja) |
 | Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | implementáció és helyi Supabase-próba kész; fizikai eszközök hátravannak |
 | Első élő kör és válaszadás | idempotens indítás, szerverhatáridő, saját mentett tipp és visszatérés | helyi implementáció és valódi Supabase-próba kész |
-| További körvezérlés | korai zárás, hosszabbítás, következő kör és blokkhatár | következő egység |
-| Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | tervezett |
+| Menetszerkesztés és körvezérlés | hátralévő borok/szünetek, egyedi szöveg, korai zárás, időállítás, következő lépés és blokkhatár | helyi implementáció, mobil/asztali E2E és valódi Supabase-próba kész |
+| Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | blokkos adatfelfedés kész; pontozás és ranglista következik |
 
 Az utolsó két egység további, külön ellenőrizhető szeletekre bontandó a megvalósításkor.
 A belépés/váró mérföldkő csak valódi Supabase Auth és több kliens integrációs
@@ -50,8 +50,9 @@ meghívókezelés, QR-generálás és a demo helyett valódi adatadapter szüks�
 A host Auth és a játék létrehozásának helyi implementációja elkészült.
 A meghívó/QR, anonim vendégbelépés és közös váró snapshot/Realtime elkészült.
 Az első kör szerveroldali indítása és a saját tippek beküldése is elkészült.
-A következő egység a korai körzárás, hosszabbítás és a következő tétel indítása,
-a blokkos felfedéshez szükséges állapotátmenetekkel.
+A menetszerkesztés, korai körzárás, időállítás, egyedi szünetek, következő tétel
+és blokkos adatfelfedés elkészült. A következő egység a szerveroldali pontozás
+és a ranglista; részletek: [szerkeszthető menet](tasting-schedule.md).
 A fizikai telefonos és hosztolt integráció külön ellenőrzési kapu.
 A külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
 Az adapter a migrációból generált Supabase TypeScript-típusokat használja;

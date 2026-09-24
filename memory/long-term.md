@@ -1,5 +1,20 @@
 # Tartós projektmemória
 
+## Futás közben szerkeszthető menet — 2026-09-24
+
+- Felhasználói kérésre a még hátralévő borok sorrendje, adatai és időkerete a
+  kóstoló elindítása után is szerkeszthető. Ez felülírja a korábbi teljes menetet
+  induláskor zároló terméktervet. A megkezdett bor és már leadott tippek megmaradnak.
+- A szünet önálló, tetszőleges helyre illeszthető lépés saját címmel/szöveggel,
+  opcionális idővel. Nem az N boronkénti felfedési szabály része. Folytatás mindig
+  tudatos hostművelet; az óra nem indít magától bort.
+- A futó kör új hátralévő ideje a mentéstől számít (30–1800 s). Lejárt kör továbbra
+  sem nyitható újra. A játékos egyetlen, csendes sticky órát lát, a helyi piszkozat
+  ugyanazon round ID melletti frissítéskor megmarad.
+- Privát menettábla, idempotens request ID, verzióellenőrzés és game→round zár
+  védi a párhuzamos hostmódosításokat. Jövőbeli szünet szövege is csak a hosté;
+  játékoshoz az aktív átvezetés és az explicit felfedett borok kerülhetnek.
+
 ## Háttéranimáció minden oldalon — 2026-09-24
 
 - A felhasználó minden oldalon a kezdőlapi hátteret kéri, az aktív játékot is

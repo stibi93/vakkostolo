@@ -13,3 +13,10 @@
 
 .player-session .lobby-panel { margin-top: 0; padding-top: 0; border-top: 0; }
 .player-session .lobby-panel > h2 { font-family: var(--display); font-size: 30px; margin-top: 0; }
+
+/* One quiet clock stays in the reading flow while the player scrolls the form. */
+.live-round-player .live-round-heading { position: sticky; top: 8px; z-index: 5; padding: 12px 16px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--accent); }
+.live-round-player .live-round-heading .eyebrow { display: none; }
+.live-round-player .live-round-heading h3 { font-size: 21px; }
+.live-round-player .live-timer { font: 500 21px/1.2 'IBM Plex Mono', monospace; color: var(--accent); }
+.live-round-player :is(input, button, legend) { scroll-margin-top: 80px; }

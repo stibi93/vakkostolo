@@ -180,3 +180,9 @@ A `ratings.price_bucket` (1–8) tárolja a tippet; a régi `price_huf` nullázh
 inkluzív: 1000, 2000, 3000, 4000, 6000, 8000, 10 000 Ft, fölötte 8); kliens nem
 hívhatja. A `games.scoring_version` 1 vagy 2 lehet, alapértéke 2. A
 `get_game_snapshot` `own_rating` mezője `price_bucket`-et ad `price_huf` helyett.
+
+## Szerkeszthető menet
+
+A 0011 migráció host-only privát menettáblát és idempotens szerkesztési, időállítási,
+körváltási és felfedési RPC-ket vezet be. Részletek és korlátok:
+[szerkeszthető kóstolómenet](tasting-schedule.md).
