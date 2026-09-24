@@ -1,5 +1,14 @@
 # Tartós projektmemória
 
+## Kezdőlapi képek szerepe — 2026-09-24
+
+- Felhasználói kérésre a kezdőlapi fotókhoz konkrét segítség és továbblépés
+  tartozzon, ne pusztán képcím. A jelenlegi blokk: borsor/szervezői útmutató,
+  vak előkészítés/nyitható ellenőrzőlista, kóstolás/demó. A mobil szöveges részek
+  teljes szélességűek. Indok: a képek a feladat megértését és elvégzését segítsék.
+- A fejlécben csak a Vakkóstoló márkanév szerepeljen, ismétlődő kategórianév
+  nélkül; a láblécben ne ismételjük a márkát.
+
 ## Értékelési szempontok a bemutatkozásban — 2026-09-24
 
 - A felhasználó az ár, alkoholfok és tetszés szempontjait még változtatni tervezi.

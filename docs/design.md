@@ -25,6 +25,14 @@ Saját címkemotívumot használunk, nem más borászat arculatát másoljuk.
 A személyes `frontend-design` skill `references/wine-tasting.md` profilja
 ugyanezt az irányt rögzíti; más projektekre nem írja elő ezeket a színeket.
 
+## Kezdőlapi eligazítás
+
+A képek a kóstoló előkészítését segítik: borsor összeállítása szervezői
+útmutatóval, az eredet elrejtése nyitható ellenőrzőlistával, majd a demó
+kipróbálása. A korábbi külön lépéssor ezzel összevonva; nincs öncélú képcím.
+Mobilon a három képes magyarázat egymás alatt, teljes szélességben jelenik meg.
+A fejlécben nincs külön VAKBORKÓSTOLÓ felirat, a lábléc nem ismétli a márkanevet.
+
 ## Megvalósítás
 
 A közös tokenek a `src/styles.css`-ben, a kezdőlap és belépés stílusai a

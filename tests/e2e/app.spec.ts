@@ -9,6 +9,8 @@ test('kezdőlap → próbakóstoló → újratöltés → kezdőlap', async ({ p
   await expect(page.getByRole('heading', { name: 'Vakborkóstoló, telefonon.' })).toBeVisible();
   await expect(page.getByText('A közös online kóstoló még készül.', { exact: false })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Játékmestereknek' })).toBeVisible();
+  await expect(page.locator('header').getByText('VAKBORKÓSTOLÓ', { exact: true })).toHaveCount(0);
+  await expect(page.locator('footer')).toHaveCount(0);
   expect(demoRequests).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.keyboard.press('Tab');
@@ -19,6 +21,8 @@ test('kezdőlap → próbakóstoló → újratöltés → kezdőlap', async ({ p
   await page.getByRole('link', { name: 'Próbakóstoló megnyitása' }).click();
   await expect(page).toHaveURL(/\/demo$/);
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
+  await expect(page.locator('header').getByText('VAKBORKÓSTOLÓ', { exact: true })).toHaveCount(0);
+  await expect(page.locator('footer')).not.toContainText('Vakkóstoló');
   await page.reload();
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
   await page.getByRole('link', { name: 'Vakkóstoló, kezdőlap' }).click();
@@ -80,7 +84,7 @@ test('a szüreti háttér képernyőn kívül megáll, visszatéréskor folytat�
   const artwork = page.locator('.harvest-artwork');
   await artwork.scrollIntoViewIfNeeded();
   await expect(artwork).toHaveClass(/harvest-running/);
-  await page.locator('footer').scrollIntoViewIfNeeded();
+  await page.getByRole('link', { name: 'Demó kipróbálása' }).scrollIntoViewIfNeeded();
   await expect(artwork).not.toHaveClass(/harvest-running/);
   await expect.poll(() => page.locator('.harvest-vine').evaluate(element => getComputedStyle(element).animationPlayState)).toBe('paused');
   await artwork.scrollIntoViewIfNeeded();
@@ -98,8 +102,27 @@ test('a kezdőlapi fotó betöltődik, képhibánál is használható a belépé
   await expect(page.locator('.editorial-photo').first().locator('img')).toHaveCount(0);
   await expect(page.getByText('A kép nem érhető el.')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByRole('link', { name: 'Játékmestereknek', exact: true }).click();
+  await page.getByRole('link', { name: 'Szervezői útmutató', exact: true }).click();
   await page.getByRole('link', { name: 'Játékmesteri belépés', exact: true }).click();
   await expect(page).toHaveURL(/\/host$/);
   await expect(page.locator('.home-ambient')).toHaveCount(0);
+});
+
+test('a képes útmutató ellenőrzőlistát és működő továbblépéseket ad', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const guide = page.getByRole('region', { name: 'Készülj a kóstolóra' });
+  const checklist = guide.locator('summary');
+  await checklist.focus();
+  await page.keyboard.press('Enter');
+  await expect(guide.getByText('Számozd meg őket a kóstolás sorrendjében.')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await guide.screenshot({ path: testInfo.outputPath('guide-expanded.png') });
+  await page.keyboard.press('Enter');
+  await expect(guide.getByText('Számozd meg őket a kóstolás sorrendjében.')).not.toBeVisible();
+  await guide.getByRole('link', { name: 'Szervezői útmutató' }).click();
+  await expect(page.getByRole('heading', { name: 'Kóstoló szervezése' })).toBeVisible();
+  await page.goBack();
+  await guide.getByRole('link', { name: 'Demó kipróbálása' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
 });

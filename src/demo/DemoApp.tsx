@@ -89,7 +89,6 @@ export function DemoApp() {
       <a className="skip-link" href="#main">Ugrás a tartalomhoz</a>
       <header className="topbar">
         <Link className="brand" to="/" aria-label="Vakkóstoló, kezdőlap">Vakkóstoló</Link>
-        <span className="topbar-note">VAKBORKÓSTOLÓ</span>
         <span className="demo-badge"><span aria-hidden="true" />PRÓBAKÓSTOLÓ</span>
       </header>
 
@@ -174,7 +173,7 @@ export function DemoApp() {
         <p className="notice" role="status">{notice}</p>
         <div className="demo-disclaimer"><span className="demo-label">PRÓBAÜZEM</span><p>Ez egy helyi demó: a három nézet ugyanazt a játékot mutatja. Az online játékot külön, a Játékmesteri belépésnél készítheted elő. Itt az oldal frissítése törli a tippeket és a saját képeket.</p></div>
       </main>
-      <footer><span className="footer-wordmark">Vakkóstoló</span><a href="#main">Vissza az elejére ↑</a></footer>
+      <footer><a href="#main">Vissza az elejére ↑</a></footer>
     </div>
   );
 }

@@ -1,5 +1,19 @@
 # Aktuális munkamenet
 
+## Kezdőlapi képek funkciója és feliratok — 2026-09-24
+
+- A közös és demófejléc külön VAKBORKÓSTOLÓ felirata, valamint a lábléc
+  márkaneve eltávolítva. Az üres közös lábléc megszűnt; a demó vissza-linkje megmaradt.
+- A képes blokk most szervezői útmutatóhoz vezet, helyben nyitható előkészítési
+  ellenőrzőlistát ad, illetve a demót nyitja meg. Az ismétlődő lépéssor megszűnt.
+  Kategóriafelsorolás nem került vissza; a képek és a párhuzamos arculati munka megmaradtak.
+- Check 199/199, típusok/lint/build és app+demo E2E 20/20 sikeres. Új navigáció,
+  billentyűzetes listanyitás, képhiba és mobil túlcsordulás ellenőrizve.
+  Mobil/asztali kezdőlap és nyitott asztali lista renderelve, átnézve:
+  test-results/home-purpose/. Következő termékegység továbbra is a körvezérlés.
+- A külön agent fotóigazítási és dokumentációs módosításai megmaradtak;
+  a mostani commit kizárólag e feladat saját diffjét tartalmazza. Push/deploy nincs.
+
 ## Bemutatkozó szövegek és arculati commit — 2026-09-24
 
 - A meglévő arculati folytatás felhasználói kérésre rögzítve: `7f82aa8`

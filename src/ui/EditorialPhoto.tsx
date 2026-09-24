@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import './editorial.css';
 
 export function EditorialPhoto({ src, alt, number, caption, eager = false, width = 1086, height = 1448 }: {
-  src: string; alt: string; number: string; caption: string; eager?: boolean; width?: number; height?: number;
+  src: string; alt: string; number: string; caption: ReactNode; eager?: boolean; width?: number; height?: number;
 }) {
   const [failed, setFailed] = useState(false);
   return <figure className="editorial-photo">

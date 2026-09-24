@@ -1,0 +1,19 @@
+.home-guide { border-top: 0; }
+.home-guide .editorial-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.home-guide .editorial-grid > :nth-child(2) { margin-top: 0; }
+.home-guide .editorial-photo-media { aspect-ratio: 4 / 3; }
+.home-guide .editorial-photo figcaption { display: block; padding: 24px 0; font: inherit; }
+.home-guide-copy h3 { font-size: clamp(23px, 2.2vw, 29px); }
+.home-guide-copy p { font-size: 15px; line-height: 1.7; color: var(--muted); margin: 0 0 14px; }
+.home-guide-action, .home-guide-checklist summary { min-height: 44px; color: var(--accent); font-size: 14px; font-weight: 600; }
+.home-guide-action { display: inline-flex; align-items: center; gap: 12px; }
+.home-guide-checklist summary { cursor: pointer; padding: 12px 0; line-height: 1.5; }
+.home-guide-checklist summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.home-guide-checklist ul { margin: 8px 0 0; padding-left: 20px; font-size: 14px; line-height: 1.7; }
+.home-guide-checklist li + li { margin-top: 8px; }
+.home-guide-copy .home-guide-note { font-size: 12px; margin: 10px 0 0; }
+@media (max-width: 700px) {
+  .home-guide .editorial-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .home-guide .editorial-photo-media { aspect-ratio: 3 / 2; }
+  .home-guide .editorial-photo figcaption { padding: 20px 0; }
+}
