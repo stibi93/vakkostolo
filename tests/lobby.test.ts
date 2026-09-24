@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
 import type { Database } from '../src/lib/database.types';
 import { createLobbyApi, LobbyError, parseLobbySnapshot } from '../src/lobby/api';
@@ -88,4 +88,28 @@ describe('váró frissítés és visszatérés', () => {
     s.changed(); const listener = vi.fn(); s.store.subscribe(listener); s.store.dispose(); pending.resolve(snapshot); await tick();
     expect(listener).not.toHaveBeenCalled();
   });
+});
+
+it('azonos Auth-fiók háttérből visszatérése nem töröl piszkozatot; fiókváltás és kilépés igen', () => {
+  vi.useFakeTimers();
+  try {
+    let auth!: (event: string, session: { user: { id: string } } | null) => void;
+    const channel = { on: vi.fn().mockReturnThis(), subscribe: vi.fn().mockReturnThis() };
+    const unsubscribe = vi.fn();
+    const client = { channel: () => channel, removeChannel: vi.fn(), auth: {
+      onAuthStateChange(callback: typeof auth) { auth = callback; return { data: { subscription: { unsubscribe } } }; },
+    } } as unknown as SupabaseClient<Database>;
+    const changed = vi.fn(), sessionChanged = vi.fn();
+    const stop = createLobbyApi(client).watch(id, changed, vi.fn(), sessionChanged);
+    auth('INITIAL_SESSION', { user: { id: member } });
+    auth('SIGNED_IN', { user: { id: member } });
+    auth('TOKEN_REFRESHED', { user: { id: member } });
+    vi.runAllTimers();
+    expect(changed).toHaveBeenCalledTimes(2); expect(sessionChanged).not.toHaveBeenCalled();
+    auth('SIGNED_IN', { user: { id } }); vi.runAllTimers();
+    expect(sessionChanged).toHaveBeenCalledTimes(1);
+    auth('SIGNED_OUT', null); vi.runAllTimers(); expect(sessionChanged).toHaveBeenCalledTimes(2);
+    stop(); auth('SIGNED_IN', { user: { id } }); vi.runAllTimers();
+    expect(sessionChanged).toHaveBeenCalledTimes(2); expect(unsubscribe).toHaveBeenCalledOnce();
+  } finally { vi.useRealTimers(); }
 });

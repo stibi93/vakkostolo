@@ -86,6 +86,7 @@ test('host indít, két vendég automatikusan értékel; mentés, módosítás, 
     await expect(one.getByText('A szerver által mentett tipped')).toBeVisible();
     await expect(two.getByText('A szerver által mentett tipped')).toHaveCount(0);
     await fill(one, '6000'); f.hub.change(gameId, 'rounds');
+    await one.evaluate(() => { document.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('focus')); });
     await expect(one.getByLabel('Becsült palackár (Ft)')).toHaveValue('6000');
     await one.getByRole('button', { name: 'Tipp módosítása' }).click();
     await expect.poll(() => f.saved.get(1)?.price_huf).toBe(6000);

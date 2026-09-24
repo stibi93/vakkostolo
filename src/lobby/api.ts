@@ -73,10 +73,17 @@ export function createLobbyApi(client: SupabaseClient<Database>): LobbyApi {
           connection(status === 'SUBSCRIBED' ? 'live' : 'fallback');
           if (status === 'SUBSCRIBED') notify();
         });
-      const { data } = client.auth.onAuthStateChange((event) => {
+      let userId: string | null | undefined;
+      const { data } = client.auth.onAuthStateChange((event, session) => {
+        const nextUserId = session?.user.id ?? null;
+        const sameUser = userId !== undefined && userId === nextUserId;
+        userId = nextUserId;
         if (event === 'INITIAL_SESSION') return;
+        // SIGNED_IN also occurs when an existing session is recovered on focus.
+        // Keep that user's draft; only a different identity or sign-out clears it.
+        const recovered = sameUser && ['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event);
         // No SDK calls inside the synchronous Auth callback (session lock).
-        setTimeout(() => { if (active) { if (event === 'TOKEN_REFRESHED') notify(); else sessionChanged(); } }, 0);
+        setTimeout(() => { if (active) { if (recovered) notify(); else sessionChanged(); } }, 0);
       });
       return () => { active = false; data.subscription.unsubscribe(); void client.removeChannel(channel); };
     },
