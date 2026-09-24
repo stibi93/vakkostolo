@@ -18,7 +18,7 @@ export function App() {
         <Route path="/auth/callback" element={<HostArea />} />
         <Route path="*" element={<PageFrame>
           <p className="eyebrow">404 · ISMERETLEN OLDAL</p>
-          <h1>Ez az oldal nincs a borsorban.</h1>
+          <h1>Az oldal nem található.</h1>
           <p>Ellenőrizd a címet, vagy térj vissza a kezdőlapra.</p>
           <Link className="button-primary" to="/">Vissza a kezdőlapra <span aria-hidden="true">↗</span></Link>
         </PageFrame>} />

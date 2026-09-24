@@ -10,7 +10,7 @@ import { TastingArtwork } from './TastingArtwork';
 type View = 'host' | 'player' | 'presentation';
 interface DemoRound { status: RoundStatus; closesAt: number }
 const labels: Record<RoundStatus, string> = {
-  pending: 'Címke letakarva', open: 'Most ezt kóstoljuk', closed: 'Tippek lezárva', revealed: 'Felfedve',
+  pending: 'Még nem indult', open: 'Kóstolás folyamatban', closed: 'Tippek lezárva', revealed: 'Felfedve',
 };
 const gameLabels: Record<GameStatus, string> = {
   draft: 'Előkészítés', lobby: 'Váró nyitva', tasting: 'Kóstolás',
@@ -58,14 +58,14 @@ export function DemoApp() {
     if (status !== 'tasting') return;
     setRounds((previous) => previous.map((round, index) => index === activeIndex ? { ...round, status: 'closed' } : round));
     setStatus('intermission');
-    setNotice('A tippeket lezártuk. Jöhet a következő lépés.');
+    setNotice('A kör lezárult. A tippek már nem módosíthatók.');
   }
 
   function revealBlock() {
     if (!block.length || status !== 'intermission') return;
     setRounds((previous) => previous.map((round, index) => block.includes(index) ? { ...round, status: 'revealed' } : round));
     setStatus('reveal');
-    setNotice('A blokk borai és eredményei most már a Prezentáció nézetben is látszanak.');
+    setNotice('A felfedett borok és az eredmények a Prezentáció nézetben láthatók.');
   }
 
   function submit(rating: Rating): boolean {
@@ -84,24 +84,24 @@ export function DemoApp() {
     <div className="app-shell" data-view={view}>
       <a className="skip-link" href="#main">Ugrás a tartalomhoz</a>
       <header className="topbar">
-        <Link className="brand" to="/" aria-label="Vakpohár, kezdőlap">vakpohár<span aria-hidden="true">.</span></Link>
-        <span className="topbar-note">BOR VAN. CÍMKE NINCS.</span>
+        <Link className="brand" to="/" aria-label="Vakkóstoló, kezdőlap">Vakkóstoló</Link>
+        <span className="topbar-note">VAKBORKÓSTOLÓ</span>
         <span className="demo-badge"><span aria-hidden="true" />PRÓBAKÓSTOLÓ</span>
       </header>
 
       <main id="main" tabIndex={-1}>
         <section className="hero">
           <div className="hero-editorial">
-            <p className="eyebrow">VAKKÓSTOLÓ, BARÁTOK KÖZÖTT</p>
-            <h1>Na, ez<br /><span>melyik?</span></h1>
-            <p className="hero-copy">Tölts egy pohárral. Mondd meg, mit gondolsz.<br />{' '}Aztán nézzük meg, mi volt a palackban.</p>
+            <p className="eyebrow">PRÓBAKÓSTOLÓ MINTAADATOKKAL</p>
+            <h1>Helyi <span>demó</span></h1>
+            <p className="hero-copy">Próbáld ki a tippek beküldését<br />{' '}és az eredmények felfedését három mintaborral.</p>
           </div>
           <TastingArtwork />
-          <div className="hero-edition"><span>01 / SZAGOLD</span><span>02 / KÓSTOLD</span><span>03 / TIPPELJ</span></div>
+          <div className="hero-edition"><span>01 / BEÁLLÍTÁS</span><span>02 / ÉRTÉKELÉS</span><span>03 / EREDMÉNYEK</span></div>
         </section>
 
         <div className="workspace-heading" id="tasting-table">
-          <div className="section-title"><span className="section-mark" aria-hidden="true">↳</span><div><p className="eyebrow">AZ ASZTALNÁL</p><h2>Ma vakon kóstolunk.</h2></div></div>
+          <div className="section-title"><span className="section-mark" aria-hidden="true">↳</span><div><p className="eyebrow">DEMÓNÉZETEK</p><h2>A kóstoló menete</h2></div></div>
           <nav className="view-switch" aria-label="Demónézet">
             {([['host', 'Játékmester'], ['player', 'Játékos'], ['presentation', 'Prezentáció']] as const).map(([id, label]) => (
               <button key={id} aria-pressed={view === id} className={view === id ? 'selected' : ''} onClick={() => setView(id)}>{label}</button>
@@ -111,12 +111,12 @@ export function DemoApp() {
 
         <div className="workspace-grid">
           <section className="main-panel">
-            <div className="panel-topline"><span className="live-label"><span />{gameLabels[status]}</span><span className="sheet-code">{view === 'host' ? 'HÁZIGAZDA / 01' : view === 'player' ? 'KÓSTOLÓLAP / 02' : 'EREDMÉNYLAP / 03'}</span></div>
+            <div className="panel-topline"><span className="live-label"><span />{gameLabels[status]}</span><span className="sheet-code">{view === 'host' ? 'JÁTÉKMESTER / 01' : view === 'player' ? 'KÓSTOLÓLAP / 02' : 'EREDMÉNYLAP / 03'}</span></div>
 
             {view === 'host' && <>
               <div className="session-heading">
-                <h3>{status === 'lobby' ? 'Mindenki kapott poharat?' : status === 'finished' ? 'Ez jó kör volt.' : `${number(activeIndex + 1)}. tétel`}</h3>
-                <p className="muted">{status === 'lobby' ? 'Állítsd be az időt és a felfedést. Ha mindenki kész, mehet az első bor.' : 'Te döntöd el, mikor jön a következő bor, és mikor nézzük meg a tippeket.'}</p>
+                <h3>{status === 'lobby' ? 'Kóstoló beállítása' : status === 'finished' ? 'A kóstoló véget ért' : `${number(activeIndex + 1)}. tétel`}</h3>
+                <p className="muted">{status === 'lobby' ? 'Állítsd be a körök hosszát és a felfedés gyakoriságát, majd indítsd el a kóstolót.' : 'A következő tételt és az eredmények felfedését a játékmester indítja.'}</p>
               </div>
               <div className="session-stats">
                 <div><strong>03</strong><span>kóstolandó bor</span></div>
@@ -125,7 +125,7 @@ export function DemoApp() {
               </div>
               <div className="settings-row">
                 <label>Kóstolási idő<select value={duration} disabled={status !== 'lobby'} onChange={(event) => setDuration(Number(event.target.value))}><option value={60}>1 perc / bor</option><option value={120}>2 perc / bor</option><option value={180}>3 perc / bor</option></select></label>
-                <label>Közös felfedés<select value={revealEvery} disabled={status !== 'lobby'} onChange={(event) => setRevealEvery(Number(event.target.value))}><option value={1}>Minden bor után</option><option value={2}>2 boronként</option><option value={3}>Csak a végén</option></select></label>
+                <label>Felfedés gyakorisága<select value={revealEvery} disabled={status !== 'lobby'} onChange={(event) => setRevealEvery(Number(event.target.value))}><option value={1}>Minden bor után</option><option value={2}>2 boronként</option><option value={3}>Csak a végén</option></select></label>
               </div>
               <div className="actions">
                 {canStart && <button className="button-primary" onClick={startRound}>{status === 'lobby' ? 'Kóstoló indítása' : 'Következő tétel'}<span aria-hidden="true">↗</span></button>}
@@ -134,44 +134,44 @@ export function DemoApp() {
                   <button className="button-secondary" disabled={seconds === 0} onClick={() => {
                     if (!canSubmit(current.status, current.closesAt, Date.now())) return;
                     setRounds((previous) => previous.map((round, index) => index === activeIndex ? { ...round, closesAt: round.closesAt + 30_000 } : round));
-                    setNotice('Hozzáadtunk 30 másodpercet a körhöz.');
+                    setNotice('A kör ideje 30 másodperccel meghosszabbítva.');
                   }}>+30 másodperc</button>
                 </>}
                 {status === 'intermission' && block.length > 0 && <button className="button-primary" onClick={revealBlock}>Eredmények felfedése <span aria-hidden="true">↗</span></button>}
-                {status === 'reveal' && revealed.length === rounds.length && <button className="button-primary" onClick={() => { setStatus('finished'); setView('presentation'); setNotice('Minden bor felfedve. Íme a végeredmény.'); }}>Kóstoló befejezése <span aria-hidden="true">↗</span></button>}
+                {status === 'reveal' && revealed.length === rounds.length && <button className="button-primary" onClick={() => { setStatus('finished'); setView('presentation'); setNotice('A kóstoló véget ért. Minden bor és a végeredmény megtekinthető.'); }}>Kóstoló befejezése <span aria-hidden="true">↗</span></button>}
                 {status === 'finished' && <button className="button-primary" onClick={() => setView('presentation')}>Végeredmény megtekintése <span aria-hidden="true">↗</span></button>}
               </div>
               <p className="small-note">{status === 'tasting' ? `${ratings[activeIndex] ? 1 : 0} / 1 helyi tipp beküldve. ${seconds === 0 ? 'Lejárt az idő; zárd le a kört a továbblépéshez.' : 'A beküldés a Játékos nézetben próbálható ki.'}` : 'A borok neve és valódi adatai a felfedésig rejtve maradnak a játékosnézetben.'}</p>
             </>}
 
             {view === 'player' && <>
-              {status === 'lobby' ? <div className="empty-state"><span className="big-symbol" aria-hidden="true">…</span><h3>Foglaltunk neked helyet.</h3><p>A váróban vagy. A játékmester indítja az első bort; addig készítsd oda a poharad.</p><span className="pill">Te · tesztjátékos</span></div>
+              {status === 'lobby' ? <div className="empty-state"><span className="big-symbol" aria-hidden="true">…</span><h3>Várakozás az indításra</h3><p>Az első tételt a Játékmester nézetben indíthatod el.</p><span className="pill">Te · tesztjátékos</span></div>
                 : current.status === 'open' && seconds > 0 ? <RatingForm key={activeIndex} index={activeIndex} seconds={seconds} saved={ratings[activeIndex]} onSubmit={submit} />
-                : <div className="empty-state"><span className="big-symbol" aria-hidden="true">✓</span><h3>{status === 'finished' ? 'Jöhet a nagy megfejtés.' : 'Erre a borra ennyi volt.'}</h3><p>{ratings[activeIndex] ? 'A tipped a demóban elmentve. ' : 'Ehhez a tételhez nincs beküldött tipped. '}{revealed.length ? 'A már felfedett borokat a Prezentáció nézetben találod.' : 'A következő lépést a játékmester indítja.'}</p></div>}
+                : <div className="empty-state"><span className="big-symbol" aria-hidden="true">✓</span><h3>{status === 'finished' ? 'A kóstoló véget ért' : 'A kör lezárult'}</h3><p>{ratings[activeIndex] ? 'A tippedet elmentettük a demóban. ' : 'Ehhez a tételhez nincs beküldött tipped. '}{revealed.length ? 'A már felfedett borokat a Prezentáció nézetben találod.' : 'A következő lépést a játékmester indítja.'}</p></div>}
             </>}
 
             {view === 'presentation' && <>
-              <div className="session-heading"><h3>{revealed.length ? 'Ez volt a palackban.' : 'Egyelőre marad a kérdőjel.'}</h3><p className="muted">{revealed.length ? 'Fiktív mintaborok, a te helyi tippjeiddel.' : 'A játékmester felfedése után itt látod, mit ittál, és mennyire volt közel a tipped.'}</p></div>
+              <div className="session-heading"><h3>{revealed.length ? 'Felfedett borok' : 'Még nincs felfedett bor'}</h3><p className="muted">{revealed.length ? 'Mintaborok és a demóban beküldött tippjeid.' : 'A felfedés után itt jelennek meg a boradatok, a tippjeid és a pontszámaid.'}</p></div>
               {revealed.map((index) => <article className="result-card" key={index}><span className="result-number">{number(index + 1)}</span><div><h4>{demoWines[index].name}</h4><p>{huf(demoWines[index].priceHuf)} <span className="separator">/</span> {alcohol(demoWines[index].alcoholTenths)}</p><p className="small-note">{ratings[index] ? `Tipped: ${huf(ratings[index].priceHuf)} · ${alcohol(ratings[index].alcoholTenths)} · Tetszés: ${ratings[index].liking}/10` : 'Nem érkezett tipped erre a tételre.'}</p></div><strong>{ratings[index] ? scoreRating(ratings[index], demoWines[index]) : 0}<small>pont</small></strong></article>)}
               {revealed.length > 0 && <div className="score-summary"><span>{status === 'finished' ? 'Végeredmény' : 'Eddigi eredmény'} · Te</span><strong>{totalScore}<small> / {revealed.length * 100} pont</small></strong></div>}
               {status === 'finished' && <p className="summary-copy">{summarizeWithoutAi({ allRoundsRevealed: true, participantCount: 1, wines: demoWines.map((wine, index) => ({ label: wine.name, responseCount: ratings[index] ? 1 : 0, meanLiking: ratings[index]?.liking ?? null })) })}</p>}
-              <p className="small-note">Az ár és az alkohol pontossága ad pontot. A tetszés a személyes kedvencedről szól.</p>
+              <p className="small-note">Az ár és az alkoholfok becslésének pontossága ad pontot. A tetszés nem számít bele a pontszámba.</p>
             </>}
           </section>
 
           <aside className="side-panel">
-            <div className="side-heading"><span className="eyebrow">KÓSTOLÁSI SORREND</span><h3>A mai borsor<span>03</span></h3><p>A nevekkel még várunk.</p></div>
+            <div className="side-heading"><span className="eyebrow">KÓSTOLÁSI SORREND</span><h3>Mintaborok<span>03</span></h3><p>A borok neve a felfedés után látható.</p></div>
             <ol className="wine-list">{rounds.map((round, index) => <li key={index} className={round.status === 'open' ? 'active-wine' : ''}>
-              <span className="wine-number">{number(index + 1)}</span><div><strong>{round.status === 'revealed' ? demoWines[index].name.split(' · ')[0] : `${number(index + 1)}. titkos bor`}</strong><span>{round.status === 'open' && seconds === 0 ? 'Lejárt az idő' : labels[round.status]}</span></div><span className="wine-status" aria-hidden="true">{round.status === 'revealed' ? '✓' : round.status === 'open' ? '●' : '○'}</span>
+              <span className="wine-number">{number(index + 1)}</span><div><strong>{round.status === 'revealed' ? demoWines[index].name.split(' · ')[0] : `${number(index + 1)}. tétel`}</strong><span>{round.status === 'open' && seconds === 0 ? 'Lejárt az idő' : labels[round.status]}</span></div><span className="wine-status" aria-hidden="true">{round.status === 'revealed' ? '✓' : round.status === 'open' ? '●' : '○'}</span>
             </li>)}</ol>
-            <div className="tasting-tip"><span className="eyebrow">JEGYZET A MARGÓRA</span><p>Nem kell érteni hozzá.<br />Elég, ha van véleményed.</p></div>
-            <div className="ticket-bottom"><span>3 BOR / 1 ESTE</span><span aria-hidden="true">✕</span><span>NINCS PUSKA</span></div>
+            <div className="tasting-tip"><span className="eyebrow">PONTOZÁS</span><p>Az ár és az alkoholfok becslésére<br />boronként legfeljebb 100 pont jár.</p></div>
+            <div className="ticket-bottom"><span>3 MINTABOR</span><span aria-hidden="true">✕</span><span>HELYI DEMÓ</span></div>
           </aside>
         </div>
         <p className="notice" role="status">{notice}</p>
         <div className="demo-disclaimer"><span className="demo-label">PRÓBAÜZEM</span><p>Ez egy helyi demó: a három nézet ugyanazt a játékot mutatja. QR-belépés és közös online játék még nincs; az oldal frissítése törli a tippeket.</p></div>
       </main>
-      <footer><span className="footer-wordmark">vakpohár.</span><span>JÓ TÁRSASÁGHOZ. ISMERETLEN BOROKHOZ.</span><a href="#main">Vissza az elejére ↑</a></footer>
+      <footer><span className="footer-wordmark">Vakkóstoló</span><span>ÁR, ALKOHOLFOK ÉS TETSZÉS</span><a href="#main">Vissza az elejére ↑</a></footer>
     </div>
   );
 }
@@ -187,7 +187,7 @@ function RatingForm({ index, seconds, saved, onSubmit }: { index: number; second
     const amount = Number(abv.replace(',', '.')) * 10;
     const rating: Rating = { priceHuf: Number(price), alcoholTenths: Math.round(amount), liking };
     if (!price.trim() || !abv.trim() || Math.abs(amount - Math.round(amount)) > 1e-8) {
-      setError('Add meg az árat és az alkoholfokot; az alkohol egy tizedesjegyű lehet.');
+      setError('Add meg a becsült árat és alkoholfokot. Az alkoholfokot legfeljebb egy tizedesjeggyel írd be.');
       return;
     }
     const errors = validateRating(rating);
@@ -196,15 +196,15 @@ function RatingForm({ index, seconds, saved, onSubmit }: { index: number; second
   }
 
   return <form className="rating-form" onSubmit={handleSubmit}>
-    <div className="rating-heading"><div><p className="eyebrow">A TE TIPPED</p><h3>{number(index + 1)}. titkos bor</h3></div><span className="timer">{number(Math.floor(seconds / 60))}:{number(seconds % 60)}</span></div>
-    <p className="muted">Mennyit adnál érte? Milyen erős? És a lényeg: ízlik?</p>
+    <div className="rating-heading"><div><p className="eyebrow">A TE TIPPED</p><h3>{number(index + 1)}. tétel</h3></div><span className="timer">{number(Math.floor(seconds / 60))}:{number(seconds % 60)}</span></div>
+    <p className="muted">Becsüld meg a palack árát és a bor alkoholfokát, majd értékeld, mennyire ízlik.</p>
     <div className="rating-inputs"><label>Becsült palackár <span>Ft / 0,75 l</span><input type="number" inputMode="numeric" min="0" max="1000000" step="1" required placeholder="pl. 4500" value={price} onChange={(event) => setPrice(event.target.value)} /></label>
       <label>Becsült alkoholfok <span>% vol</span><input type="text" inputMode="decimal" required placeholder="pl. 13,5" value={abv} onChange={(event) => setAbv(event.target.value)} /></label></div>
     <label className="liking-label" htmlFor="liking">Mennyire ízlik?<strong>{liking}<span> / 10</span></strong></label>
     <input id="liking" type="range" min="1" max="10" step="1" value={liking} onChange={(event) => setLiking(Number(event.target.value))} />
-    <div className="range-labels"><span>1 — Ezt kihagyom</span><span>10 — Jöhet még!</span></div>
+    <div className="range-labels"><span>1 · Nem ízlik</span><span>10 · Nagyon ízlik</span></div>
     {error && <p role="alert" className="error">{error}</p>}
     <button type="submit" className="button-primary">{saved ? 'Tipp módosítása' : 'Tipp beküldése'}<span aria-hidden="true">↗</span></button>
-    <p className="small-note">{saved ? 'Van mentett tipped ebben a demóban. Új értékeket a módosítás gombbal küldhetsz be.' : 'A tippedet a kör végéig módosíthatod.'}</p>
+    <p className="small-note">{saved ? 'A tippedet elmentettük a demóban. A kör végéig módosíthatod a Tipp módosítása gombbal.' : 'A tippedet a kör végéig módosíthatod.'}</p>
   </form>;
 }

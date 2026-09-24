@@ -21,7 +21,7 @@ async function setup(page: Page) {
   }, authSession());
   const state = { game: null as StoredGame | null, calls: [] as CreatePayload[], loseFirstResponse: false,
     malformed: false, failList: false };
-  await page.route('https://auth.vakpohar.test/**', async (route) => {
+  await page.route('https://auth.vakkostolo.test/**', async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/user') return route.fulfill({ json: authUser });
     if (url.pathname === '/auth/v1/logout') return route.fulfill({ status: 204 });

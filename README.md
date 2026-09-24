@@ -1,4 +1,4 @@
-# Vakpohár
+# Vakkóstoló
 
 Mobilra tervezett vakborkóstoló: vendégbelépés, közös kóstolás, tippek és
 közösen felfedett eredmények. Munkanév, szabadon változtatható.

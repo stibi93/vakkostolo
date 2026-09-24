@@ -9,7 +9,7 @@ async function mockAuth(page: Page, anonymous = false) {
   const user = { ...authUser, is_anonymous: anonymous };
   const session = authSession(user);
   const calls = { exchanges: 0, logouts: 0, failUser: false, rejectCode: false, logoutScope: '' };
-  await page.route('https://auth.vakpohar.test/**', async (route) => {
+  await page.route('https://auth.vakkostolo.test/**', async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/authorize') {
       expect(url.searchParams.get('provider')).toBe('google');

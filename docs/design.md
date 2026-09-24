@@ -1,18 +1,41 @@
-# Arculat — borklub és kóstolólap
+# Arculat — Vakkóstoló
 
-A felhasználó a korábbi arculatot túlságosan AI-generált hatásúnak találta.
-Az új irány egy kis borklub nyomtatott plakátjának és a kézbe adott kóstolólapnak
-a világából indul ki. Munkaverzió, a felhasználói visszajelzés alapján finomítható.
+A felhasználó 2026-09-24-én jóváhagyta a Halves alapján készült, saját
+bordó–törtfehér irányt. Az alkalmazás neve **Vakkóstoló**, dekoratív pont nélkül.
+A korábbi sárga arculatot elutasította.
 
-## Vizuális alap
+## Jóváhagyott irány
 
-- Tintafekete: `#25291f`; papír: `#f4f1e8`; lap: `#fffcf5`.
-- Plakátsárga: `#f3cf54`; piros jelölés: `#b53e26`.
-- Bricolage Grotesque a címsorokhoz és felülethez; IBM Plex Mono a számozáshoz,
-  időhöz és rövid feliratokhoz. A fontok helyben kiszolgált, rögzített npm-csomagok.
-- Egyenes vonalak, lapkeretek, aláhúzott mezők, perforált borsorjegy.
-- A palackok illusztrációja saját SVG-komponens: `src/demo/TastingArtwork.tsx`.
-  Nem ábrázol valódi borazonosságot; a számozás a vakjáték része.
+Vizuális referencia: [Halves Design System](https://www.halves.wine/system).
+Saját, jóváhagyott előnézet: [kóstolólap](design-proposals/halves/index.html).
+A Halves márkáját és komponenskódját nem vesszük át; a rendszer szerkesztési
+elvei szolgálnak alapul. Új frontendfüggőség nem szükséges.
+
+- Törtfehér háttér (`#F7F5F2`), fehér űrlapfelület.
+- Mély bordó főművelet (`#713336`), sötétebb hover (`#58262A`).
+- Tintaszínű szöveg (`#24211F`), másodlagos szöveg (`#6A635F`),
+  halvány kőszürke elválasztók (`#DDD7D1`).
+- Georgia címek és márkafelirat, Arial mezők és súgók. Rendszerbetűk,
+  magyar ékezetekkel, külön fontletöltés nélkül.
+- Vékony elválasztók, enyhe lekerekítés, egyértelmű főgomb és tömör kóstolólap.
+- A felületi szín és illusztráció felfedésig nem utalhat a rejtett borra.
+  Minden tétel azonos vizuális kezelést kap, csak a tételszám különbözik.
+
+A személyes `frontend-design` skill `references/wine-tasting.md` profilja
+rögzíti az alkalmazandó elveket. A profil ehhez a termékhez jóváhagyott;
+más projektre nem jelent automatikus szín- vagy stíluselőírást.
+
+## Megvalósítás állapota
+
+A jóváhagyott arculat az alkalmazásban is megvalósult: kezdőlap, belépési és
+hibaállapotok, demó játékmesteri, játékos- és kivetítőnézet, értékelés és eredmények.
+A kezdőlapon egyértelműen jelölt kóstolólap-minta mutatja a becsléseket.
+A játékosnézetben a feladat kerül előre; a dekoratív nyitóblokk rejtett.
+
+A közös tokenek a `src/styles.css` elején találhatók. A vezérlők körvonala
+`--control-border` (`#968B84`), a hibajelzés `--error` (`#9F2727`), a fókusz
+bordó körvonal. Az új online játékfelületek ugyanezeket a tokeneket használják.
+Az oldalspecifikus kezdőlap- és belépési stílusok a `src/app/app.css`-ben vannak.
 
 ## Felületi hang
 
@@ -22,22 +45,13 @@ szlogenek és szóviccek helyett konkrét feliratok szerepelnek. Ez a 2026-09-24
 felhasználói kérés felülírja a korábbi társasági szlogeneket.
 Az állapot, határidő és visszaigazolt beküldés jelentése maradjon pontos.
 
-## Játékmesteri belépés
+## Mobil és ellenőrzés
 
-A `/host` a meglévő papírszínt, betűket, szögletes gombokat és sárga jelölést
-használja. Egyetlen feladatpanel mutatja a belépést vagy a fiók állapotát.
-A hibánál a szöveges indok mellett újrapróbálás látható; betöltés közben nem
-jelenik meg korábbról megmaradt hosttartalom. A mintademó külön linkkel érhető el.
-Az állapotokat 360 px és asztali szélességen is vizuálisan ellenőrizzük.
+360 px szélességtől ne legyen vízszintes túlcsordulás. A márkafelirat és az
+állapotjelző rendezett tördelést kapjon. Legalább 44 px-es érintési célok,
+olvasható mezők és látható billentyűzetfókusz szükséges. Az értékelés maradjon
+elöl a játékosnézetben; dekoráció ne szorítsa ki a feladatot.
 
-## Mobil
-
-A játékos- és prezentációnézetben mobilon elmarad a nagy plakát. A játékos
-borsor-oldalsávja szintén rejtett, hogy az értékelő kerüljön előre. A látható
-beküldési állapot és fókuszjelölés megmarad, a beviteli mezők jól olvashatók.
-A legkeskenyebb hostnézetben a plakát csak tipográfiát használ; az illusztráció
-nem szoríthatja össze vagy takarhatja a címsort.
-A tisztán dekoratív rajzok nem kerülnek a képernyőolvasó tartalmába.
-
-A jelen változás vizuális: a pontozási, időzítési és adatbiztonsági szabályok
-ugyanazok. A demó továbbra sem többeszközös játék.
+A jóváhagyott előnézet nem helyettesíti az átvezetett alkalmazás asztali és
+mobilos vizuális ellenőrzését. A demó jelölése, a pontozás, az időzítés és az
+adatbiztonsági szabályok a designváltás során is megmaradnak.

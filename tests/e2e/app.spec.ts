@@ -6,7 +6,7 @@ test('kezdőlap → próbakóstoló → újratöltés → kezdőlap', async ({ p
     if (/\/src\/demo\/|\/assets\/DemoApp-/.test(request.url())) demoRequests.push(request.url());
   });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'A címke titok. A tipped szabad.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Kóstoló telefonon.' })).toBeVisible();
   await expect(page.getByText('A közös online kóstoló még készül.', { exact: false })).toBeVisible();
   expect(demoRequests).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -20,13 +20,13 @@ test('kezdőlap → próbakóstoló → újratöltés → kezdőlap', async ({ p
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
-  await page.getByRole('link', { name: 'Vakpohár, kezdőlap' }).click();
-  await expect(page.getByRole('heading', { name: 'A címke titok. A tipped szabad.' })).toBeVisible();
+  await page.getByRole('link', { name: 'Vakkóstoló, kezdőlap' }).click();
+  await expect(page.getByRole('heading', { name: 'Kóstoló telefonon.' })).toBeVisible();
 });
 
 test('ismeretlen útvonalról vissza lehet térni a kezdőlapra', async ({ page }) => {
   await page.goto('/missing-page');
-  await expect(page.getByRole('heading', { name: 'Ez az oldal nincs a borsorban.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Az oldal nem található.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toHaveCount(0);
   await page.getByRole('link', { name: 'Vissza a kezdőlapra' }).click();
   await expect(page.getByRole('link', { name: 'Próbakóstoló megnyitása' })).toBeVisible();

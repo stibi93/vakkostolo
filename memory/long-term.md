@@ -1,5 +1,24 @@
 # Tartós projektmemória
 
+## Felületi hangnem és párhuzamos munka — 2026-09-24
+
+- Felhasználói kérésre személyes `frontend-design` skill készült; a globális
+  `~/.codex/AGENTS.md` írja elő frontendfeladatokhoz. Forrása
+  `~/.codex/skills/frontend-design/SKILL.md`, felfedezési linkje
+  `~/.agents/skills/frontend-design`. Célja az átgondolt design és a feladathoz
+  igazított tényleges vizuális ellenőrzés, a projekt arculatának megtartásával.
+- Felhasználói kérés: természetes, tárgyilagos magyar feliratok. Ne kerüljenek
+  a felületre erőltetett szlogenek, boros szóviccek, színlelt bizalmaskodás vagy
+  frappánsnak szánt kiszólások. A cím nevezze meg a funkciót vagy állapotot;
+  a súgó mondja el a következő lépést. Indok: a korábbi hangnem kínosnak hatott.
+- Maradhat a tegezés és a közérthető „tipp”, „bor”, „kóstoló”. A demó jelölése,
+  adatvesztésre vonatkozó tájékoztatása és a pontozás jelentése maradjon pontos.
+- Párhuzamos munkamenetnél külön Git-worktree és szűk feladatkör használható.
+  Integrációkor az aktuális fájlokba csak a szükséges változások kerüljenek;
+  egész fájl visszamásolása felülírhatja a másik munkamenet munkáját.
+  A megosztott jegyzet nem visszaigazolt fájlzár. Az aktuális szövegezési
+  átadás: `memory/ui-copy-handoff.md`.
+
 ## Felhasználói igények — 2026-09-23
 
 - Vakon kóstolt borok telefonos értékelése: ár, alkohol, tetszési index.
@@ -10,8 +29,16 @@
 - Kezdetben ingyenes működésre törekvés, projektinfrastruktúra és AI-memória kérése.
 - Praktikus, korszerű, elfogadott és karbantartott mérnöki keretrendszerek használata.
 - A vizuális arculat legyen karakteres, kreatív; a korábbi pasztell, kártyás
-  megjelenést a felhasználó AI-generált hatásúnak találta. Az új borklub-plakátos
-  irány egyelőre munkaverzió, nem kifejezetten jóváhagyott felhasználói színpreferencia.
+  megjelenést a felhasználó AI-generált hatásúnak találta. A borklub-plakátos
+  változat sárga színét 2026-09-24-én elutasította. Új, boros designrendszer
+  keresését kérte, bemutatással a skillbe építés előtt. A bordó–törtfehér
+  Halves-adaptációt ugyanazon a napon jóváhagyta; a skill boros profiljába bekerült.
+- A jóváhagyott arculat az alkalmazásban is megvalósult. Közös CSS-tokenek:
+  `src/styles.css`; Georgia címek és Arial UI. A játékosnézetben az értékelés
+  az elsődleges, dekoratív nyitóblokk nélkül. Indok: mobilon a kóstolás
+  közbeni bevitel kapjon helyet. Új online felület ezeket a tokeneket kövesse.
+- A termék neve 2026-09-24-től **Vakkóstoló**, minden felületen azonos írásmóddal,
+  dekoratív pont nélkül. A technikai projektazonosító `vakkostolo`.
 
 ## Tervezési döntések — 2026-09-23
 
@@ -47,3 +74,20 @@ ne tarts meg egymásnak ellentmondó döntéseket aktív szabályként.
   megkülönbözteti. A játékjogosultság továbbra is DB/RPC-felelősség.
 - A host Auth klienskódja kész; a valódi Google/Supabase integráció külön kapu.
   A tesztek szintetikus Auth HTTP-válaszokat használnak, nem külső fiókot.
+
+## Játék létrehozása — 2026-09-24
+
+- A szerver a kanonikus `auth.users.is_anonymous` mezőt ellenőrzi a host-RPC-ben;
+  a kliens szerepjelzése nem jogosultság. A részletes boradat külön host-DTO-ban
+  marad; a következő játékossnapshot ezt nem használhatja.
+- A létrehozási kérés hosthoz kötött UUID-val és normalizált payloadhash-sel
+  idempotens. Indok: elveszett HTTP-válasz utáni ismétlés ne duplikáljon játékot.
+  A nyitott űrlap őrzi az UUID-t, újratöltésen át nem; ilyenkor a saját lista
+  ellenőrzése szükséges új mentés előtt. A meghívó külön következő művelet.
+- A DB-típusok a ténylegesen végrehajtott migrációk PGlite-katalógusából készülnek,
+  eltérésük a `check` része. Indok: Docker nélkül is reprodukálható helyi ellenőrzés.
+  Ez korlátozott generátor, nem teljes Supabase CLI-helyettesítő: nested select
+  metaadatot nem készít, valódi Auth/gateway és versengés próbája továbbra is kell.
+- Párhuzamos agentmunka külön ágon, worktree-ben, saját függőségtelepítéssel és
+  tesztportokon történik. Átadás konkrét commit és API-szerződés alapján; a közös
+  munkapéldány más agenthez tartozó módosításait nem szabad sajátként commitolni.

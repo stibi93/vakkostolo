@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('host → saját tipp → blokkos felfedés → végeredmény', async ({ page }, testInfo) => {
   await page.goto('/demo');
-  await expect(page.getByRole('heading', { name: /Na, ez/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Helyi demó' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('host.png'), fullPage: true });
   await page.getByRole('button', { name: 'Kóstoló indítása' }).click();

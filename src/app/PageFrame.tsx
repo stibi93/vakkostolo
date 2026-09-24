@@ -6,12 +6,12 @@ export function PageFrame({ children }: { children: ReactNode }) {
     <div className="app-shell entry-shell">
       <a className="skip-link" href="#main">Ugrás a tartalomhoz</a>
       <header className="topbar">
-        <Link className="brand" to="/" aria-label="Vakpohár, kezdőlap">vakpohár<span aria-hidden="true">.</span></Link>
-        <span className="topbar-note">BOR VAN. CÍMKE NINCS.</span>
+        <Link className="brand" to="/" aria-label="Vakkóstoló, kezdőlap">Vakkóstoló</Link>
+        <span className="topbar-note">VAKBORKÓSTOLÓ</span>
         <span className="demo-badge"><span aria-hidden="true" />FEJLESZTÉS ALATT</span>
       </header>
       <main id="main" className="entry-main" tabIndex={-1}>{children}</main>
-      <footer><span className="footer-wordmark">vakpohár.</span><span>JÓ TÁRSASÁGHOZ. ISMERETLEN BOROKHOZ.</span></footer>
+      <footer><span className="footer-wordmark">Vakkóstoló</span><span>ÁR, ALKOHOLFOK ÉS TETSZÉS</span></footer>
     </div>
   );
 }

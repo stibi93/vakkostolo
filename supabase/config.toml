@@ -1,5 +1,5 @@
 # Local development only; hosted-project Auth settings are configured separately.
-project_id = "vakpohar"
+project_id = "vakkostolo"
 
 [api]
 enabled = true
