@@ -72,6 +72,7 @@ test('host és két külön vendég élő listája, azonos becenevek, esemény �
     await expect(page.getByText('Élő kapcsolat.', { exact: true })).toBeVisible();
     await expect(page.getByText('Még senki nem lépett be.')).toBeVisible();
     await join(one); await join(two);
+    await expect.poll(() => game.hub.size()).toBe(3);
     for (const target of [page, one, two]) {
       await expect(target.getByRole('heading', { name: 'Résztvevők (2)' })).toBeVisible();
       await expect(target.getByRole('listitem').filter({ hasText: 'Anna' })).toHaveCount(2);

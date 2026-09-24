@@ -1,5 +1,26 @@
 # Aktuális munkamenet
 
+## Közös váró elkészült — 2026-09-24
+
+- A közös váró a main ágon: `2d24cee`, kivetítő-integráció `cf69278` és az
+  ezeket követő ellenőrzési/átadási commit. Host, vendég és kivetítő ugyanazt
+  a jogosultsággal védett snapshotot és Realtime-frissítést használja.
+- Belépés után `/play/:gameId`, újratöltéskor megmaradó tagság, azonos becenevek
+  sorszámozva; 15 másodperces tartalékfrissítés, hálózati hibajelzés és visszatérés.
+  Jogosultságvesztéskor a korábbi lista eltűnik; boradat nem kerül a snapshotba.
+- A 003 migráció a helyi Supabase-re alkalmazva. Valódi Auth/REST/RLS/Realtime
+  próba sikeres; a saját szintetikus adatok kitakarítva. Újrafuttatás:
+  `npm run test:lobby:local`. Google OAuth és fizikai telefonos próba hátravan.
+- Integrált `npm run check`: 169 teszt, típusok, lint és build sikeres.
+  Végső Playwright 50/50; az utolsó tesztsegéd/CSS javítás után típusellenőrzés
+  és lint is sikeres. Mobil/asztali váró, elavult és tiltott állapot, kivetítő
+  renderelve és átnézve: `test-results/shared-lobby-final/` (nem verziózott).
+- A párhuzamos arculati munka megmaradt; annak külön, még nem commitolt
+  változásai nem részei a váró commitjainak. Átadás: `memory/shared-lobby-handoff.md`.
+- Következő fejlesztés: első élő kör szerveroldali indítása (hostjog, sorzár,
+  verzióellenőrzés, határidő), majd védett játékossnapshot és kóstolólap.
+  A lentebbi közösváró-tervek korábbi állapotot írnak le.
+
 Dátum: 2026-09-24. A felhasználó kérésére a közös munkapéldány elkészült
 változásai a `main` ágon, két logikus egységben rögzítve.
 

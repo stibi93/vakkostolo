@@ -1,5 +1,21 @@
 # Tartós projektmemória
 
+## Közös váró adathatára — 2026-09-24
+
+- A host, vendég és kivetítő azonos `get_lobby_snapshot` RPC-t olvas;
+  az aktuális Auth és játéktagság határozza meg a hozzáférést. A `/play/:gameId`
+  visszatéréshez nem kell a régi meghívó. Indok: meghívócsere ne bontsa a tagságot.
+- Realtime-esemény csak újraolvasást indít; a validált RPC-pillanatkép a mérvadó.
+  A Postgres-előfizetés visszaigazolását várjuk (`postgres_changes_options.wait`):
+  a puszta websocket-csatlakozás a valódi helyi próbában még túl korai volt.
+  15 másodperces lekérdezés pótolja az elveszett eseményt és a törléseket.
+- A publication most csak games/participants táblákkal bővül, RLS mellett.
+  Borok, tippek és meghívók nem publikálhatók. A jövőbeli mezőbővítéseknél
+  a teljes Realtime-sor adatvédelmét is ellenőrizni kell, nem csak a DTO-t.
+- A sorszám az azonos becenevek vizuális megkülönböztetése, nem tartós azonosító
+  vagy online jelenlét. A résztvevő UUID-ja marad a tényleges kulcs.
+- Részletes szerződés és reprodukálható helyi integráció: `docs/lobby.md`.
+
 ## Felületi hangnem és párhuzamos munka — 2026-09-24
 
 - Felhasználói kérésre személyes `frontend-design` skill készült; a globális

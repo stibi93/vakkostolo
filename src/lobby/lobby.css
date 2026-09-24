@@ -9,3 +9,7 @@
 .lobby-self { color: var(--accent); white-space: nowrap; }
 .lobby-panel .button-secondary { margin-top: 12px; }
 @media (max-width: 600px) { .lobby-panel > .button-secondary { width: 100%; } }
+
+.projector-view .lobby-panel { margin-top: 0; padding-top: 0; border-top: 0; }
+.projector-view .lobby-panel h3 { font-size: clamp(24px, 2.4vw, 36px); }
+.projector-view .lobby-participants { font-size: clamp(18px, 1.6vw, 26px); }
