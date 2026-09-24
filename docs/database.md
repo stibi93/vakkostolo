@@ -118,13 +118,13 @@ saját mentett tipp és későn belépők védelme. Részletes paraméternevek, 
 
 | Művelet | Ellenőrzés / tranzakció |
 | --- | --- |
-| next_round | host; verzió és sorzár; lezárt előző kör; felfedési blokk szabálya |
+| next_round | host; verzió és sorzár; lezárt előző kör; mentett kártyasorrend |
 | extend_round | host; még nem járt le; +30 s, felső korlát |
 | close_round | host; idempotens lezárás; audit |
-| reveal_block | host; összes érintett kör closed; rögzített pillanatképek egy tranzakcióban |
+| control_tasting next (Felfedés kártya) | host; minden kijelölt kör closed/revealed; rögzített pillanatképek egy tranzakcióban |
 | get_submission_progress | host; csak szám és beküldési állapot, titkos tippek nélkül |
 | get_results | tagság; kizárólag felfedett körök; szerveroldali v1 pontozás |
-| finish_game | host; nincs pending/open kör, minden tétel felfedett |
+| finish_game | host; nincs pending/open kör vagy hátralévő kártya; nincs automatikus felfedés |
 
 A felfedés a `revealed_wines`-ba másol és `rounds.status`-t állít, ugyanabban a
 tranzakcióban. Nem olvassuk át közvetlenül a titkos táblát publikus view-n keresztül.
@@ -192,3 +192,38 @@ körváltási és felfedési RPC-ket vezet be. Részletek és korlátok:
 A 0012 migráció verziózott szerverpontozást és tagsággal védett eredményprojekciót
 ad. Csak felfedett borok számítanak; saját tippek csak a hívó játékoshoz kerülnek.
 A ranglista és borfotó-hozzáférés részletei: [eredmények](results.md).
+
+A 0014 migráció explicit Felfedés kártyákkal váltja fel a régi blokkhatárt.
+Adatszerkezet és kompatibilitás: [kóstolómenet](tasting-schedule.md#felfedési-kártyák--0014).
+
+## Kóstoló törlése — 0015
+
+A saját superadmin host, aal2 munkamenettel használhatja a
+`delete_game(game_id, finalize=false)` RPC-t. Előkészítéskor privát törlési
+bizonylat készül, és a válasz felsorolja a saját kóstoló Storage-objektumait.
+A kliens a Storage API-val eltávolítja a valódi fájlokat; a külön törlési
+policy a már felfedett fotók törlését is engedi az előkészített kóstolón belül.
+SQL nem töröl Storage-metaadatot, mert attól a fájl a háttértárban maradna.
+
+`finalize=true` csak üres fotótár esetén törli a játékot, a kapcsolt
+borokat, résztvevőket, meghívót, értékeléseket és privát menetet kaszkáddal.
+A bizonylat csak játék-ID/host-ID párost őriz, így az elveszett válasz utáni
+ismétlés biztonságos. Idegen host, vendég és aal1 munkamenet nem törölhet.
+Hálózati hibánál a felület nem jelez sikert: az egész művelet újrapróbálható;
+már eltávolított fotók addig nem állnak vissza.
+
+Törlési integrációs próba: `npm run test:delete:local`; saját szintetikus
+Auth-felhasználókkal és fotókkal, automatikus takarítással.
+
+## Teljes menet létrehozása — 0016
+
+A `create_game_with_schedule` RPC az alapborok létrehozását és a teljes
+menet mentését egy tranzakcióban végzi. A borok nullától induló indexei
+a létrejött kör-ID-khez rendelődnek; a kártyákhoz új szerveroldali ID készül.
+Minden bor pontosan egyszer, a borlista sorrendjében szerepel; felfedés
+csak előző borokra hivatkozhat. Hibánál a teljes létrehozás visszagördül.
+
+A létrehozási bizonylat initial_schedule_hash mezője a teljes kezdeti bemenetet
+védi. Ugyanaz a host/kérés sorosodik, az ismétlés ugyanazt a játékot adja vissza,
+és nem írja vissza a később szerkesztett menetet. A régi create_game megmarad.
+Helyi integrációs próba: `node scripts/test-create-schedule-local.mjs`.

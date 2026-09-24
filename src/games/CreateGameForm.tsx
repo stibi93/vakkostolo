@@ -4,19 +4,21 @@ import { useNavigate } from 'react-router';
 import { WinePhoto } from '../ui/WinePhoto';
 import { gameErrorMessage } from './api';
 import { parseAlcohol, validateGameInput } from './model';
-import type { GamesApi } from './model';
+import type { GamesApi, InitialStep } from './model';
 import { prepareWinePhoto, WinePhotoError } from './winePhoto';
 
 type PickedPhoto = { blob: Blob; url: string };
-type WineFields = { id: string; name: string; price: string; alcohol: string; photo: PickedPhoto | null; photoMessage: string };
-const emptyWine = (): WineFields => ({ id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
+type WineFields = { kind: 'wine'; id: string; name: string; price: string; alcohol: string; photo: PickedPhoto | null; photoMessage: string };
+const emptyWine = (): WineFields => ({ kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
+type CardFields = { kind: 'break' | 'reveal'; id: string; title: string; message: string; seconds: number; targets: string[] };
+type Entry = WineFields | CardFields;
 export function CreateGameForm({ api }: { api: GamesApi }) {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [timed, setTimed] = useState(true);
   const [seconds, setSeconds] = useState('120');
-  const [reveal, setReveal] = useState('2');
-  const [wines, setWines] = useState<WineFields[]>(() => [emptyWine()]);
+  const [entries, setEntries] = useState<Entry[]>(() => [emptyWine()]);
+  const wines = entries.filter((e): e is WineFields => e.kind === 'wine');
   const [requestId] = useState(() => crypto.randomUUID());
   const [pending, setPending] = useState<false | 'game' | 'photos'>(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -32,17 +34,17 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
   useEffect(() => { if (errors.length) errorBox.current?.focus(); }, [errors]);
 
   function updateWine(id: string, field: 'name' | 'price' | 'alcohol', value: string) {
-    setWines((current) => current.map((wine) => wine.id === id ? { ...wine, [field]: value } : wine));
+    setEntries((current) => current.map((wine) => wine.kind === 'wine' && wine.id === id ? { ...wine, [field]: value } : wine));
   }
   function setPhoto(id: string, photo: PickedPhoto | null, photoMessage: string) {
-    setWines((current) => current.map((wine) => {
-      if (wine.id !== id) return wine;
+    setEntries((current) => current.map((wine) => {
+      if (wine.kind !== 'wine' || wine.id !== id) return wine;
       if (wine.photo && wine.photo !== photo) { URL.revokeObjectURL(wine.photo.url); photoUrls.current.delete(wine.photo.url); }
       return { ...wine, photo, photoMessage };
     }));
   }
   async function pickPhoto(id: string, file: File) {
-    setWines((current) => current.map((wine) => wine.id === id ? { ...wine, photoMessage: 'Fotó előkészítése…' } : wine));
+    setEntries((current) => current.map((wine) => wine.kind === 'wine' && wine.id === id ? { ...wine, photoMessage: 'Fotó előkészítése…' } : wine));
     try {
       const blob = await prepareWinePhoto(file);
       if (!mounted.current) return;
@@ -52,29 +54,44 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
     } catch (error) {
       if (!mounted.current) return;
       const message = error instanceof WinePhotoError ? error.message : 'A kép nem dolgozható fel. Válassz másik fájlt.';
-      setWines((current) => current.map((wine) => wine.id === id ? { ...wine, photoMessage: message } : wine));
+      setEntries((current) => current.map((wine) => wine.kind === 'wine' && wine.id === id ? { ...wine, photoMessage: message } : wine));
     }
   }
   function removeWine(id: string) {
-    setWines((current) => current.filter((wine) => {
-      if (wine.id === id && wine.photo) { URL.revokeObjectURL(wine.photo.url); photoUrls.current.delete(wine.photo.url); }
+    setEntries((current) => current.filter((wine) => {
+      if (wine.kind === 'wine' && wine.id === id && wine.photo) { URL.revokeObjectURL(wine.photo.url); photoUrls.current.delete(wine.photo.url); }
       return wine.id !== id;
     }));
   }
-  function moveWine(index: number, offset: number) {
-    setWines((current) => {
+  function moveStep(index: number, offset: number) {
+    setEntries((current) => {
       const next = [...current];
       [next[index], next[index+offset]] = [next[index+offset], next[index]];
       return next;
     });
   }
+  function addCard(kind: CardFields['kind']) {
+    setEntries(current => [...current, {kind,id:crypto.randomUUID(),title:kind === 'break' ? 'Szünet' : 'Felfedés',message:'',seconds:kind === 'break' ? 300 : 0,targets:[]}]);
+  }
+  function patchCard(id: string, value: Partial<CardFields>) {
+    setEntries(current => current.map(e => e.id === id && e.kind !== 'wine' ? {...e,...value} : e));
+  }
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (submitting.current) return;
-    const input = { title, roundSeconds: timed ? Number(seconds) : 0, revealEvery: Number(reveal),
+    const steps: InitialStep[] = entries.map(e => e.kind === 'wine' ? {kind:'wine',wine_index:wines.findIndex(w=>w.id===e.id)}
+      : {kind:e.kind,title:e.title,message:e.message,seconds:e.seconds,wine_indexes:e.targets.map(id=>wines.findIndex(w=>w.id===id))});
+    const input = { ...(entries.some(e=>e.kind !== 'wine') ? {steps} : {}), title, roundSeconds: timed ? Number(seconds) : 0, revealEvery: 2,
       wines: wines.map((wine) => ({ name: wine.name, priceHuf: wine.price.trim() ? Number(wine.price) : NaN,
         alcoholTenths: parseAlcohol(wine.alcohol) })) };
     const invalid = validateGameInput(input);
+    if (entries.length > 60) invalid.push('Legfeljebb 60 lépés adható hozzá.');
+    entries.forEach((e,i) => {
+      if (e.kind === 'wine') return;
+      if (!e.title.trim() || e.title.trim().length > 100 || e.message.length > 2000) invalid.push(`${i+1}. lépés: adj meg legfeljebb 100 karakteres címet és 2000 karakteres szöveget.`);
+      if (e.kind === 'break' && (!Number.isInteger(e.seconds) || e.seconds < 0 || e.seconds > 7200)) invalid.push(`${i+1}. lépés: a szünet 0–7200 egész másodperc lehet.`);
+      if (e.kind === 'reveal' && (!e.targets.length || e.targets.some(id=>!entries.slice(0,i).some(w=>w.kind==='wine' && w.id===id)))) invalid.push(`${i+1}. lépés: válassz legalább egy, a felfedés előtt szereplő bort. Ellenőrizd a kijelöléseket és a sorrendet.`);
+    });
     setErrors(invalid);
     if (invalid.length) return;
     submitting.current = true;
@@ -103,7 +120,7 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
 
   return <section className="game-section" aria-labelledby="create-title">
     <h2 id="create-title">Új kóstoló</h2>
-    <p>Add meg a kóstoló adatait és a borokat a tervezett sorrendben. A fotó kivételével minden mező kötelező.</p>
+    <p>Add meg a boradatokat, és állítsd össze a kóstoló menetét. A fotók és a kártyák kísérőszövege nem kötelező.</p>
     <form onSubmit={(event) => void submit(event)} noValidate>
       <fieldset className="game-fields" disabled={pending !== false}>
         <legend className="sr-only">A kóstoló adatai</legend>
@@ -111,12 +128,39 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
         <div className="game-settings">
           <label className="timer-toggle"><input type="checkbox" checked={timed} onChange={e => setTimed(e.target.checked)} />Időkorlát használata</label>
           {timed && <label>Kóstolási idő boronként (másodperc)<input type="number" min="30" max="1800" step="1" inputMode="numeric" value={seconds} onChange={(event) => setSeconds(event.target.value)} required /></label>}
-          <label>Felfedés ennyi bor után<input type="number" min="1" max="12" step="1" inputMode="numeric" value={reveal} onChange={(event) => setReveal(event.target.value)} required /></label>
+
         </div>
-        <p className="game-hint">A felfedést később te indítod. Az utolsó blokk kevesebb bort is tartalmazhat.</p>
-        <h3>Borok</h3>
+        <p className="game-hint">A borokat, szüneteket és felfedéseket már itt sorba rendezheted. A felfedéshez egy vagy több, előtte szereplő bort válassz.</p>
+        <h3>A kóstoló menete</h3>
+        <div className="schedule-actions">
+          <button type="button" className="button-secondary" disabled={wines.length >= 12 || entries.length >= 60} onClick={() => setEntries(current => [...current, emptyWine()])}>Bor hozzáadása ({wines.length}/12)</button>
+          <button type="button" className="button-secondary" disabled={entries.length >= 60} onClick={() => addCard('break')}>Szünet hozzáadása</button>
+          <button type="button" className="button-secondary" disabled={entries.length >= 60} onClick={() => addCard('reveal')}>Felfedés hozzáadása</button>
+        </div>
         <p id="wine-privacy" className="game-hint">A borok adatait és fotóit csak te láthatod a felfedésig.</p>
-        {wines.map((wine, index) => <fieldset className="wine-fields" key={wine.id} aria-describedby="wine-privacy">
+        {entries.map((entry, stepIndex) => {
+          if (entry.kind !== 'wine') return <fieldset key={entry.id} className={`wine-fields schedule-step-${entry.kind}`}>
+            <legend>{stepIndex+1}. lépés · {entry.kind === 'break' ? 'Szünet' : 'Felfedés'}</legend>
+            <label>{entry.kind === 'break' ? 'Szünet címe' : 'Felfedés címe'}<input required maxLength={100} value={entry.title} onChange={e=>patchCard(entry.id,{title:e.target.value})} /></label>
+            <label>Játékosoknak megjelenő szöveg<textarea rows={3} maxLength={2000} value={entry.message} onChange={e=>patchCard(entry.id,{message:e.target.value})} /></label>
+            {entry.kind === 'break' ? <label>Szünet hossza (másodperc, 0 = óra nélkül)<input type="number" min={0} max={7200} step={1} value={Number.isFinite(entry.seconds)?entry.seconds:''} onChange={e=>patchCard(entry.id,{seconds:e.target.value===''?NaN:Number(e.target.value)})} /></label>
+              : <fieldset className="reveal-targets"><legend>Bemutatandó borok</legend>
+                <p className="small-note">Jelölj ki egy vagy több korábbi bort.</p>
+                {entries.slice(0,stepIndex).filter((w): w is WineFields=>w.kind==='wine').map(w=><label key={w.id} className="timer-toggle">
+                  <input type="checkbox" checked={entry.targets.includes(w.id)} onChange={e=>patchCard(entry.id,{targets:e.target.checked?[...entry.targets,w.id]:entry.targets.filter(id=>id!==w.id)})} />{wines.findIndex(x=>x.id===w.id)+1}. {w.name || 'Névtelen bor'}
+                </label>)}
+                {entry.targets.filter(id=>!entries.slice(0,stepIndex).some(w=>w.kind==='wine' && w.id===id)).map(id=><label key={id} className="timer-toggle">
+                  <input type="checkbox" checked onChange={()=>patchCard(entry.id,{targets:entry.targets.filter(x=>x!==id)})} />Érvénytelen kijelölés — töröld vagy állítsd helyre a sorrendet
+                </label>)}
+              </fieldset>}
+            <div className="wine-actions">
+              <button type="button" className="button-secondary" disabled={stepIndex===0} aria-label={`${stepIndex+1}. lépés előrébb`} onClick={()=>moveStep(stepIndex,-1)}>Előrébb</button>
+              <button type="button" className="button-secondary" disabled={stepIndex===entries.length-1} aria-label={`${stepIndex+1}. lépés hátrébb`} onClick={()=>moveStep(stepIndex,1)}>Hátrébb</button>
+              <button type="button" className="button-secondary" aria-label={`${stepIndex+1}. lépés törlése`} onClick={()=>setEntries(current=>current.filter(e=>e.id!==entry.id))}>Törlés</button>
+            </div>
+          </fieldset>;
+          const wine=entry,index=wines.findIndex(w=>w.id===entry.id);
+          return <fieldset className="wine-fields" key={wine.id} aria-describedby="wine-privacy">
           <legend>{index+1}. tétel</legend>
           <label>Bor neve és évjárata<input value={wine.name} onChange={(event) => updateWine(wine.id, 'name', event.target.value)} maxLength={200} required autoComplete="off" /></label>
           <div className="game-settings">
@@ -139,18 +183,18 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
             </div>
           </div>
           <div className="wine-actions">
-            <button type="button" className="button-secondary" disabled={index === 0} aria-label={`${index+1}. tétel előrébb`} onClick={() => moveWine(index, -1)}>Előrébb</button>
-            <button type="button" className="button-secondary" disabled={index === wines.length-1} aria-label={`${index+1}. tétel hátrébb`} onClick={() => moveWine(index, 1)}>Hátrébb</button>
+            <button type="button" className="button-secondary" disabled={stepIndex === 0} aria-label={`${index+1}. tétel előrébb`} onClick={() => moveStep(stepIndex, -1)}>Előrébb</button>
+            <button type="button" className="button-secondary" disabled={stepIndex === entries.length-1} aria-label={`${index+1}. tétel hátrébb`} onClick={() => moveStep(stepIndex, 1)}>Hátrébb</button>
             <button type="button" className="button-secondary" disabled={wines.length === 1} aria-label={`${index+1}. tétel törlése`} onClick={() => removeWine(wine.id)}>Törlés</button>
           </div>
-        </fieldset>)}
-        <button type="button" className="button-secondary" disabled={wines.length >= 12} onClick={() => setWines((current) => [...current, emptyWine()])}>Bor hozzáadása ({wines.length}/12)</button>
+        </fieldset>;})}
+
       </fieldset>
       {errors.length > 0 && <div className="auth-message" role="alert" ref={errorBox} tabIndex={-1}>
         <p>A kóstoló mentését nem igazoltuk vissza.</p><ul>{errors.map((error) => <li key={error}>{error}</li>)}</ul>
         <p>Hálózati hiba után ugyanazokkal az adatokkal újrapróbálhatod a mentést.</p>
       </div>}
-      <p className="game-hint">A kóstolót elmentjük. Ezután megnyithatod a várót és meghívhatod a résztvevőket. Az online körök indítása még készül.</p>
+      <p className="game-hint">A teljes menetet együtt mentjük: borok, szünetek és felfedések. Ezután megnyithatod a várót.</p>
       <button type="submit" className="button-primary" disabled={pending !== false}>{pending ? 'Kóstoló mentése…' : 'Kóstoló létrehozása'}</button>
       {pending && <p role="status">{pending === 'photos' ? 'A kóstoló létrejött, fotók feltöltése…' : 'Várakozás a szerver visszaigazolására…'}</p>}
     </form>

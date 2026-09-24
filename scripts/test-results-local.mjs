@@ -42,6 +42,9 @@ try {
   const plan=()=>host.rpc('get_tasting_schedule',{p_game_id:game}).then(r=>data(r,'Menet'));
   const result=client=>client.rpc('get_game_results',{p_game_id:game}).then(r=>data(r,'Eredmény'));
   const act=async action=>host.rpc('control_tasting',{p_game_id:game,p_expected_version:(await plan()).version,p_request_id:randomUUID(),p_action:action}).then(r=>data(r,action));
+  const agenda=await plan();
+  data(await host.rpc('save_tasting_schedule',{p_game_id:game,p_expected_version:agenda.version,p_request_id:randomUUID(),
+    p_steps:agenda.steps.flatMap(w=>[w,{id:randomUUID(),kind:'reveal',title:'Bemutató',message:'',seconds:0,reveal_round_ids:[w.id]}])}),'Felfedési kártyák');
   const round=(await plan()).steps[0].id,path=`${game}/${round}.jpg`;
   const photo=await readFile(new URL('../public/images/blind-tasting-table.jpg',import.meta.url));
   data(await host.storage.from('wine-photos').upload(path,photo,{contentType:'image/jpeg'}),'Szintetikus fotó');

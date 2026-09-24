@@ -72,3 +72,12 @@ it('aktuális szünet és felfedett adatok célzott projekciója; rejtett extra 
   expect(()=>parseGameSnapshot({...value,round:raw.round},game)).toThrow();
   expect(()=>parseGameSnapshot({...value,break:{...value.break,ends_at:'invalid'}},game)).toThrow();
 });
+
+it('az aktív felfedési kártya csak már felfedett, egyedi borazonosítókat tartalmazhat',()=>{
+  const card={id:member,title:'Bemutató',message:'Szöveg',round_ids:[round]};
+  const value={...raw,game:{...raw.game,status:'reveal'},round:null,reveal_card:card,
+    revealed:[{id:round,position:1,name:'Bor',price_huf:4500,alcohol_tenths:130}]};
+  expect(parseGameSnapshot(value,game).revealCard?.roundIds).toEqual([round]);
+  for(const round_ids of [[],[round,round],[member]]) expect(()=>parseGameSnapshot({...value,reveal_card:{...card,round_ids}},game)).toThrow();
+  expect(()=>parseGameSnapshot({...value,game:{...raw.game,status:'tasting'}},game)).toThrow();
+});

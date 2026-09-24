@@ -81,13 +81,3 @@ export function remainingSeconds(closesAt: number, now: number): number {
 export function canSubmit(status: RoundStatus, closesAt: number, now: number): boolean {
   return status === 'open' && now < closesAt;
 }
-
-/** Contiguous unrevealed block; a short last block can be revealed too. */
-export function revealableIndexes(statuses: readonly RoundStatus[], every: number): number[] {
-  if (!Number.isInteger(every) || every < 1) throw new Error('Érvénytelen blokkbeállítás.');
-  const start = statuses.findIndex((status) => status !== 'revealed');
-  if (start === -1) return [];
-  const end = Math.min(start + every, statuses.length);
-  const block = statuses.slice(start, end);
-  return block.every((status) => status === 'closed') ? block.map((_, i) => start + i) : [];
-}

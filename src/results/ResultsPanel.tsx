@@ -8,20 +8,22 @@ const numeric=(value:number)=>value.toLocaleString('hu-HU',{maximumFractionDigit
 const alcohol=(value:number)=>`${numeric(value/10)}% vol`;
 const money=(value:number)=>`${value.toLocaleString('hu-HU')} Ft`;
 
-export function ResultsPanel({ results, gameId, selfId, photos, presentation=false }: {
-  results: GameResults; gameId:string; selfId:string|null; photos?:ResultPhotoApi; presentation?:boolean;
+export function ResultsPanel({ results, gameId, selfId, photos, presentation=false, roundIds, intro }: {
+  results: GameResults; gameId:string; selfId:string|null; photos?:ResultPhotoApi; presentation?:boolean; roundIds?:string[]; intro?: { title:string; message:string };
 }) {
-  const [selected,setSelected]=useState(results.wines.length-1);
+  const wines = roundIds ? roundIds.flatMap(id => results.wines.filter(w => w.id === id)) : results.wines;
+  const [selected,setSelected]=useState(roundIds ? 0 : wines.length-1);
   const [view,setView]=useState<'wine'|'ranking'>('wine');
   const [page,setPage]=useState(0);
-  const wine=results.wines[Math.min(selected,results.wines.length-1)];
+  const wine=wines[Math.min(selected,wines.length-1)];
   const self=results.leaderboard.find(e=>e.id===selfId);
   const pageSize=presentation?5:50, pages=Math.max(1,Math.ceil(results.leaderboard.length/pageSize));
   if(!wine) return <p>Még nincs felfedett eredmény. A borok a játékmester felfedése után jelennek meg.</p>;
   return <section className={`results-panel${presentation?' results-presentation':''}`} aria-label="Kóstoló eredményei">
-    <header className="results-heading"><div><p className="eyebrow">{results.final?'VÉGEREDMÉNY':'FELFEDETT EREDMÉNYEK'}</p>
-      <h2>{results.final?'A kóstoló eredménye':'Eddigi eredmények'}</h2>
-      <p>{results.revealedCount} felfedett bor · legfeljebb {results.maxPoints} pont</p></div>
+    <header className="results-heading"><div><p className="eyebrow">{intro ? 'FELFEDÉS / BEMUTATÓ' : results.final?'VÉGEREDMÉNY':'FELFEDETT EREDMÉNYEK'}</p>
+      <h2>{intro?.title ?? (results.final?'A kóstoló eredménye':'Eddigi eredmények')}</h2>
+      {intro?.message && <p className="live-break-message">{intro.message}</p>}
+      <p>{intro && `${wines.length} bemutatott bor · összesen `}{results.revealedCount} felfedett bor · legfeljebb {results.maxPoints} pont</p></div>
       {!presentation && self && <div className="results-own-total"><strong>{self.points}</strong><span>pont összesen · {self.rank}. hely</span></div>}
     </header>
     {!results.final && <p className="small-note">Csak a már felfedett borok számítanak bele. A sorrend a következő felfedéskor változhat.</p>}
@@ -33,10 +35,10 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
     {view==='wine' ? <>
       <nav className="result-navigation" aria-label="Felfedett bor kiválasztása">
         <button className="button-secondary" disabled={selected<=0} onClick={()=>setSelected(i=>i-1)}>Előző bor</button>
-        <label><span className="sr-only">Felfedett bor</span><select aria-label="Felfedett bor" value={wine.id} onChange={e=>setSelected(results.wines.findIndex(w=>w.id===e.target.value))}>
-          {results.wines.map(w=><option key={w.id} value={w.id}>{String(w.position).padStart(2,'0')}. tétel</option>)}
+        <label><span className="sr-only">Felfedett bor</span><select aria-label="Felfedett bor" value={wine.id} onChange={e=>setSelected(wines.findIndex(w=>w.id===e.target.value))}>
+          {wines.map(w=><option key={w.id} value={w.id}>{String(w.position).padStart(2,'0')}. tétel</option>)}
         </select></label>
-        <button className="button-secondary" disabled={selected>=results.wines.length-1} onClick={()=>setSelected(i=>i+1)}>Következő bor</button>
+        <button className="button-secondary" disabled={selected>=wines.length-1} onClick={()=>setSelected(i=>i+1)}>Következő bor</button>
       </nav>
       <article className="result-wine" aria-label={`${wine.position}. bor eredménye`}>
         <ResultPhoto key={`${wine.id}:${wine.photoUpdatedAt}`} api={photos} gameId={gameId} wine={wine} />

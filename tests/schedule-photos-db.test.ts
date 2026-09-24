@@ -13,7 +13,7 @@ async function user(id: string) {
 interface Step { id: string; title: string; status: string }
 beforeAll(async () => { await loadDatabase(db); });
 afterAll(async () => { await db.close(); });
-it('átrendezéskor a fotó a borhoz kötve marad; csak a valódi blokkfelfedés engedi a játékosnak', async () => {
+it('átrendezéskor a fotó a borhoz kötve marad; csak a valódi kártyás felfedés engedi a játékosnak', async () => {
   await db.query(`insert into auth.users(id,is_anonymous,raw_app_meta_data) values
     ($1,false,'{"vakkostolo_role":"superadmin"}'),($2,true,'{}')`, [host, guest]);
   await user(host);
@@ -33,7 +33,7 @@ it('átrendezéskor a fotó a borhoz kötve marad; csak a valódi blokkfelfedés
   await user(guest); await db.query('select public.join_game($1,$2)', [token, 'Tesztvendég']);
   await user(host);
   const current = await plan();
-  await db.query('select public.save_tasting_schedule($1,$2,$3,$4)', [game, current.version, randomUUID(), JSON.stringify([...current.steps].reverse())]);
+  await db.query('select public.save_tasting_schedule($1,$2,$3,$4)', [game, current.version, randomUUID(), JSON.stringify([...current.steps.slice().reverse(),{id:randomUUID(),kind:'reveal',title:'Bemutató',message:'',seconds:0,reveal_round_ids:current.steps.map(w=>w.id)}])]);
   const wines = (await db.query<{ g: { wines: { round_id: string; position: number; photo_updated_at: string | null }[] } }>('select public.get_host_game($1) g', [game])).rows[0].g.wines;
   expect(wines[1]).toMatchObject({ round_id: photographed, position: 2 });
   expect(wines[1].photo_updated_at).not.toBeNull();

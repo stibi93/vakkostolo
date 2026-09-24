@@ -1,17 +1,20 @@
+import type { TastingSchedule } from '../schedule/model';
 import type { GameStatus } from '../domain/game';
 
 export interface WineInput { name: string; priceHuf: number; alcoholTenths: number }
-export interface CreateGameInput { title: string; roundSeconds: number; revealEvery: number; wines: WineInput[] }
+export type InitialStep = { kind: 'wine'; wine_index: number } | { kind: 'break' | 'reveal'; title: string; message: string; seconds: number; wine_indexes: number[] };
+export interface CreateGameInput { title: string; roundSeconds: number; revealEvery: number; wines: WineInput[]; steps?: InitialStep[] }
 export interface HostGameSummary {
   id: string; title: string; status: GameStatus; roundSeconds: number; revealEvery: number; createdAt: string;
 }
 export interface HostWine extends WineInput {
   position: number; roundId: string; photoUpdatedAt: string | null; photoLocked: boolean;
 }
-export interface HostGame extends HostGameSummary { wines: HostWine[] }
+export interface HostGame extends HostGameSummary { wines: HostWine[]; schedule?: TastingSchedule }
 export interface GamesApi {
   create(input: CreateGameInput, requestId: string): Promise<string>;
   list(): Promise<HostGameSummary[]>;
+  remove?(id: string): Promise<void>;
   get(id: string): Promise<HostGame>;
   uploadPhoto(gameId: string, roundId: string, photo: Blob): Promise<void>;
   removePhoto(gameId: string, roundId: string): Promise<void>;

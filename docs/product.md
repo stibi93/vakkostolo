@@ -57,19 +57,21 @@ host böngészője tárolja, ezért más böngészőben a kivetítő nem tudja m
    [első élő kör](live-round.md).
 6. A határidő lezárja a beküldést. A játékmester korábban is zárhat, vagy
    lejárat előtt hosszabbíthat. Új tétel mindig tudatos játékmesteri művelet.
-7. Felfedés egyenként, minden N. bor után vagy csak a végén. N alapértéke 2,
-   de csak javasolt UX-beállítás. Az adott blokk összes köre lezárt kell legyen.
-   A felfedés nem automatikus: a jogosult játékmester indítja.
-8. Az utolsó blokk kisebb is lehet N-nél. A zárás előtt minden hátralévő tétel
-   felfedhető; a végeredmény csak az összes értékelt tétel felfedése után végleges.
+7. A menetszerkesztőben külön **Felfedés** kártyák helyezhetők a borok és
+   szünetek közé. Minden kártyán egy vagy több, előtte szereplő bor választható.
+   A kártya indításakor a szerver csak ezeket fedi fel. A bor lezárása önmagában
+   nem teszi láthatóvá az adatait, nincs kötelező N boros blokkhatár.
+8. Egy már felfedett bor későbbi bemutatókártyán is szerepelhet.
+   A kóstoló akkor fejezhető be, ha nincs hátralévő lépés vagy nyitott kör.
+   A kártyákból kimaradt borok ekkor is rejtve maradnak; a végső ranglista
+   kizárólag a felfedett borokból számol.
 
 ## Játékmesteri vezérlő
 
 Asztali gépen két oszlop, telefonon egymás alatti panelek. Felül játékállapot és
 kapcsolatjelző. Középen aktuális tétel, hátralévő idő, beküldött/aktív játékosok
 száma. Elsődleges gomb mindig az aktuális állapothoz tartozik: váró megnyitása,
-indítás, kör lezárása, következő tétel. Külön gomb: +30 másodperc, eredmények
-felfedése, prezentáció. A lezárás és felfedés következményét röviden jelzi a UI.
+indítás, kör lezárása, következő tétel. Külön vezérlő: időállítás és prezentáció. A lezárás és felfedés következményét röviden jelzi a UI.
 
 Oldalsáv: sorszámozott borlista (várakozik/kóstolás/lezárt/felfedett),
 létszám, meghívó link és valódi QR. Titkos ár és alkohol csak a host szerkesztőben.
@@ -151,3 +153,10 @@ játékmester későbbi helyreállító folyamata külön feladat.
 
 Nem MVP: fizetés, nyilvános közösségi háló, borfelismerő AI, offline szerver,
 natív mobilapp, globális ranglista vagy korlátlan nagyrendezvény.
+
+## Kóstoló törlése
+
+A saját kóstolók listáján és a kóstoló részletein elérhető a **Kóstoló törlése**.
+A cím és a végleges adatvesztés ismertetése után külön **Végleges törlés**
+gomb indítja. Futó és befejezett kóstoló is törölhető; a meghívó és a
+játékosok hozzáférése megszűnik. A kapcsolt fotók és értékelések is törlődnek.

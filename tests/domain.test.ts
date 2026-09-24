@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canSubmit, canTransition, priceBucketOf, priceBuckets, remainingSeconds, revealableIndexes, scoreRating, validateRating } from '../src/domain/game';
+import { canSubmit, canTransition, priceBucketOf, priceBuckets, remainingSeconds, scoreRating, validateRating } from '../src/domain/game';
 import { summarizeWithoutAi } from '../src/ai/summary';
 
 const wine = { name: 'Tesztbor', priceHuf: 5000, alcoholTenths: 135 };
@@ -45,13 +45,6 @@ describe('körök és határidő', () => {
     expect(canTransition('finished', 'tasting')).toBe(false);
     expect(canTransition('tasting', 'reveal')).toBe(false);
     expect(canTransition('lobby', 'tasting')).toBe(true);
-  });
-  it('csak teljesen lezárt blokkot fed fel, az utolsó töredékblokkot is', () => {
-    expect(revealableIndexes(['closed', 'open', 'pending'], 2)).toEqual([]);
-    expect(revealableIndexes(['closed', 'closed', 'pending'], 2)).toEqual([0, 1]);
-    expect(revealableIndexes(['revealed', 'revealed', 'closed'], 2)).toEqual([2]);
-    expect(revealableIndexes(['revealed'], 2)).toEqual([]);
-    expect(() => revealableIndexes(['closed'], 0)).toThrow();
   });
 });
 

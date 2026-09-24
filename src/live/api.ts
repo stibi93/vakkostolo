@@ -61,8 +61,17 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
       return { id: w.id, name: w.name, position: Number(w.position), priceHuf: Number(w.price_huf), alcoholTenths: Number(w.alcohol_tenths) };
     });
   }
+  let revealCard: GameSnapshot['revealCard'];
+  if (row.reveal_card !== undefined) {
+    const c = record(row.reveal_card);
+    if (!isUuid(c.id) || typeof c.title !== 'string' || !c.title.trim() || c.title.length > 100 ||
+      typeof c.message !== 'string' || c.message.length > 2000 || base.game.status !== 'reveal' || round !== null || ownRating !== null ||
+      !Array.isArray(c.round_ids) || !c.round_ids.length || c.round_ids.length > 12 ||
+      c.round_ids.some(id => !isUuid(id) || !revealed?.some(w => w.id === id)) || new Set(c.round_ids).size !== c.round_ids.length) return invalid();
+    revealCard = { id: c.id, title: c.title, message: c.message, roundIds: c.round_ids };
+  }
   const results = row.results === undefined ? undefined : parseResults(row.results, base.role);
-  return { ...base, round, ownRating, ...(results ? { results } : {}), ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
+  return { ...base, round, ownRating, ...(revealCard ? { revealCard } : {}), ...(results ? { results } : {}), ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
 }
 function fromServer(error: { message: string; code?: string }, status?: number): LiveError {
   const accessLost = ['AUTH_REQUIRED', 'GAME_NOT_FOUND', 'NOT_A_PARTICIPANT'].includes(error.message) || status === 401 || status === 403;

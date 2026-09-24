@@ -1,4 +1,4 @@
-// Local-only Storage + schedule integration; only synthetic records are created.
+// Local-only game deletion integration; only synthetic records are created.
 import { execFileSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { randomUUID } from 'node:crypto';
@@ -38,8 +38,19 @@ try {
   const signed=data(await guest.storage.from('wine-photos').createSignedUrl(path,60),'Felfedett fotó');
   ensure((await fetch(signed.signedUrl)).ok,'Felfedett fotó letöltése sikertelen');
 
-  ensure((await host.storage.from('wine-photos').upload(path,file,{upsert:true,contentType:'image/jpeg'})).error,'Felfedett fotó cserélhető');
-  console.log('Helyi Storage: feltöltés, csere, törlés, rejtett hozzáférés tiltása, valódi felfedés utáni megtekintés és zárolás sikeres.');
+  ensure((await guest.rpc('delete_game',{p_game_id:game})).error,'Vendég törölhet');
+  const toDelete=data(await host.rpc('delete_game',{p_game_id:game}),'Törlés előkészítése');
+  ensure(toDelete.includes(path),'Hiányzik a törlendő fotó');
+  ensure((await host.rpc('delete_game',{p_game_id:game,p_finalize:true})).error,'Fotóval együtt véglegesíthető');
+  const deletedPhotos=await host.storage.from('wine-photos').remove(toDelete);
+  data(deletedPhotos,'Kóstoló fotóinak törlése');
+  data(await host.rpc('delete_game',{p_game_id:game,p_finalize:true}),'Kóstoló törlése');
+  data(await host.rpc('delete_game',{p_game_id:game,p_finalize:true}),'Törlés ismétlése');
+  ensure((await host.rpc('get_host_game',{p_game_id:game})).error,'Törölt kóstoló elérhető');
+  ensure((await guest.rpc('get_game_snapshot',{p_game_id:game})).error,'Törölt játék snapshotja elérhető');
+  ensure((await host.storage.from('wine-photos').download(path)).error,'Törölt kép letölthető');
+  console.log('Kóstoló törlése: fotók Storage API-n át, hozzáférés megszűnése, ismétlés sikeres.');
+  console.log('Helyi Storage: feltöltés, csere, törlés, rejtett hozzáférés tiltása, valódi felfedés utáni megtekintés sikeres.');
 } finally {
   if(paths.length) {
     let removed;

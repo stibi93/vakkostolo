@@ -1,7 +1,8 @@
 # Szerkeszthető kóstolómenet
 
 A játékmester a mentett kóstolóban, a **Borok és szünetek → Menet szerkesztése**
-gombbal tölti be a menetet. Mentett draftban, a váróban és futás közben is
+gombbal nyitja meg a szerkesztőt. A teljes mentett menet a szerkesztőn kívül is
+látható, újratöltés után is, a szünetek címével és szövegével együtt. Mentett draftban, a váróban és futás közben is
 módosíthatók a még meg nem kezdett lépések. Egy menet 1–12 bort és összesen
 legfeljebb 60 lépést tartalmazhat.
 
@@ -10,6 +11,10 @@ legfeljebb 60 lépést tartalmazhat.
 - Szünet bárhová beilleszthető, egyedi címmel (100 karakter) és szöveggel
   (2000 karakter). 0 másodperc esetén nincs óra; egyébként legfeljebb 7200
   másodperc. A számláló lejárta nem indít automatikusan új tételt.
+- Felfedés kártya címmel, üzenettel és egy vagy több bemutatandó borral
+  illeszthető be. Csak a kártya előtti borok választhatók; az átrendezés vagy
+  törlés miatt érvénytelenné vált kijelölést javítani kell. Korábban felfedett bor
+  újra bemutatható. A kártyán nincs óra, a játékmester léptet tovább.
 - A borok számozása a sorrendet követi, a szünet nem kap borsorszámot. A
   játékmesternek a fizikai palackjelöléseket is hozzá kell igazítania.
 - A megkezdett és lezárt tételek adatai és helye megmaradnak. A leadott
@@ -24,11 +29,13 @@ Időkorláttal a játékos egyetlen, görgetéskor is látható, nem villogó ó
 frissítése ugyanazt a körkomponenst tartja meg, így a helyi piszkozat megmarad.
 
 A **Következő lépés indítása** a mentett sorrend szerint lép: bor esetén
-beküldési határidőt nyit, szünet esetén megjeleníti az átvezető szöveget.
-Nyitott, még le nem járt körből nem enged továbblépni. A felfedési blokkok
-szabálya továbbra is érvényes: minden N. lezárt bor után felfedés kell az újabb
-bor előtt. A végső kisebb blokk is felfedhető. A **Kóstoló befejezése** csak
-az összes bor felfedése és a hátralévő lépések befejezése után használható.
+beküldést nyit, szünet esetén megjeleníti az átvezető szöveget,
+Felfedés kártyánál pedig csak a kijelölt borokat mutatja be.
+Nyitott, még le nem járt körből nem enged továbblépni. Nincs kötelező
+blokkos felfedés vagy automatikus adatközlés körlezáráskor.
+A **Kóstoló befejezése** akkor használható, ha nincs hátralévő lépés vagy nyitott
+kör. A ki nem választott borok befejezéskor is rejtve maradnak. A végső ranglista
+a felfedett borok alapján készül.
 Az élő felfedés a fotós borlapot, a játékos saját tippjeit és pontjait,
 valamint a közös ranglistát is megmutatja: [eredmények](results.md).
 
@@ -66,3 +73,31 @@ Az aktív kör `closes_at` értéke ilyenkor NULL; nincs mesterséges távoli ha
 A szerver ettől függetlenül ellenőrzi a nyitott állapotot, tagságot és jogosultságot.
 Kikapcsolás és visszakapcsolás verzióvédett, idempotens művelet; visszakapcsoláskor
 a megadott idő a mentéstől számít. Az eredménysnapshot külső projekciója megmarad.
+
+## Felfedési kártyák — 0014
+
+A `202609240014_reveal_cards.sql` bővíti a privát menetet: `kind='reveal'`,
+`reveal_round_ids uuid[]`. Mentéskor ugyanazon játék korábbi borai, 1–12 egyedi
+azonosító engedélyezett. Végrehajtáskor minden kiválasztott kör closed/revealed.
+A kijelölés, a felfedési másolat és a verzióváltás egy tranzakció.
+A régi `reveal` vezérlőakció is kizárólag a soron következő Felfedés kártyát
+indíthatja; nem kerülheti meg a sorrendet.
+
+A `get_host_game.schedule` tartalmazza a mentett menetet. A játékos snapshotjában
+csak az aktív kártya `reveal_card: {id,title,message,round_ids}` mezője jelenik meg,
+az aktiválással már felfedett borazonosítókkal. A borlapok a kártya kijelölését
+követik, a ranglista az összes eddig felfedett bort összesíti.
+
+A `reveal_every` mező és létrehozási paraméter visszamenőleges kompatibilitás
+miatt megmarad, de már nem vezérli a felfedést. Régi kóstolókhoz nem készülnek
+automatikusan kártyák: a játékmester a hátralévő menethez adhatja hozzá őket.
+
+## Gyors kártyahozzáadás
+
+A mentett kóstoló tetején, az élő vezérlő előtt látható a menet.
+A **Szünet hozzáadása** és **Felfedés hozzáadása** gomb közvetlenül megnyitja
+a szerkesztőt az új kártyával. A szerkesztőben a hozzáadógombok a lista fölött
+vannak. A kártyák továbbra is a **Menet mentése** gombbal rögzülnek.
+Új kóstolónál a Bor hozzáadása, Szünet hozzáadása és Felfedés hozzáadása már
+az első mentés előtt elérhető. Közös listában rendezhetők, a felfedési kártya
+előtti borok jelölhetők ki. A teljes menet egyetlen létrehozással mentődik.

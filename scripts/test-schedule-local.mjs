@@ -52,7 +52,7 @@ try {
   const round=(await snap()).round.id;
   data(await one.rpc('submit_rating',{p_round_id:round,p_price_bucket:5,p_alcohol_tenths:130,p_liking:8}),'Tipp');
   const current=await plan();
-  data(await host.rpc('save_tasting_schedule',{p_game_id:game,p_expected_version:current.version,p_request_id:randomUUID(),p_steps:[current.steps[2],current.steps[1]]}),'Élő átrendezés');
+  data(await host.rpc('save_tasting_schedule',{p_game_id:game,p_expected_version:current.version,p_request_id:randomUUID(),p_steps:[current.steps[2],{id:randomUUID(),kind:'reveal',title:'Bemutató',message:'',seconds:0,reveal_round_ids:original.steps.map(w=>w.id)},current.steps[1]]}),'Élő átrendezés');
   ensure((await snap()).own_rating.price_bucket===5,'Élő szerkesztés elvesztette a tippet');
   const beforeDisable=changed; await act('time',0); await until(()=>changed>beforeDisable,'Időkorlát kikapcsolás Realtime');
   const untimed=await snap(); ensure(untimed.round.closes_at===null && untimed.round.can_submit,'Időkorlát nélküli snapshot hibás');
@@ -64,7 +64,11 @@ try {
     peer.rpc('save_tasting_schedule',{p_game_id:game,p_expected_version:version,p_request_id:randomUUID(),p_steps:running.steps.filter(s=>s.status==='pending')})]);
   ensure(race.filter(r=>!r.error).length===1 && race.some(r=>r.error?.message==='VERSION_CONFLICT'),'Lezárás és mentés versengése hibás');
   if((await snap()).round.status==='open') await act('close');
-  await act('next'); await act('close'); await act('reveal'); await act('next');
+  await act('next'); await act('close');
+  ensure(!(await snap()).revealed?.length,'Lezárás automatikusan felfedett');
+  await act('next');
+  ensure((await snap()).reveal_card.round_ids.length===2 && (await snap()).revealed.length===2,'A kártya nem fedte fel a két bort');
+  await act('next');
   ensure((await snap()).break.message==='Egyedi átvezetés','Átvezetés nem érkezett meg');
   ensure((await outsider.rpc('get_tasting_schedule',{p_game_id:game})).error,'Vendég kezelheti a menetet');
   await act('finish'); ensure((await snap()).game.status==='finished','Nem zárult le');

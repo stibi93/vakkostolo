@@ -129,3 +129,65 @@ describe('host olvasási határok', () => {
     await expect(db.query('select private.require_permanent_user()')).rejects.toThrow(/permission denied/);
   });
 });
+
+describe('kóstoló törlése', () => {
+  it('csak saját aal2 host készítheti elő és törölheti; az ismétlés biztonságos', async () => {
+    const id=await create();
+    await asUser(other);await expect(db.query('select public.delete_game($1)',[id])).rejects.toThrow('GAME_NOT_FOUND');
+    await asUser(guest);await expect(db.query('select public.delete_game($1)',[id])).rejects.toThrow('PERMANENT_AUTH_REQUIRED');
+    await asUser(host,'authenticated','aal1');await expect(db.query('select public.delete_game($1)',[id])).rejects.toThrow(/MFA/);
+    await asUser(host);
+    await expect(db.query('select public.delete_game($1,true)',[id])).rejects.toThrow('DELETE_NOT_PREPARED');
+    await db.query('select public.delete_game($1)',[id]);
+    await db.query('select public.delete_game($1,true)',[id]);
+    await db.query('select public.delete_game($1)',[id]);
+    await db.query('select public.delete_game($1,true)',[id]);
+    expect((await db.query('select * from public.games')).rows).toHaveLength(0);
+    expect((await db.query('select * from public.rounds')).rows).toHaveLength(0);
+    expect((await db.query('select * from public.wine_secrets')).rows).toHaveLength(0);
+    await expect(db.query('select public.get_host_game($1)',[id])).rejects.toThrow('GAME_NOT_FOUND');
+    await asUser(other);await expect(db.query('select public.delete_game($1,true)',[id])).rejects.toThrow('GAME_NOT_FOUND');
+  });
+  it('a felfedett fotó is törölhető előkészítés után, megmaradt objektumnál a játék nem törlődik',async()=>{
+    const id=await create();
+    const round=(await db.query<{id:string}>('select id from public.rounds where game_id=$1 limit 1',[id])).rows[0].id;
+    const path=id+'/'+round+'.jpg';
+    await db.query("insert into storage.objects(bucket_id,name) values('wine-photos',$1)",[path]);
+    await db.exec('reset role');
+    await db.query("update public.rounds set status='revealed',opened_at=now(),closes_at=now()+interval '120 seconds' where id=$1",[round]);
+    await asUser(host);
+    expect((await db.query('delete from storage.objects where name=$1',[path])).affectedRows).toBe(0);
+    const prepared=await db.query<{paths:string[]}>('select public.delete_game($1) paths',[id]);
+    expect(prepared.rows[0].paths).toEqual([path]);
+    await expect(db.query('select public.delete_game($1,true)',[id])).rejects.toThrow('PHOTOS_REMAIN');
+    await asUser(other);expect((await db.query('delete from storage.objects where name=$1',[path])).affectedRows).toBe(0);
+    await asUser(host);expect((await db.query('delete from storage.objects where name=$1',[path])).affectedRows).toBe(1);
+    await db.query('select public.delete_game($1,true)',[id]);
+  });
+});
+
+describe('teljes menet létrehozása',()=>{
+  const agenda=[{kind:'wine',wine_index:0},{kind:'break',title:'Pihenő',message:'Víz és kenyér',seconds:0},
+    {kind:'wine',wine_index:1},{kind:'reveal',title:'Közös bemutató',message:'Két bor',wine_indexes:[0,1]}];
+  const createAgenda=(steps:unknown=agenda)=>db.query<{id:string}>('select public.create_game_with_schedule($1,$2,$3,$4,$5,$6) id',
+    [request,'Teljes menet',120,2,JSON.stringify(wines),JSON.stringify(steps)]);
+  it('sorrend és többboros felfedés együtt menthető; ismétlés nem dupláz és nem írja vissza a későbbi szerkesztést',async()=>{
+    const id=(await createAgenda()).rows[0].id;
+    const p=(await db.query<{p:{version:number;steps:{id:string;kind:string;reveal_round_ids:string[]}[]}}>('select public.get_tasting_schedule($1) p',[id])).rows[0].p;
+    expect(p.steps.map(s=>s.kind)).toEqual(['wine','break','wine','reveal']);
+    expect(p.steps[3].reveal_round_ids).toEqual([p.steps[0].id,p.steps[2].id]);
+    await db.query('select public.save_tasting_schedule($1,$2,gen_random_uuid(),$3)',[id,p.version,JSON.stringify(p.steps.filter(s=>s.kind==='wine').map((s,i)=>({...s,title:wines[i].name,seconds:0,price_huf:wines[i].price_huf,alcohol_tenths:wines[i].alcohol_tenths})))]);
+    expect((await createAgenda()).rows[0].id).toBe(id);
+    expect((await db.query<{p:{steps:unknown[]}}>('select public.get_tasting_schedule($1) p',[id])).rows[0].p.steps).toHaveLength(2);
+    await expect(createAgenda(agenda.slice(0,3))).rejects.toThrow('REQUEST_ID_CONFLICT');
+  });
+  it('hibás, üres vagy későbbi borra mutató felfedésnél az egész létrehozás visszagördül',async()=>{
+    for(const indexes of [[],[1],[0,0],[-1],[20]]) {
+      await expect(createAgenda([agenda[0],{...agenda[3],wine_indexes:indexes},agenda[2]])).rejects.toThrow();
+      expect((await db.query('select * from public.games')).rows).toHaveLength(0);
+    }
+    await expect(createAgenda([agenda[0],agenda[0]])).rejects.toThrow('INVALID_SCHEDULE');
+    await asUser(guest);await expect(createAgenda()).rejects.toThrow('PERMANENT_AUTH_REQUIRED');
+    await asUser(host,'authenticated','aal1');await expect(createAgenda()).rejects.toThrow(/MFA/);
+  });
+});

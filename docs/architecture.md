@@ -52,12 +52,16 @@ flowchart LR
 stateDiagram-v2
   [*] --> draft
   draft --> lobby: váró megnyitása
-  lobby --> tasting: első kör indítása
+  lobby --> tasting: első bor indítása
+  lobby --> intermission: kezdő szünet
   tasting --> intermission: kör lezárása / határidő
   intermission --> tasting: következő kör
-  intermission --> reveal: lezárt blokk felfedése
+  intermission --> reveal: Felfedés kártya indítása
   reveal --> tasting: következő kör
-  reveal --> finished: minden kör lezárt és felfedett
+  reveal --> intermission: szünet
+  reveal --> reveal: következő bemutatókártya
+  intermission --> finished: nincs hátralévő lépés vagy nyitott kör
+  reveal --> finished: nincs hátralévő lépés vagy nyitott kör
 ```
 
 Az aktív kör saját állapota `pending → open → closed → revealed`.

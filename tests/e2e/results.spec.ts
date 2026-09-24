@@ -8,7 +8,7 @@ const first='20000000-0000-0000-0000-000000000001', second='20000000-0000-0000-0
 const member=(i:number)=>`30000000-0000-0000-0000-${String(i).padStart(12,'0')}`;
 const participants=Array.from({length:10},(_,i)=>({id:member(i+1),nickname:i===0?'Anna':`Vendég ${i+1}`,seat:i+1,joined_at:'2026-09-24T10:00:00Z'}));
 function fixture(revealed=true) {
-  const hub=realtimeHub();const state={revealed,finished:false,failPhoto:false,photoReads:0};
+  const hub=realtimeHub();const state={revealed,finished:false,failPhoto:false,photoReads:0,card:null as null | {id:string;title:string;message:string;round_ids:string[]}};
   const publicWines=[{id:first,position:1,name:'Dűlőválogatás Furmint 2024',price_huf:5000,price_bucket:5,alcohol_tenths:135,photo_updated_at:'2026-09-24T10:00:00Z',response_count:2,average_liking:8},
     {id:second,position:2,name:'Kékfrankos 2023',price_huf:7500,price_bucket:6,alcohol_tenths:125,photo_updated_at:null,response_count:0,average_liking:null}];
   return {state,hub,async attach(page:Page,host=false) {
@@ -24,7 +24,8 @@ function fixture(revealed=true) {
       if(path==='/rest/v1/rpc/get_game_snapshot')return route.fulfill({json:{
         ...lobbyResponse(game,participants,host?'host':'player',host?null:member(1)),
         game:{id:game,title:'Őszi kóstoló',status:state.revealed?(state.finished?'finished':'reveal'):'tasting',version:state.revealed?4:2},
-        round:{id:second,position:2,status:state.revealed?'revealed':'open',opened_at:new Date(Date.now()-30000).toISOString(),closes_at:new Date(Date.now()+60000).toISOString(),eligible:!host,can_submit:!host&&!state.revealed},own_rating:null,
+        round:state.card ? null : {id:second,position:2,status:state.revealed?'revealed':'open',opened_at:new Date(Date.now()-30000).toISOString(),closes_at:new Date(Date.now()+60000).toISOString(),eligible:!host,can_submit:!host&&!state.revealed},own_rating:null,
+        ...(state.card ? {reveal_card:state.card} : {}),
         ...(state.revealed?{revealed:publicWines,results:{scoring_version:2,final:state.finished,revealed_count:2,max_points:200,
           wines:publicWines.map((w,i)=>({...w,own:host||i===1?null:{price_bucket:6,price_huf:null,alcohol_tenths:140,liking:8,price_points:25,alcohol_points:41.6666666666667,total:67}})),
           leaderboard:participants.map((p,i)=>({id:p.id,nickname:p.nickname,seat:p.seat,rank:i<2?1:3,points:i<2?67:0,answered:i<2?1:0,unscored:0}))}}:{})
@@ -91,4 +92,24 @@ test('befejezett kóstoló hostoldaláról is megnyitható a prezentáció',asyn
   const link=page.getByRole('link',{name:'Eredmények kivetítése'});
   await expect(link).toBeVisible();await expect(link).toHaveAttribute('href',`/present/${game}`);
   await expect(link).toHaveAttribute('target','_blank');
+});
+
+for (const host of [false,true]) test(`felfedési kártya kiválasztott borai a ${host?'kivetítőn':'játékosnál'}`,async({page},info)=>{
+  const f=fixture();f.state.card={id:member(20),title:'Illatok összehasonlítása',message:'Kezdjük a furminttal.',round_ids:[first]};
+  await f.attach(page,host);await page.goto(`/${host?'present':'play'}/${game}`);
+  await expect(page.getByRole('heading',{name:'Illatok összehasonlítása'})).toBeVisible();
+  await expect(page.getByLabel('Felfedett bor',{exact:true})).toHaveValue(first);
+  await expect(page.getByRole('button',{name:'Következő bor',exact:true})).toBeDisabled();
+  await expect(page.getByRole('heading',{name:'Kékfrankos 2023'})).toHaveCount(0);
+  if(host && info.project.name.includes('desktop')) await expect(page.getByRole('article',{name:'1. bor eredménye'})).toBeInViewport({ratio:1});
+  await page.screenshot({path:info.outputPath('single-reveal-card.png'),fullPage:true});
+  f.state.card={id:member(21),title:'Közös összevetés',message:'Most mindkét bort bemutatjuk.',round_ids:[second,first]};
+  f.hub.change(game,'games');
+  await expect(page.getByRole('heading',{name:'Közös összevetés'})).toBeVisible();
+  await expect(page.getByLabel('Felfedett bor',{exact:true})).toHaveValue(second);
+  await page.getByRole('button',{name:'Következő bor',exact:true}).click();
+  await expect(page.getByLabel('Felfedett bor',{exact:true})).toHaveValue(first);
+  await page.reload();
+  await expect(page.getByLabel('Felfedett bor',{exact:true})).toHaveValue(second);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

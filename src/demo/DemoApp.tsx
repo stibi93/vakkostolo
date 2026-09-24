@@ -1,9 +1,10 @@
+import '../schedule/schedule.css';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { HomeMotionToggle } from '../ui/HomeAtmosphere';
 import { useAppMotion } from '../ui/useAppMotion';
 import type { FormEvent } from 'react';
-import { canSubmit, priceBucketLabel, remainingSeconds, revealableIndexes, scoreRating, validateRating } from '../domain/game';
+import { canSubmit, priceBucketLabel, remainingSeconds, scoreRating, validateRating } from '../domain/game';
 import type { GameStatus, Rating, RoundStatus } from '../domain/game';
 import { RatingFields } from '../rating/RatingFields';
 import { draftFromRating, ratingFromDraft } from '../rating/draft';
@@ -37,7 +38,8 @@ export function DemoApp() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [ratings, setRatings] = useState<Record<number, Rating>>({});
   const [duration, setDuration] = useState(120);
-  const [revealEvery, setRevealEvery] = useState(2);
+  const [cards, setCards] = useState([{after:2,targets:[0,1]},{after:3,targets:[2]}]);
+  const [shownCards,setShownCards] = useState(0);
   const [now, setNow] = useState(Date.now);
   const [notice, setNotice] = useState('Válassz nézetet, és próbáld ki egy kóstoló menetét.');
 
@@ -48,7 +50,9 @@ export function DemoApp() {
 
   const current = rounds[activeIndex];
   const seconds = remainingSeconds(current.closesAt, now);
-  const block = revealableIndexes(rounds.map((round) => round.status), revealEvery);
+  const tasted = rounds.filter(round => round.status === 'closed' || round.status === 'revealed').length;
+  const nextCard = cards[shownCards];
+  const block = nextCard && tasted >= nextCard.after ? nextCard.targets : [];
   const pendingIndex = rounds.findIndex((round) => round.status === 'pending');
   const revealed = rounds.flatMap((round, index) => round.status === 'revealed' ? [index] : []);
   const totalScore = revealed.reduce((sum, index) => sum + (ratings[index] ? scoreRating(ratings[index], demoWines[index]) : 0), 0);
@@ -72,7 +76,8 @@ export function DemoApp() {
   }
 
   function revealBlock() {
-    if (!block.length || status !== 'intermission') return;
+    if (!block.length || !['intermission','reveal'].includes(status)) return;
+    setShownCards(value => value+1);
     setRounds((previous) => previous.map((round, index) => block.includes(index) ? { ...round, status: 'revealed' } : round));
     setStatus('reveal');
     setNotice('A felfedett borok és az eredmények a Prezentáció nézetben láthatók.');
@@ -126,7 +131,7 @@ export function DemoApp() {
             {view === 'host' && <>
               <div className="session-heading">
                 <h3>{status === 'lobby' ? 'Kóstoló beállítása' : status === 'finished' ? 'A kóstoló véget ért' : `${number(activeIndex + 1)}. tétel`}</h3>
-                <p className="muted">{status === 'lobby' ? 'Állítsd be a körök hosszát és a felfedés gyakoriságát, majd indítsd el a kóstolót.' : 'A következő tételt és az eredmények felfedését a játékmester indítja.'}</p>
+                <p className="muted">{status === 'lobby' ? 'Állítsd be az időt és a két mintakártyán bemutatandó borokat, majd indítsd el a kóstolót.' : 'A következő tételt és az eredmények felfedését a játékmester indítja.'}</p>
               </div>
               <div className="session-stats">
                 <div><strong>03</strong><span>kóstolandó bor</span></div>
@@ -144,8 +149,18 @@ export function DemoApp() {
                     }
                   }} />Időkorlát használata</label>
                 {duration !== 0 && <label>Kóstolási idő<select value={duration} disabled={status !== 'lobby'} onChange={(event) => setDuration(Number(event.target.value))}><option value={60}>1 perc / bor</option><option value={120}>2 perc / bor</option><option value={180}>3 perc / bor</option></select></label>}
-                <label>Felfedés gyakorisága<select value={revealEvery} disabled={status !== 'lobby'} onChange={(event) => setRevealEvery(Number(event.target.value))}><option value={1}>Minden bor után</option><option value={2}>2 boronként</option><option value={3}>Csak a végén</option></select></label>
+
               </div>
+              <section className="schedule-section" aria-label="Demó felfedési kártyái">
+                <p className="small-note">A mintamenetben két Felfedés kártya szerepel. Az online kóstoló szerkesztőjében szabadon rendezheted a borokat, szüneteket és kártyákat.</p>
+                {cards.map((card,i) => <fieldset className="reveal-targets" key={i} disabled={status !== 'lobby'}>
+                  <legend>{i+1}. Felfedés kártya · {card.after}. bor után</legend>
+                  {demoWines.slice(0,card.after).map((_,index) => <label className="timer-toggle" key={index}>
+                    <input type="checkbox" checked={card.targets.includes(index)} disabled={card.targets.length===1 && card.targets.includes(index)}
+                      onChange={e => setCards(previous=>previous.map((c,j)=>j===i?{...c,targets:e.target.checked?[...c.targets,index]:c.targets.filter(x=>x!==index)}:c))} />{index+1}. tétel bemutatása
+                  </label>)}
+                </fieldset>)}
+              </section>
               <div className="actions">
                 {canStart && <button className="button-primary" onClick={startRound}>{status === 'lobby' ? 'Kóstoló indítása' : 'Következő tétel'}<span aria-hidden="true">↗</span></button>}
                 {status === 'tasting' && <>
@@ -156,8 +171,8 @@ export function DemoApp() {
                     setNotice('A kör ideje 30 másodperccel meghosszabbítva.');
                   }}>+30 másodperc</button>
                 </>}
-                {status === 'intermission' && block.length > 0 && <button className="button-primary" onClick={revealBlock}>Eredmények felfedése <span aria-hidden="true">↗</span></button>}
-                {status === 'reveal' && revealed.length === rounds.length && <button className="button-primary" onClick={() => { setStatus('finished'); setView('presentation'); setNotice('A kóstoló véget ért. Minden bor és a végeredmény megtekinthető.'); }}>Kóstoló befejezése <span aria-hidden="true">↗</span></button>}
+                {['intermission','reveal'].includes(status) && block.length > 0 && <button className="button-primary" onClick={revealBlock}>Felfedés kártya indítása <span aria-hidden="true">↗</span></button>}
+                {status === 'reveal' && shownCards === cards.length && pendingIndex < 0 && <button className="button-primary" onClick={() => { setStatus('finished'); setView('presentation'); setNotice('A kóstoló véget ért. A kiválasztott borok és a végeredmény megtekinthető.'); }}>Kóstoló befejezése <span aria-hidden="true">↗</span></button>}
                 {status === 'finished' && <button className="button-primary" onClick={() => setView('presentation')}>Végeredmény megtekintése <span aria-hidden="true">↗</span></button>}
               </div>
               <p className="small-note">{status === 'tasting' ? `${ratings[activeIndex] ? 1 : 0} / 1 helyi tipp beküldve. ${seconds === 0 ? 'Lejárt az idő; zárd le a kört a továbblépéshez.' : 'A beküldés a Játékos nézetben próbálható ki.'}` : 'A borok neve és valódi adatai a felfedésig rejtve maradnak a játékosnézetben.'}</p>
@@ -174,7 +189,7 @@ export function DemoApp() {
               <div className="session-heading"><h3>{revealed.length ? 'Felfedett borok' : 'Még nincs felfedett bor'}</h3><p className="muted">{revealed.length ? 'Mintaborok és a demóban beküldött tippjeid.' : 'A felfedés után itt jelennek meg a boradatok, a tippjeid és a pontszámaid.'}</p></div>
               {revealed.map((index) => <article className="result-card" key={index}><WinePhoto src={demoPhotos.photos[index].src} alt={`${demoWines[index].name} – ${demoPhotos.photos[index].custom ? 'saját kép' : 'AI-mintafotó'}`} number={number(index + 1)} /><div><h4>{demoWines[index].name}</h4><p className="small-note">{demoPhotos.photos[index].src ? demoPhotos.photos[index].custom ? 'Saját kép · helyi demó' : 'AI-val készített mintafotó' : 'Kép nélküli mintabor'}</p><p>{huf(demoWines[index].priceHuf)} <span className="separator">/</span> {alcohol(demoWines[index].alcoholTenths)}</p><p className="small-note">{ratings[index] ? `Tipped: ${priceBucketLabel(ratings[index].priceBucket)} · ${alcohol(ratings[index].alcoholTenths)} · Tetszés: ${ratings[index].liking}/10` : 'Nem érkezett tipped erre a tételre.'}</p></div><strong>{ratings[index] ? scoreRating(ratings[index], demoWines[index]) : 0}<small>pont</small></strong></article>)}
               {revealed.length > 0 && <div className="score-summary"><span>{status === 'finished' ? 'Végeredmény' : 'Eddigi eredmény'} · Te</span><strong>{totalScore}<small> / {revealed.length * 100} pont</small></strong></div>}
-              {status === 'finished' && <p className="summary-copy">{summarizeWithoutAi({ allRoundsRevealed: true, participantCount: 1, wines: demoWines.map((wine, index) => ({ label: wine.name, responseCount: ratings[index] ? 1 : 0, meanLiking: ratings[index]?.liking ?? null })) })}</p>}
+              {status === 'finished' && revealed.length === rounds.length && <p className="summary-copy">{summarizeWithoutAi({ allRoundsRevealed: revealed.length === rounds.length, participantCount: 1, wines: demoWines.map((wine, index) => ({ label: wine.name, responseCount: ratings[index] ? 1 : 0, meanLiking: ratings[index]?.liking ?? null })) })}</p>}
             </>}
           </section>
 

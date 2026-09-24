@@ -33,3 +33,12 @@
 .wine-fields { border-color: var(--control-border); border-top: 3px solid var(--accent); background: var(--paper); }
 .wine-fields legend { background: var(--accent); color: var(--sheet); padding: 6px 12px; font-family: var(--display); font-size: 17px; }
 .host-game-list a { color: var(--accent); font-family: var(--display); font-size: 22px; line-height: 1.3; }
+
+.game-delete { margin-block: 12px; min-width: 0; }
+.host-game-list .game-delete { grid-column: 1 / -1; }
+.schedule-fields > .schedule-actions { margin-bottom: 20px; }
+.game-fields textarea { width: 100%; min-width: 0; padding: 12px; resize: vertical; border: 1px solid var(--control-border); background: var(--sheet); color: var(--ink); font: inherit; }
+.game-fields textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.game-fields .timer-toggle { display: flex; align-items: center; gap: 10px; }
+.game-fields .timer-toggle input { width: 20px; height: 20px; flex-shrink: 0; }
+.game-fields .schedule-step-break { background: var(--blue); }

@@ -37,9 +37,8 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft }:
         <p className="small-note">Lezárás után ehhez a borhoz már nem érkezhet tipp.</p>
       </> : <>
         <div className="schedule-actions"><button className="button-primary" onClick={() => void act('next')}>Következő lépés indítása</button>
-          <button className="button-secondary" onClick={() => void act('reveal')}>Lezárt blokk felfedése</button>
           <button className="button-secondary" onClick={() => void act('finish')}>Kóstoló befejezése</button></div>
-        <p className="small-note">A következő lépés a mentett sorrend szerinti bor vagy szünet. A felfedés megmutatja a lezárt blokk boradatait a játékosoknak.</p>
+        <p className="small-note">A következő lépés a mentett sorrend szerinti bor, szünet vagy Felfedés kártya. Csak a kártyán kijelölt borok válnak láthatóvá.</p>
       </>}
     </fieldset>
     {error && <p className="auth-message" role="alert">{error}</p>}

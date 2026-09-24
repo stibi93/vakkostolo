@@ -26,6 +26,7 @@
     "test:live:local": "node scripts/test-live-local.mjs",
     "test:results:local": "node scripts/test-results-local.mjs",
     "test:schedule:local": "node scripts/test-schedule-local.mjs",
+    "test:delete:local": "node scripts/test-delete-local.mjs",
     "test:photos:local": "node scripts/test-photos-local.mjs"
   },
   "dependencies": {

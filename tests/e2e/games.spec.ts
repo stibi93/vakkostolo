@@ -11,6 +11,7 @@ interface StoredGame {
 }
 interface CreatePayload {
   p_request_id: string; p_title: string; p_round_seconds: number; p_reveal_every: number;
+  p_steps?: {kind:string;wine_index?:number;wine_indexes?:number[];title?:string;message?:string;seconds?:number}[];
   p_wines: { name: string; price_huf: number; alcohol_tenths: number }[];
 }
 async function setup(page: Page) {
@@ -22,7 +23,7 @@ async function setup(page: Page) {
     }
   }, authSession());
   const state = { game: null as StoredGame | null, calls: [] as CreatePayload[], loseFirstResponse: false,
-    malformed: false, failList: false };
+    malformed: false, failList: false, failDelete: false, deletes: 0 };
   await page.route('https://auth.vakkostolo.test/**', async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === '/auth/v1/user') return route.fulfill({ json: authUser });
@@ -31,7 +32,13 @@ async function setup(page: Page) {
       if (state.failList) return route.fulfill({ status: 503, json: { message: 'fixture unavailable' } });
       return route.fulfill({ json: state.game ? [state.game] : [] });
     }
-    if (url.pathname === '/rest/v1/rpc/create_game') {
+    if (url.pathname === '/rest/v1/rpc/delete_game') {
+      state.deletes++;
+      if (state.failDelete) return route.fulfill({status:503,json:{message:'unavailable'}});
+      if (route.request().postDataJSON().p_finalize) state.game=null;
+      return route.fulfill({json:[]});
+    }
+    if (['/rest/v1/rpc/create_game','/rest/v1/rpc/create_game_with_schedule'].includes(url.pathname)) {
       const body = route.request().postDataJSON() as CreatePayload;
       state.calls.push(body);
       expect(body).not.toHaveProperty('host_id');
@@ -153,4 +160,49 @@ test('új kóstoló időkorlát nélkül is létrehozható',async({page})=>{
   await expect(page.getByRole('heading',{name:'Őszi kóstoló'})).toBeVisible();
   expect(state.calls[0].p_round_seconds).toBe(0);
   await expect(page.getByText('Időkorlát nélkül',{exact:false})).toBeVisible();
+});
+
+test('kóstoló törlés: mégse, hiba, újrapróba és lista frissítése',async({page},info)=>{
+  const state=await setup(page);
+  state.game={id:gameId,title:'Törlendő próba',status:'draft',round_seconds:120,reveal_every:2,created_at:new Date().toISOString(),wines:[]};
+  await page.goto('/host');
+  await page.getByRole('button',{name:'Kóstoló törlése · Törlendő próba'}).click();
+  await page.getByRole('button',{name:'Mégse',exact:true}).click();expect(state.deletes).toBe(0);
+  await page.getByRole('button',{name:'Kóstoló törlése · Törlendő próba'}).click();
+  state.failDelete=true;
+  await page.getByRole('button',{name:'Végleges törlés',exact:true}).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await page.getByRole('group',{name:'Kóstoló törlésének megerősítése: Törlendő próba'}).screenshot({path:info.outputPath('delete-confirm.png')});
+  state.failDelete=false;
+  await page.getByRole('button',{name:'Végleges törlés',exact:true}).focus();await page.keyboard.press('Enter');
+  await expect(page.getByText('A kóstoló törölve.',{exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Törlendő próba',exact:true})).toHaveCount(0);
+  await page.reload();await expect(page.getByText('Még nincs mentett kóstolód.',{exact:true})).toBeVisible();
+});
+
+test('új kóstoló: szünet és többboros felfedés már az első mentés előtt',async({page},info)=>{
+  const state=await setup(page);await fillGame(page);
+  await expect(page.getByRole('button',{name:'Szünet hozzáadása',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Szünet hozzáadása',exact:true}).click();
+  await page.getByLabel('Szünet címe').fill('Közös pihenő');
+  await page.getByRole('button',{name:/Bor hozzáadása/}).click();
+  await fillWine(page,2,'Második bor','5000','12');
+  await page.getByRole('button',{name:'Felfedés hozzáadása',exact:true}).click();
+  await page.getByLabel('Felfedés címe').fill('Két bor bemutatása');
+  await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('válassz legalább egy');
+  expect(state.calls).toHaveLength(0);
+  await page.getByRole('checkbox',{name:'1. Első mintabor 2024',exact:true}).check();
+  await page.getByRole('checkbox',{name:'2. Második bor',exact:true}).check();
+  await page.getByRole('region',{name:'Új kóstoló',exact:true}).screenshot({path:info.outputPath('create-full-schedule.png')});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  state.loseFirstResponse=true;
+  await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).focus();await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(new RegExp(`/host/${gameId}$`));
+  expect(state.calls).toHaveLength(2);
+  expect(state.calls[0]).toEqual(state.calls[1]);
+  expect(state.calls[0].p_steps?.map(s=>s.kind)).toEqual(['wine','break','wine','reveal']);
+  expect(state.calls[0].p_steps?.[3].wine_indexes).toEqual([0,1]);
 });

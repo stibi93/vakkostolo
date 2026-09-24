@@ -30,6 +30,8 @@ beforeEach(async()=>{
   const token=(await db.query<{t:{token:string}}>('select public.issue_invite($1) t',[game])).rows[0].t.token;
   for(const [id,name] of [[one,'Anna'],[two,'Béla']]) {await user(id);await db.query('select public.join_game($1,$2)',[token,name]);}
   await user(host);rounds=(await db.query<{id:string}>('select id from public.rounds where game_id=$1 order by position',[game])).rows.map(r=>r.id);
+  const plan=(await db.query<{p:{version:number;steps:{id:string}[]}}>('select public.get_tasting_schedule($1) p',[game])).rows[0].p;
+  await db.query('select public.save_tasting_schedule($1,$2,$3,$4)',[game,plan.version,randomUUID(),JSON.stringify(plan.steps.flatMap(w=>[w,{id:randomUUID(),kind:'reveal',title:'Bemutató',message:'',seconds:0,reveal_round_ids:[w.id]}]))]);
   await db.query("insert into storage.objects(bucket_id,name) values('wine-photos',$1)",[`${game}/${rounds[0]}.jpg`]);
 });
 afterAll(async()=>{await db.close();});

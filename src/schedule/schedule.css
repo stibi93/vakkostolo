@@ -27,3 +27,10 @@
 .live-revealed li { border-top: 1px solid var(--line); padding: 16px 0; }
 @media(min-width:760px) { .schedule-wine-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } }
 .schedule-section textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+.schedule-overview { margin-top: 24px; }
+.schedule-overview .schedule-step-heading strong { overflow-wrap: anywhere; min-width: 0; }
+.schedule-step-reveal { border-left-color: var(--accent); background: var(--paper); border-top: 2px solid var(--accent); }
+.reveal-targets { border: 1px solid var(--line); margin-bottom: 20px; padding: 16px; min-width: 0; }
+.schedule-section .timer-toggle { display: flex; align-items: center; gap: 12px; }
+.schedule-section .timer-toggle input { width: 20px; height: 20px; flex-shrink: 0; padding: 0; }

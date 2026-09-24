@@ -13,6 +13,7 @@ export interface GameSnapshot extends LobbySnapshot {
   round: ActiveRound | null; ownRating: SavedRating | null;
   receivedAt: number; serverTime: number;
   results?: GameResults;
+  revealCard?: { id: string; title: string; message: string; roundIds: string[] };
   pause?: { id: string; title: string; message: string; endsAt: string | null };
   revealed?: { id: string; position: number; name: string; priceHuf: number; alcoholTenths: number }[];
 }

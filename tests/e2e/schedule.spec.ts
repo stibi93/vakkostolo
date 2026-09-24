@@ -21,7 +21,7 @@ function fixture(active = false) {
       const path = new URL(route.request().url()).pathname;
       if (path === '/auth/v1/user') return route.fulfill({json:user});
       if (path === '/rest/v1/rpc/get_host_game') return route.fulfill({json:{id:game,title:'Őszi menet',status:state.status,
-        round_seconds:120,reveal_every:2,created_at:new Date().toISOString(),wines:state.steps.filter(s=>s.kind==='wine').map((s,i)=>({round_id:s.id,photo_updated_at:null,photo_locked:s.status==='revealed',position:i+1,name:s.title,price_huf:s.price_huf,alcohol_tenths:s.alcohol_tenths}))}});
+        schedule:{version:state.version,status:state.status,reveal_every:2,steps:state.steps},round_seconds:120,reveal_every:2,created_at:new Date().toISOString(),wines:state.steps.filter(s=>s.kind==='wine').map((s,i)=>({round_id:s.id,photo_updated_at:null,photo_locked:s.status==='revealed',position:i+1,name:s.title,price_huf:s.price_huf,alcohol_tenths:s.alcohol_tenths}))}});
       if (path === '/rest/v1/rpc/get_game_snapshot') return route.fulfill({json:{
         ...lobbyResponse(game,[{id:member,nickname:'Anna',seat:1,joined_at:new Date(Date.now()-60000).toISOString()}],player?'player':'host',player?member:null),
         game:{id:game,title:'Őszi menet',status:state.status,version:state.version},server_now:new Date().toISOString(),own_rating:null,
@@ -69,7 +69,9 @@ test('mentett menet: egyedi szünet, sorrend, új bor, törlés és konfliktus',
   expect(f.state.steps[2].title).toBe('Új tétel 2024');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await editor.screenshot({path:info.outputPath('schedule-editor.png')});
-  await page.reload();await page.getByRole('button',{name:'Menet szerkesztése'}).click();
+  await page.reload();
+  await expect(page.getByRole('list',{name:'Mentett kóstolómenet'})).toContainText('Víz és kenyér');
+  await page.getByRole('button',{name:'Menet szerkesztése'}).click();
   await expect(page.getByLabel('Átvezető képernyő címe')).toHaveValue('Víz és kenyér');
 });
 test('élő időállítás megőrzi a játékos piszkozatát, lezárás után egyedi átvezetés',async({page,browser},info)=>{
@@ -117,4 +119,48 @@ test('boronként menthető az időkorlát kikapcsolása',async({page})=>{
   expect(f.state.steps[0].seconds).toBe(0);expect(f.state.steps[1].seconds).toBe(120);
   await page.reload();await page.getByRole('button',{name:'Menet szerkesztése'}).click();
   await expect(page.getByRole('checkbox',{name:'Időkorlát használata'}).first()).not.toBeChecked();
+});
+
+test('egy- és többboros felfedési kártya menthető, bezárva és újratöltve is látszik',async({page},info)=>{
+  const f=fixture();await f.attach(page);await page.goto(`/host/${game}`);
+  await page.getByRole('button',{name:'Menet szerkesztése'}).click();
+  await page.getByRole('button',{name:'Felfedés hozzáadása'}).click();
+  await page.getByLabel('Felfedés címe').fill('Két bor összehasonlítása');
+  await page.getByLabel('Játékosoknak megjelenő szöveg').fill('Miben különbözik az illatuk?');
+  await page.getByRole('checkbox',{name:'Titkos bor 1',exact:true}).check();
+  await page.getByRole('checkbox',{name:'Titkos bor 2',exact:true}).check();
+  await page.getByRole('button',{name:'Felfedés hozzáadása'}).click();
+  await page.getByLabel('Felfedés címe').last().fill('Második bor újra');
+  await page.getByRole('checkbox',{name:'Titkos bor 2',exact:true}).last().check();
+  await page.getByRole('region',{name:'Borok és szünetek'}).screenshot({path:info.outputPath('reveal-card-editor.png')});
+  await page.getByRole('button',{name:'Menet mentése',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Menet szerkesztése'})).toBeVisible();
+  expect(f.state.steps[2].reveal_round_ids).toEqual([wine,second]);
+  expect(f.state.steps[3].reveal_round_ids).toEqual([second]);
+  await page.reload();
+  const overview=page.getByRole('list',{name:'Mentett kóstolómenet'});
+  await expect(overview).toContainText('Két bor összehasonlítása');
+  await expect(overview).toContainText('Miben különbözik az illatuk?');
+  await overview.screenshot({path:info.outputPath('reveal-card-overview.png')});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.getByRole('button',{name:'Menet szerkesztése'}).click();
+  await page.getByLabel('Felfedés címe').first().fill('Elvetett cím');
+  await page.getByRole('button',{name:'Módosítások elvetése és bezárás'}).click();
+  await expect(overview).toContainText('Két bor összehasonlítása');
+  await expect(overview).not.toContainText('Elvetett cím');
+});
+
+test('a kártyagombok közvetlenül a mentett kóstoló tetején elérhetők',async({page},info)=>{
+  const f=fixture();await f.attach(page);await page.goto(`/host/${game}`);
+  await expect(page.getByRole('button',{name:'Szünet hozzáadása',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Felfedés hozzáadása',exact:true})).toBeVisible();
+  await page.getByRole('region',{name:'Borok és szünetek'}).screenshot({path:info.outputPath('visible-card-actions.png')});
+  await page.getByRole('button',{name:'Szünet hozzáadása',exact:true}).click();
+  await expect(page.getByLabel('Átvezető képernyő címe')).toHaveValue('Szünet');
+  await page.getByRole('button',{name:'Menet mentése',exact:true}).click();
+  await page.getByRole('button',{name:'Felfedés hozzáadása',exact:true}).click();
+  await page.getByRole('checkbox',{name:'Titkos bor 1',exact:true}).check();
+  await page.getByRole('button',{name:'Menet mentése',exact:true}).click();
+  await expect(page.getByRole('list',{name:'Mentett kóstolómenet'})).toContainText('Felfedés');
+  expect(f.state.steps.map(s=>s.kind)).toEqual(['wine','wine','break','reveal']);
 });

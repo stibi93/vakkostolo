@@ -74,3 +74,7 @@ nem valódi termékazonosságot vagy eredményt állítanak.
   tiltott, utána engedélyezett fotó; saját/közös DTO és pontozás, saját próbaadatok takarításával.
 
 Fizikai telefonos és valódi kivetítős elfogadás külön kézi próba.
+
+A Felfedés kártya alatt a kijelölt borok lapozhatók, a ranglista az összes eddig
+felfedett borból számol. A kóstoló lezárása nem fed fel új bort; a kártyákból
+kimaradt borok a végső eredményből is kimaradnak.

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('host → saját tipp → blokkos felfedés → végeredmény', async ({ page }, testInfo) => {
+test('host → saját tipp → kártyás felfedés → végeredmény', async ({ page }, testInfo) => {
   await page.goto('/demo');
   await expect(page.getByRole('heading', { name: 'Helyi demó' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -18,17 +18,17 @@ test('host → saját tipp → blokkos felfedés → végeredmény', async ({ pa
   await expect(page.getByText('Dűlőjáró · Furmint 2024')).toHaveCount(0);
   await page.getByRole('button', { name: 'Játékmester', exact: true }).click();
   await page.getByRole('button', { name: 'Kör lezárása' }).click();
-  await expect(page.getByRole('button', { name: 'Eredmények felfedése' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Felfedés kártya indítása' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Következő tétel' }).click();
   await page.getByRole('button', { name: 'Kör lezárása' }).click();
-  await page.getByRole('button', { name: 'Eredmények felfedése' }).click();
+  await page.getByRole('button', { name: 'Felfedés kártya indítása' }).click();
   await page.getByRole('button', { name: 'Prezentáció' }).click();
   await expect(page.getByRole('heading', { name: 'Dűlőjáró · Furmint 2024' })).toBeVisible();
   await expect(page.locator('.score-summary')).toContainText('100');
   await page.getByRole('button', { name: 'Játékmester', exact: true }).click();
   await page.getByRole('button', { name: 'Következő tétel' }).click();
   await page.getByRole('button', { name: 'Kör lezárása' }).click();
-  await page.getByRole('button', { name: 'Eredmények felfedése' }).click();
+  await page.getByRole('button', { name: 'Felfedés kártya indítása' }).click();
   await page.getByRole('button', { name: 'Kóstoló befejezése' }).click();
   await expect(page.locator('.score-summary')).toContainText('Végeredmény');
   await expect(page.getByRole('heading', { name: 'Nyári tétel · Rosé 2024' })).toBeVisible();
@@ -70,7 +70,7 @@ test('helyi borfotó cseréje, hibája, törlése és felfedése', async ({ page
   await page.getByLabel('Kép kiválasztása · 1. tétel').setInputFiles({ name: 'big.png', mimeType: 'image/png', buffer: Buffer.alloc(8 * 1024 * 1024 + 1) });
   await expect(page.getByText('Legfeljebb 8 MB-os képet válassz.')).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('photo-editor.png'), fullPage: true });
-  await page.getByLabel('Felfedés gyakorisága').selectOption('1');
+
   await page.getByRole('button', { name: 'Kóstoló indítása' }).click();
   await page.getByRole('button', { name: 'Játékos', exact: true }).click();
   await expect(page.locator('.wine-photo')).toHaveCount(0);
@@ -78,14 +78,16 @@ test('helyi borfotó cseréje, hibája, törlése és felfedése', async ({ page
   await expect(page.locator('.wine-photo')).toHaveCount(0);
   await page.getByRole('button', { name: 'Játékmester', exact: true }).click();
   await page.getByRole('button', { name: 'Kör lezárása' }).click();
-  await page.getByRole('button', { name: 'Eredmények felfedése' }).click();
+  await page.getByRole('button', { name: 'Következő tétel' }).click();
+  await page.getByRole('button', { name: 'Kör lezárása' }).click();
+  await page.getByRole('button', { name: 'Felfedés kártya indítása' }).click();
   await page.getByRole('button', { name: 'Prezentáció' }).click();
-  await expect(page.locator('.result-card img')).toHaveAttribute('src', customSrc!);
+  await expect(page.locator('.result-card').first().locator('img')).toHaveAttribute('src', customSrc!);
   await page.getByRole('button', { name: 'Játékmester', exact: true }).click();
   await page.getByText('Mintaborok képei', { exact: true }).click();
   await page.getByRole('button', { name: 'Kép törlése · 1. tétel', exact: true }).click();
   await page.getByRole('button', { name: 'Prezentáció' }).click();
-  await expect(page.locator('.result-card img')).toHaveCount(0);
+  await expect(page.locator('.result-card').first().locator('img')).toHaveCount(0);
   await expect(page.getByText('Kép nélküli mintabor')).toBeVisible();
   await page.getByRole('button', { name: 'Játékmester', exact: true }).click();
   await page.getByText('Mintaborok képei', { exact: true }).click();

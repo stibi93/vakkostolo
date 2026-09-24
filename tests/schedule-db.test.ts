@@ -19,6 +19,7 @@ async function save(steps: unknown[], version: number, id = randomUUID()) {
 async function command(action: string, seconds: number | null = null, version?: number, id = randomUUID()) {
   return db.query('select public.control_tasting($1,$2,$3,$4,$5)', [game, version ?? (await plan()).version, id, action, seconds]);
 }
+const reveal = (ids: string[]) => ({id:randomUUID(),kind:'reveal',title:'Közös bemutató',message:'Figyeld az illatot!',seconds:0,reveal_round_ids:ids});
 const pause = () => ({ id: randomUUID(), kind: 'break', title: 'Víz és kenyér', message: 'Tíz perc múlva folytatjuk. Titkos következő bor!', seconds: 600 });
 beforeAll(async () => { await loadDatabase(db); });
 beforeEach(async () => {
@@ -74,10 +75,10 @@ it('idő szerveroldali, idempotens, rövidíthető; lejárt kör nem nyitható �
   await expect(command('time', 100)).rejects.toThrow('DEADLINE_PASSED');
   await user(guest); await expect(db.query('select public.submit_rating($1,5,130,8)', [p.steps[0].id])).rejects.toThrow('DEADLINE_PASSED');
 });
-it('lezárás, szünet, következő bor és blokkos felfedés után befejezhető', async () => {
-  const p = await plan(); await save([p.steps[0],pause(),p.steps[1]],p.version);
+it('lezárás, szünet, következő bor és kártyás felfedés után befejezhető', async () => {
+  const p = await plan(); await save([p.steps[0],pause(),p.steps[1],reveal(p.steps.map(s=>s.id))],p.version);
   await command('start'); await expect(command('next')).rejects.toThrow('ROUND_STILL_OPEN');
-  await command('close'); await expect(command('reveal')).rejects.toThrow('BLOCK_INCOMPLETE');
+  await command('close'); await expect(command('reveal')).rejects.toThrow('REVEAL_CARD_REQUIRED');
   await command('next'); expect((await plan()).status).toBe('intermission');
   await command('next'); await command('close'); await command('reveal');
   await user(guest); const result = await db.query('select public.get_game_snapshot($1) s', [game]);
@@ -102,13 +103,51 @@ it('idegen és ismételt lépésazonosítók, érvénytelen idő és boradat vis
   const foreign=(await db.query<{p:Plan}>('select public.get_tasting_schedule($1) p',[otherGame])).rows[0].p.steps[0];
   await user(host); await expect(save([foreign],p.version)).rejects.toThrow('STEP_LOCKED');
 });
-it('teljes blokk után új bor csak felfedéssel indulhat; az utolsó kisebb blokk is felfedhető', async () => {
-  const p = await plan(); await save([...p.steps,{...p.steps[1],id:randomUUID(),title:'Harmadik'}],p.version);
-  await command('start'); await command('close'); await command('next'); await command('close');
-  await expect(command('next')).rejects.toThrow('REVEAL_REQUIRED');
-  await expect(command('finish')).rejects.toThrow('STEPS_REMAIN');
-  await command('reveal'); await command('next'); await command('close'); await command('reveal'); await command('finish');
-  expect((await plan()).steps.map(s=>s.status)).toEqual(['revealed','revealed','revealed']);
+it('a kártya egy vagy több kiválasztott bort fed fel, ismételhető bemutatóval; nincs automatikus blokk', async () => {
+  const p = await plan(), third={...p.steps[1],id:randomUUID(),title:'Harmadik'};
+  const first=reveal([p.steps[1].id]), second=reveal([p.steps[0].id,third.id]), replay=reveal([third.id,p.steps[1].id]);
+  await save([...p.steps,third,first,second,replay],p.version);
+  for (const action of ['start','close','next','close','next','close']) await command(action);
+  await user(guest);
+  expect(JSON.stringify((await db.query('select public.get_game_snapshot($1)',[game])).rows)).not.toMatch(/Titkos|Harmadik|Közös bemutató|reveal_card/);
+  await user(host); await expect(command('finish')).rejects.toThrow('STEPS_REMAIN');
+  const version=(await plan()).version,key=randomUUID();
+  await command('next',null,version,key); await command('next',null,version,key);
+  await user(guest);
+  const a=(await db.query<{s:{reveal_card:{round_ids:string[]};revealed:{id:string}[];round:null}}>('select public.get_game_snapshot($1) s',[game])).rows[0].s;
+  expect(a.reveal_card.round_ids).toEqual(first.reveal_round_ids);expect(a.round).toBeNull();
+  expect(a.revealed.map(w=>w.id)).toEqual([p.steps[1].id]);
+  expect(JSON.stringify(a)).not.toMatch(/Titkos első|Harmadik/);
+  await user(host);await command('next');await command('next');
+  await user(guest);
+  const b=(await db.query<{s:{reveal_card:{round_ids:string[]};revealed:unknown[]}}>('select public.get_game_snapshot($1) s',[game])).rows[0].s;
+  expect(b.reveal_card.round_ids).toEqual(replay.reveal_round_ids);expect(b.revealed).toHaveLength(3);
+  await user(host);await command('finish');expect((await plan()).status).toBe('finished');
+});
+it('befejezéskor a kártyán nem szereplő bor rejtve marad',async()=>{
+  for(const action of ['start','close','next','close','finish']) await command(action);
+  await user(guest);
+  expect(JSON.stringify((await db.query('select public.get_game_snapshot($1)',[game])).rows)).not.toMatch(/Titkos|price_huf|alcohol_tenths/);
+});
+it('a mentett adminnézet tartalmazza a szünetet és a felfedési kártyát',async()=>{
+  const p=await plan(),b=pause(),c=reveal([p.steps[0].id]);
+  await save([p.steps[0],b,c,p.steps[1]],p.version);
+  const result=(await db.query<{g:{schedule:Plan}}>('select public.get_host_game($1) g',[game])).rows[0].g;
+  expect(result.schedule.steps.map(s=>s.id)).toEqual([p.steps[0].id,b.id,c.id,p.steps[1].id]);
+});
+it('üres, ismételt, idegen, törölt vagy későbbi bor nem kerülhet felfedési kártyára; a mentés visszagördül',async()=>{
+  const p=await plan();
+  for(const ids of [[],[p.steps[0].id,p.steps[0].id],[randomUUID()],[p.steps[1].id]]) {
+    await expect(save([p.steps[0],reveal(ids),p.steps[1]],p.version)).rejects.toThrow('INVALID_REVEAL_TARGETS');
+    expect((await plan()).version).toBe(p.version);
+  }
+  const c=reveal([p.steps[0].id]);await save([...p.steps,c],p.version);
+  const current=await plan();
+  await expect(save([p.steps[1],c],current.version)).rejects.toThrow('INVALID_REVEAL_TARGETS');
+  await user(other);
+  const otherGame=(await db.query<{id:string}>(`select public.create_game(gen_random_uuid(),'Más',120,2,'[{"name":"Másik","price_huf":3000,"alcohol_tenths":120}]') id`)).rows[0].id;
+  const foreign=(await db.query<{p:Plan}>('select public.get_tasting_schedule($1) p',[otherGame])).rows[0].p.steps[0];
+  await user(host);await expect(save([...p.steps,reveal([foreign.id])],current.version)).rejects.toThrow('INVALID_REVEAL_TARGETS');
 });
 it('mentett draft is szerkeszthető, a bor egyedi idejével indul, kézi szünetnek nincs határideje', async () => {
   await db.exec('reset role'); await db.query("update public.games set status='draft' where id=$1",[game]); await user(host);

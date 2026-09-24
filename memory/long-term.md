@@ -1,5 +1,34 @@
 # Tartós projektmemória
 
+## Teljes menet már létrehozáskor — 2026-09-24
+
+- Felhasználói pontosítás: a szünet és felfedés már az új kóstoló űrlapján
+  hozzáadható legyen. A korábbi „előbb mentsd a borokat” folyamat nem megfelelő.
+- Közös helyi lista, bor-ID alapú kijelölés; a 0016 RPC a teljes játékot és
+  menetet egy tranzakcióban hozza létre, indexeket tartós kör-ID-kre fordítva.
+  A teljes kezdeti payload hash-e védi az ismétlést; hibás kártyánál nincs
+  félkész játék. A fotók a létrejött borokhoz töltődnek fel.
+
+## Kóstolótörlés — 2026-09-24
+
+- Saját superadmin aal2 felhasználó megerősítés után futó vagy lezárt játékot is
+  törölhet. Kapcsolt adatok kaszkáddal, fotók előbb Storage API-val törlődnek.
+- A 0015 privát törlési bizonylata engedi a zárolt fotók eltávolítását is; a
+  véglegesítés maradék objektumnál megáll. A bizonylat játék-ID/host-ID párosa
+  lehetővé teszi az elveszett válasz utáni biztonságos ismétlést.
+
+## Felfedési kártyák — 2026-09-24
+
+- Felhasználói kérésre megszűnt a kötelező N boros blokkhatár. A bor lezárása
+  nem fed fel adatot; csak explicit, menetbe illesztett Felfedés kártya teheti.
+- Kártyánként 1–12 korábbi bor, cím és üzenet. Már felfedett bor újra
+  bemutatható. A játékos csak az aktív kártyát kapja, a host a mentett teljes
+  menetet szerkesztésen kívül és újratöltés után is látja.
+- Befejezéskor is rejtve maradnak a kártyákból kimaradt borok; a végső ranglista
+  csak felfedett borokból számol. Részletes indok: docs/decisions/002-reveal-cards.md.
+- 0014: privát reveal_round_ids, atomi publikálás, sorrend/jogosultság/verzió
+  ellenőrzés. reveal_every csak kompatibilitási mező; nincs automatikus backfill.
+
 ## Opcionális időkeret és kategóriajelölések — 2026-09-24
 
 - Felhasználói kérésre időkorlát nélkül is indulhat kóstoló; létrehozáskor,

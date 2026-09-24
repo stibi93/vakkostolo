@@ -17,14 +17,15 @@ import type { GameSnapshot, LiveApi, SavedRating } from './model';
 import { secondsLeft } from './model';
 import './live.css';
 
-export function LiveGamePanel({ api, gameId, showTitle = true, presentation = false, onStatusChange }: {
-  api: LiveApi; gameId: string; showTitle?: boolean; presentation?: boolean; onStatusChange?: (status: GameStatus) => void;
+export function LiveGamePanel({ api, gameId, showTitle = true, presentation = false, onStatusChange, onVersionChange }: {
+  api: LiveApi; gameId: string; showTitle?: boolean; presentation?: boolean; onStatusChange?: (status: GameStatus) => void; onVersionChange?: (version: number) => void;
 }) {
   const { state, refresh } = useSnapshot(api, gameId);
   const snapshot = state.snapshot;
   const presence = usePresence(api.presence, gameId, snapshot);
   useEffect(() => { if (snapshot) onStatusChange?.(snapshot.game.status); }, [snapshot, onStatusChange]);
-  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!(snapshot?.round || snapshot?.pause)} presence={presence}>
+  useEffect(() => { if (snapshot) onVersionChange?.(snapshot.game.version); }, [snapshot, onVersionChange]);
+  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!(snapshot?.round || snapshot?.pause || snapshot?.revealCard)} presence={presence}>
     {snapshot && <RoundPanel key={`${snapshot.role}:${snapshot.selfParticipantId ?? 'host'}:${snapshot.round?.id ?? 'lobby'}`}
       api={api} snapshot={snapshot} refresh={refresh} presentation={presentation}
       available={!state.stale && state.connection !== 'offline'} />}
@@ -54,7 +55,7 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
       ? <LiveRatingForm api={api} snapshot={snapshot} refresh={refresh}
           enabled={available && open && round.canSubmit} />
       : <p className="small-note">{open ? 'A játékosok a határidőig módosíthatják a tippjüket.'
-        : 'A lenti vezérlőn indíthatod a következő lépést vagy a blokk felfedését.'}</p>}
+        : 'A lenti vezérlőn indíthatod a mentett menet következő kártyáját.'}</p>}
   </section>;
 }
 function TastingExtras({ api, snapshot, refresh, available, presentation }: {
@@ -71,6 +72,11 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
       {remaining !== null && <p role="timer" aria-label="Szünetből hátralévő idő" className="live-timer">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</p>}
       <p className="small-note">A folytatást a játékmester indítja.</p>
     </section>}
+    {snapshot.revealCard && !presentation && <section className="live-break" aria-label="Felfedés">
+      <p className="eyebrow">FELFEDÉS / BEMUTATÓ</p><h3>{snapshot.revealCard.title}</h3>
+      <p className="live-break-message">{snapshot.revealCard.message}</p>
+      <p className="small-note">{snapshot.revealCard.roundIds.length} bemutatott bor · A folytatást a játékmester indítja.</p>
+    </section>}
     {snapshot.game.status === 'finished' && !snapshot.results && <h3>A kóstoló befejeződött.</h3>}
     {snapshot.role === 'host' && !presentation && api.schedule && <HostControls api={api.schedule} snapshot={snapshot} refresh={refresh} available={available} secondsLeft={secondsLeft(snapshot,now)} />}
     {snapshot.results && snapshot.role === 'host' && !presentation && <p>
@@ -78,7 +84,7 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
     </p>}
     {snapshot.results && <details className="live-results" open={presentation || snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
       <summary>Eredmények ({snapshot.results.revealedCount} bor)</summary>
-      <ResultsPanel key={snapshot.results.revealedCount} results={snapshot.results} gameId={snapshot.game.id} selfId={snapshot.selfParticipantId} photos={api.resultPhotos} presentation={presentation} />
+      <ResultsPanel key={snapshot.revealCard?.id ?? snapshot.results.revealedCount} roundIds={snapshot.revealCard?.roundIds} intro={presentation ? snapshot.revealCard : undefined} results={snapshot.results} gameId={snapshot.game.id} selfId={snapshot.selfParticipantId} photos={api.resultPhotos} presentation={presentation} />
     </details>}
     {!snapshot.results && !!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
       <summary>Felfedett borok ({snapshot.revealed.length})</summary><ol className="live-revealed">
