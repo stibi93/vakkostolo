@@ -54,6 +54,9 @@ try {
   const current=await plan();
   data(await host.rpc('save_tasting_schedule',{p_game_id:game,p_expected_version:current.version,p_request_id:randomUUID(),p_steps:[current.steps[2],current.steps[1]]}),'Élő átrendezés');
   ensure((await snap()).own_rating.price_bucket===5,'Élő szerkesztés elvesztette a tippet');
+  const beforeDisable=changed; await act('time',0); await until(()=>changed>beforeDisable,'Időkorlát kikapcsolás Realtime');
+  const untimed=await snap(); ensure(untimed.round.closes_at===null && untimed.round.can_submit,'Időkorlát nélküli snapshot hibás');
+  data(await one.rpc('submit_rating',{p_round_id:round,p_price_bucket:5,p_alcohol_tenths:130,p_liking:8}),'Időkorlát nélküli tipp');
   const before=changed; await act('time',300); await until(()=>changed>before,'Időváltozás Realtime');
   const timed=await snap(); ensure(Date.parse(timed.round.closes_at)-Date.parse(timed.server_now)>295000,'Új idő nem jutott el a játékoshoz');
   const running=await plan(); const version=running.version;

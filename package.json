@@ -24,6 +24,7 @@
     "test:lobby:local": "node scripts/test-lobby-local.mjs",
     "test:presence:local": "node scripts/test-presence-local.mjs",
     "test:live:local": "node scripts/test-live-local.mjs",
+    "test:results:local": "node scripts/test-results-local.mjs",
     "test:schedule:local": "node scripts/test-schedule-local.mjs",
     "test:photos:local": "node scripts/test-photos-local.mjs"
   },

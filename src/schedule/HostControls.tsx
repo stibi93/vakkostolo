@@ -17,7 +17,7 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft }:
     if (receipt.current.signature !== signature) receipt.current = { signature, id: newRequestId() };
     busy.current = true; setPending(true); setError(''); setNotice('');
     try { await api.control(snapshot.game.id, snapshot.game.version, receipt.current.id, action, duration);
-      setNotice(action === 'time' ? 'Az új határidő mentve.' : 'A művelet mentve.'); }
+      setNotice(action === 'time' ? (duration === 0 ? 'Az időkorlát kikapcsolva. A kört kézzel zárhatod le.' : 'Az új határidő mentve.') : 'A művelet mentve.'); }
     catch (error) { setError(lobbyErrorMessage(error)); }
     finally { await refresh(); busy.current = false; setPending(false); }
   }
@@ -29,8 +29,9 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft }:
       {live ? <>
         <form className="schedule-time" onSubmit={event => { event.preventDefault(); void act('time', Number(seconds)); }}>
           <label>Hátralévő idő mostantól (másodperc)<input type="number" min="30" max="1800" step="1" required value={seconds} onChange={e => setSeconds(e.target.value)} /></label>
-          <button className="button-secondary" type="submit">Idő beállítása</button>
+          <button className="button-secondary" type="submit">{snapshot.round?.closesAt === null ? 'Időkorlát bekapcsolása' : 'Idő beállítása'}</button>
         </form>
+        {snapshot.round?.closesAt !== null && <button className="button-secondary" onClick={() => void act('time',0)}>Időkorlát kikapcsolása</button>}
         <p className="small-note">Az új idő a mentéstől számít. A játékosok kitöltött mezői megmaradnak.</p>
         <button className="button-secondary" onClick={() => void act('close')}>Kör lezárása most</button>
         <p className="small-note">Lezárás után ehhez a borhoz már nem érkezhet tipp.</p>

@@ -1,3 +1,4 @@
+import { CategoryIcon } from './CategoryIcon';
 import { useId } from 'react';
 import type { FocusEvent } from 'react';
 import { flushSync } from 'react-dom';
@@ -22,7 +23,7 @@ export function RatingFields({ value, onChange }: { value: RatingDraft; onChange
   }
   return <div className="rating-fields">
     <fieldset className="rating-group">
-      <legend>Becsült ár</legend>
+      <legend><CategoryIcon category="price" />Becsült ár</legend>
       <div className="rating-price-grid">
         {priceBuckets.map((bucket) => <label key={bucket.id} className="rating-choice rating-price">
           <input type="radio" name={`${id}-price`} value={bucket.id} checked={value.priceBucket === String(bucket.id)}
@@ -33,7 +34,7 @@ export function RatingFields({ value, onChange }: { value: RatingDraft; onChange
     </fieldset>
 
     <fieldset className="rating-group">
-      <legend id={`${id}-alcohol-legend`}>Becsült alkoholfok</legend>
+      <legend id={`${id}-alcohol-legend`}><CategoryIcon category="alcohol" />Becsült alkoholfok</legend>
       <div className="rating-stepper">
         <button type="button" className="rating-step" aria-label="Alkoholfok csökkentése fél fokkal"
           onClick={() => set({ alcohol: stepAlcohol(value.alcohol, -1) })}>−<small>0,5</small></button>
@@ -51,12 +52,12 @@ export function RatingFields({ value, onChange }: { value: RatingDraft; onChange
     </fieldset>
 
     <fieldset className="rating-group">
-      <legend>Tetszés</legend>
+      <legend><CategoryIcon category="liking" />Tetszés</legend>
       <div className="rating-liking-grid">
         {likingScale.map((score) => <label key={score} className="rating-choice rating-liking">
           <input type="radio" name={`${id}-liking`} value={score} checked={value.liking === String(score)}
             onChange={() => set({ liking: String(score) })} aria-label={`Tetszés: ${score} a 10-ből`} required />
-          <span aria-hidden="true">{String(score).padStart(2, '0')}</span>
+          <span aria-hidden="true">{score}</span>
         </label>)}
       </div>
       <p className="rating-scale-ends" aria-hidden="true"><span>egyáltalán nem ízlik</span><span>nagyon ízlik</span></p>

@@ -24,7 +24,7 @@ export function parseHostSummary(value: unknown): HostGameSummary {
   if (!isUuid(row.id) || typeof row.status !== 'string' || !Object.hasOwn(gameStatusLabels, row.status) ||
     typeof row.created_at !== 'string' || !Number.isFinite(Date.parse(row.created_at))) throw invalidResponse();
   return { id: row.id, title: text(row.title, 100), status: row.status as GameStatus,
-    roundSeconds: integer(row.round_seconds, 30, 1800), revealEvery: integer(row.reveal_every, 1, 12), createdAt: row.created_at };
+    roundSeconds: row.round_seconds === 0 ? 0 : integer(row.round_seconds, 30, 1800), revealEvery: integer(row.reveal_every, 1, 12), createdAt: row.created_at };
 }
 export function parseHostGame(value: unknown): HostGame {
   const row = record(value);

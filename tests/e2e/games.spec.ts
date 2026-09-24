@@ -144,3 +144,13 @@ test('ablakváltás nem törli az űrlapot, kijelentkezés után a titkos adatok
   await expect(page.getByLabel('Felhasználónév')).toBeVisible();
   await expect(page.getByLabel('Bor neve és évjárata')).toHaveCount(0);
 });
+
+test('új kóstoló időkorlát nélkül is létrehozható',async({page})=>{
+  const state=await setup(page);await fillGame(page);
+  await page.getByRole('checkbox',{name:'Időkorlát használata'}).uncheck();
+  await expect(page.getByLabel('Kóstolási idő boronként (másodperc)')).toHaveCount(0);
+  await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Őszi kóstoló'})).toBeVisible();
+  expect(state.calls[0].p_round_seconds).toBe(0);
+  await expect(page.getByText('Időkorlát nélkül',{exact:false})).toBeVisible();
+});

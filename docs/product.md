@@ -16,7 +16,7 @@ a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
 | Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
 
 A hostbelépés, játéklétrehozás, meghívás, közös váró és az első élő kör
-beküldése elkészült. A szerkeszthető menet, szünetek, időállítás és további körvezérlés is elkészült; a szerveroldali pontozás és ranglista még terv. A kezdőlap a `/` címen van;
+beküldése elkészült. A szerkeszthető menet, szünetek, időállítás és további körvezérlés is elkészült; a szerveroldali pontozás, saját eredmény és prezentációs ranglista is elkészült. Részletek: [eredmények](results.md). A kezdőlap a `/` címen van;
 a jelenlegi demo a `/demo` alatt három nézetkapcsolóval egy oldalon fut.
 A kezdőlap főgombja a `/join` játékosbelépésre vezet. Itt a játékmestertől
 kapott teljes meghívólink illeszthető be; a QR közvetlenül a `/join/:token`
@@ -76,7 +76,7 @@ létszám, meghívó link és valódi QR. Titkos ár és alkohol csak a host sze
 A megkezdett bor adatai és helye zárolódik; a hátralévő borok és egyedi szünetek futás közben is szerkeszthetők. Részletek: [szerkeszthető menet](tasting-schedule.md). A résztvevőlista
 nem mutat mások tippjeit; a host beküldési darabszámot külön végponton kapja.
 
-Időkeret: 30–1800 másodperc, alapérték 120. Szünet két tétel között van;
+Időkeret: kikapcsolható vagy 30–1800 másodperc, alapérték 120. Időkorlát nélkül csak a játékmester kézi lezárása állítja le a tippek fogadását. Futó, még nyitott körben az időzítés ki-be kapcsolható; lejárt kör nem nyitható újra. Szünet két tétel között van;
 futó kör megállítása nem MVP-funkció. Lejárt kör nem nyitható újra. Későn érkező
 játékos a következő tételtől csatlakozhat, a korábbi körök válasza hiányzó marad.
 

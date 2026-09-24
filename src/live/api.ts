@@ -1,3 +1,4 @@
+import { parseResults } from '../results/api';
 import { createGamesApi } from '../games/api';
 import { createScheduleApi } from '../schedule/api';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -35,10 +36,10 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
       !['open', 'closed', 'revealed'].includes(String(r.status)) || typeof r.eligible !== 'boolean' ||
       typeof r.can_submit !== 'boolean') return invalid();
     round = { id: r.id, position: Number(r.position), status: r.status as 'open' | 'closed' | 'revealed',
-      openedAt: timestamp(r.opened_at), closesAt: timestamp(r.closes_at), eligible: r.eligible, canSubmit: r.can_submit };
-    if (Date.parse(round.closesAt) <= Date.parse(round.openedAt) || (base.role === 'host' && (round.eligible || round.canSubmit)) ||
+      openedAt: timestamp(r.opened_at), closesAt: r.closes_at === null ? null : timestamp(r.closes_at), eligible: r.eligible, canSubmit: r.can_submit };
+    if ((round.closesAt !== null && Date.parse(round.closesAt) <= Date.parse(round.openedAt)) || (base.role === 'host' && (round.eligible || round.canSubmit)) ||
       (round.canSubmit && (!round.eligible || round.status !== 'open' || base.game.status !== 'tasting' ||
-        Date.parse(round.closesAt) <= Date.parse(base.serverNow)))) return invalid();
+        (round.closesAt !== null && Date.parse(round.closesAt) <= Date.parse(base.serverNow))))) return invalid();
   }
   const ownRating = row.own_rating === null ? null : round ? parseSavedRating(row.own_rating, round.id) : invalid();
   if (ownRating && base.role !== 'player') return invalid();
@@ -60,7 +61,8 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
       return { id: w.id, name: w.name, position: Number(w.position), priceHuf: Number(w.price_huf), alcoholTenths: Number(w.alcohol_tenths) };
     });
   }
-  return { ...base, round, ownRating, ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
+  const results = row.results === undefined ? undefined : parseResults(row.results, base.role);
+  return { ...base, round, ownRating, ...(results ? { results } : {}), ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
 }
 function fromServer(error: { message: string; code?: string }, status?: number): LiveError {
   const accessLost = ['AUTH_REQUIRED', 'GAME_NOT_FOUND', 'NOT_A_PARTICIPANT'].includes(error.message) || status === 401 || status === 403;
@@ -88,6 +90,14 @@ export function createLiveApi(client: SupabaseClient<Database>): LiveApi {
     watch: createLobbyApi(client).watch,
     presence: createPresenceApi(client),
     schedule: createScheduleApi(client),
+    resultPhotos: {
+      async download(gameId, roundId) {
+        if (!isUuid(gameId) || !isUuid(roundId)) return invalid();
+        const { data, error } = await client.storage.from('wine-photos').download(`${gameId}/${roundId}.jpg`);
+        if (error || !data) throw new LiveError('A bor fotója most nem tölthető be.');
+        return data;
+      },
+    },
     photoUrl: createGamesApi(client).photoUrl,
     async get(gameId) {
       if (!isUuid(gameId)) throw new LiveError('A kóstoló címe érvénytelen.', true);

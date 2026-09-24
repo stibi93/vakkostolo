@@ -93,3 +93,24 @@ test('helyi borfotó cseréje, hibája, törlése és felfedése', async ({ page
   await expect(photo).toHaveAttribute('src', '/demo/sample-wine-01.png');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('időkorlát nélküli demó, kategóriaikonok és egyszerű tetszésszámok',async({page},info)=>{
+  await page.clock.install();await page.goto('/demo');
+  await page.getByRole('checkbox',{name:'Időkorlát használata'}).uncheck();
+  await page.getByRole('button',{name:'Kóstoló indítása'}).click();
+  await page.getByRole('button',{name:'Játékos',exact:true}).click();
+  await page.clock.fastForward(3600000);
+  await expect(page.getByRole('button',{name:'Tipp beküldése'})).toBeEnabled();
+  await expect(page.locator('.rating-fields .rating-category-icon')).toHaveCount(3);
+  await expect(page.locator('.rating-liking span')).toHaveText(['1','2','3','4','5','6','7','8','9','10']);
+  await expect(page.locator('.rating-heading')).toContainText('Időkorlát nélkül');
+  await page.screenshot({path:info.outputPath('demo-untimed.png'),fullPage:true});
+  await page.getByRole('button',{name:'Játékmester',exact:true}).click();
+  await page.getByRole('checkbox',{name:'Időkorlát használata'}).check();
+  await page.getByRole('button',{name:'Játékos',exact:true}).click();
+  await expect(page.locator('.timer')).toBeVisible();
+  await page.getByRole('button',{name:'Játékmester',exact:true}).click();
+  await page.getByRole('button',{name:'Kör lezárása',exact:false}).click();
+  await page.getByRole('button',{name:'Játékos',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Tipp beküldése'})).toHaveCount(0);
+});

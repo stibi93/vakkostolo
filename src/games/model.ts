@@ -27,7 +27,7 @@ const length = (value: string) => Array.from(value.trim()).length;
 export function validateGameInput(input: CreateGameInput): string[] {
   const errors: string[] = [];
   if (length(input.title) < 1 || length(input.title) > 100) errors.push('A kóstoló címe 1–100 karakter legyen.');
-  if (!integerBetween(input.roundSeconds, 30, 1800)) errors.push('A kóstolási idő 30–1800 egész másodperc lehet.');
+  if (input.roundSeconds !== 0 && !integerBetween(input.roundSeconds, 30, 1800)) errors.push('Válassz időkorlát nélküli kóstolást vagy 30–1800 egész másodpercet.');
   if (!integerBetween(input.revealEvery, 1, 12)) errors.push('A felfedési gyakoriság 1–12 egész tétel lehet.');
   if (input.wines.length < 1 || input.wines.length > 12) errors.push('Adj meg 1–12 bort.');
   input.wines.forEach((wine, i) => {

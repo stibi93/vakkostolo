@@ -186,3 +186,9 @@ hívhatja. A `games.scoring_version` 1 vagy 2 lehet, alapértéke 2. A
 A 0011 migráció host-only privát menettáblát és idempotens szerkesztési, időállítási,
 körváltási és felfedési RPC-ket vezet be. Részletek és korlátok:
 [szerkeszthető kóstolómenet](tasting-schedule.md).
+
+## Felfedett eredmények
+
+A 0012 migráció verziózott szerverpontozást és tagsággal védett eredményprojekciót
+ad. Csak felfedett borok számítanak; saját tippek csak a hívó játékoshoz kerülnek.
+A ranglista és borfotó-hozzáférés részletei: [eredmények](results.md).

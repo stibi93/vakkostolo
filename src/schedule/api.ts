@@ -7,8 +7,8 @@ import type { ScheduleApi, ScheduleStep, TastingSchedule } from './model';
 const messages: Record<string, string> = {
   VERSION_CONFLICT: 'Közben megváltozott a kóstoló. A piszkozatod megmaradt; töltsd be a mentett menetet, és ellenőrizd a változásokat.',
   STEP_LOCKED: 'A már megkezdett tétel nem módosítható. Töltsd be a mentett menetet.',
-  INVALID_SCHEDULE: 'Ellenőrizd a menetet: 1–12 bor, legfeljebb 60 lépés; boronként 30–1800 másodperc.',
-  INVALID_DURATION: 'A hátralévő idő 30–1800 másodperc lehet.',
+  INVALID_SCHEDULE: 'Ellenőrizd a menetet: 1–12 bor, legfeljebb 60 lépés; boronként időkorlát nélkül vagy 30–1800 másodperc.',
+  INVALID_DURATION: 'Az időkorlát kikapcsolható, vagy 30–1800 másodpercre állítható.',
   DEADLINE_PASSED: 'Ez a kör már lejárt, az ideje nem módosítható. Lépj a következő tételre.',
   ROUND_STILL_OPEN: 'A kör még fogad tippeket. Előbb zárd le, vagy várd meg a határidőt.',
   ROUND_NOT_OPEN: 'Nincs nyitott kör. Frissítsd az állapotot.',
@@ -32,7 +32,7 @@ export function parseSchedule(value: unknown): TastingSchedule {
       !['pending', 'open', 'closed', 'revealed', 'done'].includes(s.status) || !Number.isInteger(s.seconds) || s.seconds < 0 || s.seconds > 7200 ||
       (s.kind === 'wine' && (!Number.isInteger(s.price_huf) || Number(s.price_huf) < 1 || Number(s.price_huf) > 1000000 ||
         !Number.isInteger(s.alcohol_tenths) || Number(s.alcohol_tenths) < 0 || Number(s.alcohol_tenths) > 250 ||
-        !Number.isInteger(s.round_position) || Number(s.round_position) < 1 || Number(s.round_position) > 12 || s.seconds < 30 || s.seconds > 1800))) return failure('INVALID_RESPONSE');
+        !Number.isInteger(s.round_position) || Number(s.round_position) < 1 || Number(s.round_position) > 12 || (s.seconds !== 0 && s.seconds < 30) || s.seconds > 1800))) return failure('INVALID_RESPONSE');
     return { id: s.id, kind: s.kind, title: s.title, message: s.message, seconds: s.seconds, status: s.status,
       price_huf: s.price_huf, alcohol_tenths: s.alcohol_tenths, round_position: s.round_position };
   });

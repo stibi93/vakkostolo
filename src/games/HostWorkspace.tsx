@@ -65,7 +65,7 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
       <p role="alert" className="auth-message">{state.message}</p><button className="button-primary" onClick={retry}>Újrapróbálás</button></>}
     {state.status === 'ready' && <>
       <h2 id="saved-game-title" className="saved-game-title">{state.data.title}</h2>
-      <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds} másodperc/bor · Felfedés {state.data.revealEvery} boronként</p>
+      <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds === 0 ? 'Időkorlát nélkül' : `${state.data.roundSeconds} másodperc/bor`} · Felfedés {state.data.revealEvery} boronként</p>
       <LiveGamePanel showTitle={false} api={lobby} gameId={gameId} onStatusChange={setStatusOverride} />
       {lobby.schedule && <ScheduleEditor api={lobby.schedule} gameId={gameId} onSaved={refresh} />}
       <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok és fotók nem láthatók a játékosoknak felfedés előtt.</p>

@@ -9,7 +9,7 @@ const second = '20000000-0000-0000-0000-000000000002';
 const member = '30000000-0000-0000-0000-000000000001';
 function fixture(active = false) {
   const hub = realtimeHub();
-  const state = { version: 1, status: active ? 'tasting' : 'lobby', opened: Date.now(), deadline: Date.now()+120000,
+  const state = { version: 1, status: active ? 'tasting' : 'lobby', opened: Date.now(), deadline: (Date.now()+120000) as number | null,
     conflict: false, saves: 0, controls: [] as string[], pause: false,
     steps: [wine,second].map((id,i): ScheduleStep => ({ id, kind:'wine', title: `Titkos bor ${i+1}`, message:'', seconds:120,
       status:active && i===0 ? 'open' : 'pending', price_huf:4500, alcohol_tenths:130, round_position:i+1 })) };
@@ -26,7 +26,7 @@ function fixture(active = false) {
         ...lobbyResponse(game,[{id:member,nickname:'Anna',seat:1,joined_at:new Date(Date.now()-60000).toISOString()}],player?'player':'host',player?member:null),
         game:{id:game,title:'Őszi menet',status:state.status,version:state.version},server_now:new Date().toISOString(),own_rating:null,
         round:active && !state.pause ? {id:wine,position:1,status:state.steps[0].status,opened_at:new Date(state.opened).toISOString(),
-          closes_at:new Date(state.deadline).toISOString(),eligible:player,can_submit:player && state.steps[0].status==='open'} : null,
+          closes_at:state.deadline === null ? null : new Date(state.deadline).toISOString(),eligible:player,can_submit:player && state.steps[0].status==='open'} : null,
         ...(state.pause ? {break:{id:second,title:'Víz és kenyér',message:'Pihenjünk egyet.\nA következő tételt együtt kezdjük.',ends_at:new Date(Date.now()+300000).toISOString()}} : {})
       }});
       if (path === '/rest/v1/rpc/get_tasting_schedule') return route.fulfill({json:{version:state.version,status:state.status,reveal_every:2,steps:state.steps}});
@@ -40,7 +40,7 @@ function fixture(active = false) {
       }
       if (path === '/rest/v1/rpc/control_tasting') {
         const input=route.request().postDataJSON(); state.controls.push(input.p_action); state.version++;
-        if(input.p_action==='time') state.deadline=Date.now()+input.p_seconds*1000;
+        if(input.p_action==='time') state.deadline=input.p_seconds === 0 ? null : Date.now()+input.p_seconds*1000;
         if(input.p_action==='close') {state.steps[0].status='closed';state.status='intermission';}
         if(input.p_action==='next') {state.pause=true;state.status='intermission';}
         hub.change(game,'games'); hub.change(game,'rounds'); return route.fulfill({json:game});
@@ -79,8 +79,17 @@ test('élő időállítás megőrzi a játékos piszkozatát, lezárás után eg
     const player=await context.newPage();await f.attach(player,true);await player.goto(`/play/${game}`);
     await player.getByRole('radio',{name:'4 001–6 000 Ft',exact:true}).check();
     await player.getByLabel('Becsült alkoholfok (% vol)').fill('13,5');
+    await page.getByRole('button',{name:'Időkorlát kikapcsolása'}).click();
+    await expect(player.getByRole('timer',{name:'Hátralévő idő',exact:true})).toHaveCount(0);
+    await expect(player.getByText('Időkorlát nélkül',{exact:true})).toBeVisible();
+    await expect(player.getByRole('radio',{name:'4 001–6 000 Ft',exact:true})).toBeChecked();
+    await expect(player.getByLabel('Becsült alkoholfok (% vol)')).toHaveValue('13,5');
+    await expect(player.getByRole('button',{name:'Tipp beküldése'})).toBeEnabled();
+    await expect(player.locator('.rating-category-icon')).toHaveCount(3);
+    await expect(player.locator('.rating-liking span').first()).toHaveText('1');
+    await player.screenshot({path:info.outputPath('player-untimed.png'),fullPage:true});
     await page.getByLabel('Hátralévő idő mostantól (másodperc)').fill('300');
-    await page.getByRole('button',{name:'Idő beállítása'}).click();
+    await page.getByRole('button',{name:'Időkorlát bekapcsolása'}).click();
     await expect(player.getByRole('timer',{name:'Hátralévő idő',exact:true})).toHaveText(/0[45]:[0-5][0-9]/);
     await expect(player.getByRole('radio',{name:'4 001–6 000 Ft',exact:true})).toBeChecked();
     await expect(player.getByLabel('Becsült alkoholfok (% vol)')).toHaveValue('13,5');
@@ -97,4 +106,15 @@ test('élő időállítás megőrzi a játékos piszkozatát, lezárás után eg
     expect(await player.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await player.screenshot({path:info.outputPath('player-break.png'),fullPage:true});
   } finally {await context.close();}
+});
+
+test('boronként menthető az időkorlát kikapcsolása',async({page})=>{
+  const f=fixture();await f.attach(page);await page.goto(`/host/${game}`);
+  await page.getByRole('button',{name:'Menet szerkesztése'}).click();
+  await page.getByRole('checkbox',{name:'Időkorlát használata'}).first().uncheck();
+  await page.getByRole('button',{name:'Menet mentése',exact:true}).click();
+  await expect(page.getByText('A menet mentve.',{exact:true})).toBeVisible();
+  expect(f.state.steps[0].seconds).toBe(0);expect(f.state.steps[1].seconds).toBe(120);
+  await page.reload();await page.getByRole('button',{name:'Menet szerkesztése'}).click();
+  await expect(page.getByRole('checkbox',{name:'Időkorlát használata'}).first()).not.toBeChecked();
 });

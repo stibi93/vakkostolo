@@ -119,3 +119,32 @@ it('mentett draft is szerkeszthető, a bor egyedi idejével indul, kézi szünet
   await user(guest); const snapshot=(await db.query<{s:{break:{ends_at:null}}}>('select public.get_game_snapshot($1) s',[game])).rows[0].s;
   expect(snapshot.break.ends_at).toBeNull();
 });
+
+it('időkorlát nélkül indulhat, menthető a tipp, csak kézi zárás után léphet tovább', async () => {
+  const p=await plan();
+  await save(p.steps.map(s=>({...s,seconds:0})),p.version);
+  await command('start');
+  await expect(command('next')).rejects.toThrow('ROUND_STILL_OPEN');
+  await user(guest);
+  const snapshot=(await db.query<{s:{round:{closes_at:string|null;can_submit:boolean}}}>('select public.get_game_snapshot($1) s',[game])).rows[0].s;
+  expect(snapshot.round.closes_at).toBeNull();expect(snapshot.round.can_submit).toBe(true);
+  await db.query('select public.submit_rating($1,5,130,8)',[p.steps[0].id]);
+  await user(host);await command('close');
+  await user(guest);await expect(db.query('select public.submit_rating($1,5,130,9)',[p.steps[0].id])).rejects.toThrow('ROUND_NOT_OPEN');
+});
+it('időkorlát ki-be kapcsolása idempotens, a lejárt kör időkorlátja nem vehető ki', async () => {
+  await command('start');const p=await plan();const id=p.steps[0].id,key=randomUUID();
+  await command('time',0,p.version,key);await command('time',0,p.version,key);
+  expect((await db.query<{closes_at:string|null}>('select closes_at from public.rounds where id=$1',[id])).rows[0].closes_at).toBeNull();
+  await command('time',60);
+  expect((await db.query<{closes_at:string|null}>('select closes_at from public.rounds where id=$1',[id])).rows[0].closes_at).not.toBeNull();
+  await db.exec('reset role');await db.query("update public.rounds set opened_at=now()-interval '2 minutes',closes_at=now()-interval '1 second' where id=$1",[id]);await user(host);
+  await expect(command('time',0)).rejects.toThrow('DEADLINE_PASSED');
+  await user(guest);await expect(db.query('select public.submit_rating($1,5,130,8)',[id])).rejects.toThrow('DEADLINE_PASSED');
+});
+it('új kóstoló alapideje lehet nulla; a létrehozott menet ezt örökli',async()=>{
+  const created=(await db.query<{id:string}>(`select public.create_game(gen_random_uuid(),'Óra nélkül',0,1,
+    '[{"name":"Titkos bor","price_huf":4500,"alcohol_tenths":130}]') id`)).rows[0].id;
+  const p=(await db.query<{p:{steps:{seconds:number}[]}}>('select public.get_tasting_schedule($1) p',[created])).rows[0].p;
+  expect(p.steps[0].seconds).toBe(0);
+});

@@ -1,5 +1,30 @@
 # Tartós projektmemória
 
+## Opcionális időkeret és kategóriajelölések — 2026-09-24
+
+- Felhasználói kérésre időkorlát nélkül is indulhat kóstoló; létrehozáskor,
+  boronként és futó, még nyitott körben ki-be kapcsolható. A beállításban 0,
+  az aktív körben NULL closes_at jelöli. Nincs mesterséges végtelen dátum.
+- Időkorlát nélkül a host kézzel zár; lejárt/lezárt kör továbbra sem nyitható újra.
+  Az időt és a beküldési jogosultságot mindig a szerver dönti el.
+- Az ár/alkohol/tetszés kategóriákat kis árcédula/százalék/szív SVG jelöli.
+  A tetszéskártyák 1–10 számozásúak, vezető nulla nélkül; a borsorszám arculata marad.
+
+## Eredmény és prezentáció — 2026-09-24
+
+- A felhasználó saját telefonján tipp–valódi érték összevetést és pontokat kér;
+  a prezentáción közös eredményt, borfotót, nevet és a kérdések valódi értékeit.
+- A meglévő v2 képlet szerveroldali: kategóriapont 50/25/0, alkohol legfeljebb50,
+  3 százalékponttól0, összeg egyszer kerekítve. Tetszés nem versenypont.
+  A régi v1 forintos képlet megmarad; hiányzó forintos adatból nem találunk ki pontot.
+- Csak felfedett bor válhat eredménnyé; saját választ csak a hívó játékos kap.
+  Host/prezentáció own:null, közös átlag és ranglista, egyéni válaszok nélkül.
+  A nézet ugyanazon snapshot/Realtime frissüléssel működik, a pontok újraszámolhatók.
+- A mentett fotó felfedés után hitelesített Storage-letöltéssel jelenik meg,
+  object-fit:contain; kép hiánya/hibája nem akadályozza az adatok olvasását.
+  A prezentáció ötös ranglistalapokkal és egyenkénti borlapokkal működik;
+  befejezett kóstolóhoz érvényes meghívó nélkül is megnyitható a host böngészőjében.
+
 ## Futás közben szerkeszthető menet — 2026-09-24
 
 - Felhasználói kérésre a még hátralévő borok sorrendje, adatai és időkerete a

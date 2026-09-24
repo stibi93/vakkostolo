@@ -13,6 +13,7 @@ const emptyWine = (): WineFields => ({ id: crypto.randomUUID(), name: '', price:
 export function CreateGameForm({ api }: { api: GamesApi }) {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
+  const [timed, setTimed] = useState(true);
   const [seconds, setSeconds] = useState('120');
   const [reveal, setReveal] = useState('2');
   const [wines, setWines] = useState<WineFields[]>(() => [emptyWine()]);
@@ -70,7 +71,7 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (submitting.current) return;
-    const input = { title, roundSeconds: Number(seconds), revealEvery: Number(reveal),
+    const input = { title, roundSeconds: timed ? Number(seconds) : 0, revealEvery: Number(reveal),
       wines: wines.map((wine) => ({ name: wine.name, priceHuf: wine.price.trim() ? Number(wine.price) : NaN,
         alcoholTenths: parseAlcohol(wine.alcohol) })) };
     const invalid = validateGameInput(input);
@@ -108,7 +109,8 @@ export function CreateGameForm({ api }: { api: GamesApi }) {
         <legend className="sr-only">A kóstoló adatai</legend>
         <label>Kóstoló címe<input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={100} required autoComplete="off" /></label>
         <div className="game-settings">
-          <label>Kóstolási idő boronként (másodperc)<input type="number" min="30" max="1800" step="1" inputMode="numeric" value={seconds} onChange={(event) => setSeconds(event.target.value)} required /></label>
+          <label className="timer-toggle"><input type="checkbox" checked={timed} onChange={e => setTimed(e.target.checked)} />Időkorlát használata</label>
+          {timed && <label>Kóstolási idő boronként (másodperc)<input type="number" min="30" max="1800" step="1" inputMode="numeric" value={seconds} onChange={(event) => setSeconds(event.target.value)} required /></label>}
           <label>Felfedés ennyi bor után<input type="number" min="1" max="12" step="1" inputMode="numeric" value={reveal} onChange={(event) => setReveal(event.target.value)} required /></label>
         </div>
         <p className="game-hint">A felfedést később te indítod. Az utolsó blokk kevesebb bort is tartalmazhat.</p>

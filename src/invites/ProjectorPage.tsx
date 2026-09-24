@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { authRuntime } from '../auth/runtime';
 import type { createAuthStore } from '../auth/store';
 import { gameErrorMessage } from '../games/api';
+import type { GameStatus } from '../domain/game';
 import type { GamesApi } from '../games/model';
 import { LiveGamePanel } from '../live/LiveGamePanel';
 import type { LiveApi } from '../live/model';
@@ -13,7 +14,7 @@ import { inviteUrl, publicAppOrigin, readStoredInvite } from './model';
 import type { Invite } from './model';
 import './invites.css';
 
-/** Projector view: title, QR, link and nicknames only; wine data is never requested here. */
+/** Shared display: lobby QR, live round, and only explicitly revealed wine results. */
 export function ProjectorPage() {
   const { gameId = '' } = useParams();
   const motion = useAppMotion();
@@ -62,12 +63,14 @@ function useStoredInvite(gameId: string) {
 
 function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: LiveApi; gameId: string }) {
   const invite = useStoredInvite(gameId);
-  const [title, setTitle] = useState<{ status: 'loading' } | { status: 'ready'; value: string | null } |
+  const [liveStatus, setLiveStatus] = useState<GameStatus | null>(null);
+  const [title, setTitle] = useState<{ status: 'loading' } | { status: 'ready'; value: string | null; gameStatus?: GameStatus } |
     { status: 'error'; message: string }>({ status: 'loading' });
   useEffect(() => {
     let active = true;
     games.list().then((list) => {
-      if (active) setTitle({ status: 'ready', value: list.find((game) => game.id === gameId)?.title ?? null });
+      const game = list.find(game => game.id === gameId);
+      if (active) setTitle({ status: 'ready', value: game?.title ?? null, gameStatus: game?.status });
     }, (error: unknown) => { if (active) setTitle({ status: 'error', message: gameErrorMessage(error) }); });
     return () => { active = false; };
   }, [games, gameId]);
@@ -75,20 +78,22 @@ function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: LiveA
   if (title.status === 'loading') return <p role="status">A kivetítő betöltése…</p>;
   if (title.status === 'error') return <ProjectorNotice text={title.message} />;
   if (title.value === null) return <ProjectorNotice text="Ez a kóstoló nem található a saját kóstolóid között." />;
-  if (!invite) {
+  const status = liveStatus ?? title.gameStatus ?? 'lobby';
+  const started = !['draft', 'lobby'].includes(status);
+  if (!invite && !started) {
     return <ProjectorNotice text="Ehhez a kóstolóhoz ebben a böngészőben nincs érvényes meghívó. Nyisd meg a váróját a játékmesteri oldalon." />;
   }
-  const url = inviteUrl(publicAppOrigin(), invite.token);
-  return <section className="projector-view" aria-labelledby="projector-title">
+  const url = invite ? inviteUrl(publicAppOrigin(), invite.token) : null;
+  return <section className={`projector-view${started ? ' projector-active' : ''}${['reveal','finished'].includes(status) ? ' projector-results' : ''}`} aria-labelledby="projector-title">
     <div className="projector-invite">
       <p className="eyebrow">VAKKÓSTOLÓ · KÓSTOLÓ</p>
       <h1 id="projector-title">{title.value}</h1>
-      <p className="projector-lead">Olvasd be a QR-kódot a telefonod kamerájával, és adj meg egy becenevet.</p>
+      {!started && url && <><p className="projector-lead">Olvasd be a QR-kódot a telefonod kamerájával, és adj meg egy becenevet.</p>
       <figure className="projector-qr-card">
         <QrCode value={url} label="QR-kód a kóstolóba való belépéshez" />
         <figcaption className="projector-link"><span>Vagy nyisd meg:</span><code>{url}</code></figcaption>
-      </figure>
+      </figure></>}
     </div>
-    <LiveGamePanel presentation api={lobby} gameId={gameId} showTitle={false} />
+    <LiveGamePanel presentation onStatusChange={setLiveStatus} api={lobby} gameId={gameId} showTitle={false} />
   </section>;
 }

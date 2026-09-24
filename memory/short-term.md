@@ -1,5 +1,53 @@
 # Aktuális munkamenet
 
+## Opcionális időkorlát és értékelési ikonok kész — 2026-09-24
+
+- Létrehozáskor és a menetszerkesztőben „Időkorlát használata” jelölőnégyzet.
+  Élő vezérlésben időkorlát ki/be; kézi lezárásig fogad tippet a korlátlan kör.
+  A lejárt kör nem nyitható újra. A demo ugyanezt támogatja.
+- 0013 migráció alkalmazva helyi Supabase-en: időbeállítás 0, aktív closes_at=NULL.
+  Beküldés, snapshot, indítás és vezérlés együtt módosult; a 0012 eredményprojekció
+  megmaradt. Újraindított óra a mentéstől számít, kérésismétlés nem tolja ki.
+- RatingFields: árcédula / százalék / szív piktogram, szöveges cím megtartva,
+  dekoratív SVG-k kihagyva a felolvasásból. Tetszéskártyák 1–10, vezető nulla nélkül.
+  Az eredménynézet kategóriái is ugyanazokat az ikonokat kapták.
+- check 297/297, típusok/lint/build sikeres. Érintett E2E 36/36, majd külön
+  létrehozás/menetmentés/eredménynézet 8/8. Mobil/asztali értékelőlap és mobilos
+  eredménynézet képei átnézve: test-results/optional-timer/, optional-timer-final/.
+- Valódi test:schedule:local időkorlát-kikapcsolás/bekapcsolás Realtime-mal,
+  beküldéssel és a további körvezérléssel sikeres; saját próbaadatok törölve.
+- A párhuzamos eredményfejlesztés megmaradt; közös fájlok miatt ebben a
+  munkamenetben nincs commit. Az új migráció alkalmazott, ne írjuk át.
+  Következő: fizikai telefonos próba; a kész munkák logikus commitolása.
+
+
+## Saját eredmények, szerverpontozás és fotós prezentáció kész — 2026-09-24
+
+- 0012 migráció: get_game_results és privát verziózott pontozás, csak felfedett
+  borokból. A snapshot a közös Realtime/poll adatfolyamban viszi az eredményt.
+  Saját tipp csak a hívó játékosé; host/kivetítő own:null, más válasz nincs a DTO-ban.
+- Telefon: fotós borlap, valódi ár/kategória/alkohol, tetszési átlag és darabszám,
+  saját tipp vs. valódi érték, részpont és összpont, közös ranglista. Hiányzó
+  válasz 0 pont, az átlagból kimarad. Holtverseny 1,1,3. Részállás/végeredmény jelölt.
+- Kivetítő: lapozható borlap teljes palackfotóval, mellette név és statisztikák;
+  ranglista ötösével, szokásos tartalommal 1280×720-on is elfér. Indulás után
+  nincs nagy QR-blokk; eredményekhez nem kell megmaradt meghívó. Hostnál az
+  Eredmények kivetítése link befejezett játéknál is elérhető.
+- A másik agent fotós integrációja (ce3635f) megmaradt. Az új fotós eredménypanel
+  privát Storage.download + felszabadított blob URL; csak kiválasztott felfedett
+  képet tölt, kép nélküli/hiba/újrapróba állapottal. Régi revealed fallback megmaradt.
+- 0012 a helyi Supabase-en alkalmazva. Valódi test:results:local sikeres:
+  szerverpontok, saját/közös DTO, felfedés Realtime, Storage tiltás felfedés előtt,
+  engedély utána, idegen hozzáférés tiltása, végső állapot. Saját próbaadatok törölve.
+- npm run check: 294/294, típusok/lint/build sikeres. Érintett invite/live/photos/
+  results E2E 32/32; végső hostlink 2/2 és új build. Renderelt mobil és asztali
+  borlap/ranglista átnézve, fotó betöltve: test-results/results-final/.
+- Fizikai telefon/kivetítő és hosztolt deploy nem volt; e munkamenet nem commitolt.
+  Saját 4467/4468 tesztszerverek leálltak, a 5173 fejlesztői szerver megmaradt.
+  Következő: kézi próbakóstoló telefonokkal és kivetítővel. Részletek: docs/results.md.
+  A régi v1, csak kategóriás (forintos tipp nélküli) válasz nem pontozható:
+  külön hiányos jelzést kap, nincs kitalált ár vagy utólagos scoring_version-csere.
+
 ## Kóstolómenet és borfotók integrálva — 2026-09-24
 
 - Menet külön commitban: `0060363`. A fotós worktree változásai a főágba

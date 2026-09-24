@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ResultsPanel } from '../results/ResultsPanel';
 import { RevealedWinePhoto } from './RevealedWinePhoto';
 import { HostControls } from '../schedule/HostControls';
 import { newRequestId } from '../schedule/model';
@@ -45,8 +46,8 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
   return <section className={`live-round${snapshot.role === 'player' ? ' live-round-player' : ''}`} aria-label="Aktuális kör">
     <div className="live-round-heading">
       <div><p className="eyebrow">AKTUÁLIS TÉTEL</p><h3>{String(round.position).padStart(2, '0')}. tétel</h3></div>
-      <span className="live-timer" role="timer" aria-label="Hátralévő idő">
-        {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</span>
+      {round.closesAt === null ? <span className="small-note">Időkorlát nélkül</span> : <span className="live-timer" role="timer" aria-label="Hátralévő idő">
+        {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</span>}
     </div>
     <p>{open ? 'A bor neve és valódi adatai a felfedésig rejtve maradnak.' : 'A kör már nem fogad tippeket. Várd meg a játékmester következő lépését.'}</p>
     {snapshot.role === 'player'
@@ -70,9 +71,16 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
       {remaining !== null && <p role="timer" aria-label="Szünetből hátralévő idő" className="live-timer">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</p>}
       <p className="small-note">A folytatást a játékmester indítja.</p>
     </section>}
-    {snapshot.game.status === 'finished' && <h3>A kóstoló befejeződött.</h3>}
+    {snapshot.game.status === 'finished' && !snapshot.results && <h3>A kóstoló befejeződött.</h3>}
     {snapshot.role === 'host' && !presentation && api.schedule && <HostControls api={api.schedule} snapshot={snapshot} refresh={refresh} available={available} secondsLeft={secondsLeft(snapshot,now)} />}
-    {!!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
+    {snapshot.results && snapshot.role === 'host' && !presentation && <p>
+      <a className="button-secondary" href={`/present/${snapshot.game.id}`} target="_blank" rel="noopener">Eredmények kivetítése</a>
+    </p>}
+    {snapshot.results && <details className="live-results" open={presentation || snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
+      <summary>Eredmények ({snapshot.results.revealedCount} bor)</summary>
+      <ResultsPanel key={snapshot.results.revealedCount} results={snapshot.results} gameId={snapshot.game.id} selfId={snapshot.selfParticipantId} photos={api.resultPhotos} presentation={presentation} />
+    </details>}
+    {!snapshot.results && !!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
       <summary>Felfedett borok ({snapshot.revealed.length})</summary><ol className="live-revealed">
         {snapshot.revealed.map(w => <li key={w.id}><h3>{String(w.position).padStart(2,'0')}. {w.name}</h3>
           <RevealedWinePhoto api={api} gameId={snapshot.game.id} wine={w} />

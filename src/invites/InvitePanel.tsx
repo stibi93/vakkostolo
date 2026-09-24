@@ -59,8 +59,8 @@ export function InvitePanel({ api, gameId, status, onStatusChange }: {
         <button className="button-secondary" disabled={pending} onClick={() => void issue()}>
           {pending ? 'Új meghívó készítése…' : 'Új meghívó'}</button>
       </div>
-      <p className="game-hint">A kivetítő nézet új lapon nyílik: csak a kóstoló címét, a QR-kódot és a belépett
-        beceneveket mutatja, a borok adatait nem. Húzd át a lapot a projektor képernyőjére.</p>
+      <p className="game-hint">A kivetítő nézet új lapon nyílik: a váróban QR-kódot és résztvevőket, felfedés után
+        fotós borlapokat és közös eredményeket mutat. Húzd át a lapot a projektor képernyőjére.</p>
       <p className="game-hint">Érvényes eddig: {new Date(invite.expiresAt).toLocaleString('hu-HU',
         { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}. Új meghívónál a régi link és
         QR-kód érvényét veszti; aki már belépett, bent marad.</p>

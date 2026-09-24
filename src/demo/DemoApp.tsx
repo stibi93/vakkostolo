@@ -59,7 +59,7 @@ export function DemoApp() {
     setNow(time);
     setActiveIndex(pendingIndex);
     setRounds((previous) => previous.map((round, index) => index === pendingIndex
-      ? { status: 'open', closesAt: time + duration * 1000 } : round));
+      ? { status: 'open', closesAt: duration === 0 ? Infinity : time + duration * 1000 } : round));
     setStatus('tasting');
     setNotice('A kör elindult. A Játékos nézetben beküldheted a tippedet.');
   }
@@ -131,17 +131,26 @@ export function DemoApp() {
               <div className="session-stats">
                 <div><strong>03</strong><span>kóstolandó bor</span></div>
                 <div><strong>01</strong><span>tesztjátékos</span></div>
-                <div><strong>{status === 'tasting' ? `${number(Math.floor(seconds / 60))}:${number(seconds % 60)}` : `${duration / 60}`}</strong><span>{status === 'tasting' ? 'hátralévő idő' : 'perc / tétel'}</span></div>
+                <div><strong>{duration === 0 ? 'Időkorlát nélkül' : status === 'tasting' ? `${number(Math.floor(seconds / 60))}:${number(seconds % 60)}` : `${duration / 60}`}</strong><span>{duration === 0 ? 'kézi körlezárás' : status === 'tasting' ? 'hátralévő idő' : 'perc / tétel'}</span></div>
               </div>
               <div className="settings-row">
-                <label>Kóstolási idő<select value={duration} disabled={status !== 'lobby'} onChange={(event) => setDuration(Number(event.target.value))}><option value={60}>1 perc / bor</option><option value={120}>2 perc / bor</option><option value={180}>3 perc / bor</option></select></label>
+                <label className="timer-toggle"><input type="checkbox" checked={duration !== 0}
+                  disabled={!['lobby','tasting'].includes(status) || (status === 'tasting' && seconds === 0)}
+                  onChange={event => {
+                    const next = event.target.checked ? 120 : 0;
+                    setDuration(next);
+                    if (status === 'tasting' && canSubmit(current.status,current.closesAt,Date.now())) {
+                      setRounds(previous => previous.map((round,index) => index === activeIndex ? {...round,closesAt:next === 0 ? Infinity : Date.now()+next*1000} : round));
+                    }
+                  }} />Időkorlát használata</label>
+                {duration !== 0 && <label>Kóstolási idő<select value={duration} disabled={status !== 'lobby'} onChange={(event) => setDuration(Number(event.target.value))}><option value={60}>1 perc / bor</option><option value={120}>2 perc / bor</option><option value={180}>3 perc / bor</option></select></label>}
                 <label>Felfedés gyakorisága<select value={revealEvery} disabled={status !== 'lobby'} onChange={(event) => setRevealEvery(Number(event.target.value))}><option value={1}>Minden bor után</option><option value={2}>2 boronként</option><option value={3}>Csak a végén</option></select></label>
               </div>
               <div className="actions">
                 {canStart && <button className="button-primary" onClick={startRound}>{status === 'lobby' ? 'Kóstoló indítása' : 'Következő tétel'}<span aria-hidden="true">↗</span></button>}
                 {status === 'tasting' && <>
                   <button className="button-primary" onClick={closeRound}>Kör lezárása <span aria-hidden="true">→</span></button>
-                  <button className="button-secondary" disabled={seconds === 0} onClick={() => {
+                  <button className="button-secondary" disabled={seconds === 0 || !Number.isFinite(seconds)} onClick={() => {
                     if (!canSubmit(current.status, current.closesAt, Date.now())) return;
                     setRounds((previous) => previous.map((round, index) => index === activeIndex ? { ...round, closesAt: round.closesAt + 30_000 } : round));
                     setNotice('A kör ideje 30 másodperccel meghosszabbítva.');
@@ -199,7 +208,7 @@ function RatingForm({ index, seconds, saved, onSubmit }: { index: number; second
 
   return <form className="rating-form" onSubmit={handleSubmit}>
     <div className="round-label"><div><p className="eyebrow">AKTUÁLIS TÉTEL</p><h3>{number(index + 1)}. tétel</h3><p>A bor neve a felfedésig rejtve marad.</p></div><span className="round-label-number" aria-hidden="true">{number(index + 1)}</span></div>
-    <div className="rating-heading"><div><p className="eyebrow">KÓSTOLÓLAP</p><h3>A te értékelésed</h3></div><span className="timer" aria-label={`Hátralévő idő: ${seconds} másodperc`}>{number(Math.floor(seconds / 60))}:{number(seconds % 60)}</span></div>
+    <div className="rating-heading"><div><p className="eyebrow">KÓSTOLÓLAP</p><h3>A te értékelésed</h3></div>{Number.isFinite(seconds) ? <span className="timer" aria-label={`Hátralévő idő: ${seconds} másodperc`}>{number(Math.floor(seconds / 60))}:{number(seconds % 60)}</span> : <span>Időkorlát nélkül</span>}</div>
     <RatingFields value={draft} onChange={setDraft} />
     {error && <p role="alert" className="error">{error}</p>}
     <button type="submit" className="button-primary">{saved ? 'Tipp módosítása' : 'Tipp beküldése'}<span aria-hidden="true">↗</span></button>

@@ -1,0 +1,108 @@
+.results-panel { margin: 28px 0; padding-top: 24px; border-top: 3px solid var(--accent); }
+.results-heading { display: flex; justify-content: space-between; align-items: start; gap: 20px; flex-wrap: wrap; }
+.results-heading h2 { font-size: clamp(26px,4vw,40px); }
+.results-heading p { margin: 8px 0 16px; }
+.results-own-total { display: grid; gap: 4px; color: var(--accent); }
+.results-own-total strong { font: 600 52px/1 var(--display); }
+.results-own-total span { font-size: 14px; }
+.results-switch { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.result-navigation { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.result-navigation button { padding: 10px 12px; }
+.result-navigation select { max-width: 100%; padding: 10px; border: 1px solid var(--control-border); color: var(--ink); background: var(--paper); }
+.result-wine { display: grid; gap: clamp(20px,3vw,40px); background: var(--sheet); border-block: 1px solid var(--line); padding: 24px 0; }
+.result-photo { margin: 0; background: var(--paper); min-width: 0; display: grid; align-items: center; height: 280px; }
+.result-photo img { display: block; width: 100%; height: 100%; max-height: 280px; object-fit: contain; }
+.result-photo-placeholder { padding: 24px; text-align: center; color: var(--muted); }
+.result-photo-placeholder > span { font: 600 72px/1 var(--display); color: var(--accent); }
+.result-photo-placeholder p { font-size: 14px; }
+.result-wine-content { min-width: 0; }
+.result-wine-content > h3 { font-family: var(--serif); font-size: clamp(30px,4vw,48px); font-weight: 400; margin-bottom: 24px; }
+.result-facts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; margin: 0 0 24px; }
+.result-facts dt { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.result-facts dd { margin: 0; font: 600 24px/1.2 var(--display); overflow-wrap: anywhere; }
+.result-facts .result-fact-note { font: 13px/1.5 Arial,sans-serif; color: var(--muted); margin-top: 6px; }
+.result-comparison { border-top: 3px solid var(--accent); padding-top: 18px; }
+.result-comparison-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.result-comparison h4 { margin: 0; font-size: 20px; }
+.result-comparison-heading > strong { color: var(--accent); font: 600 22px var(--display); }
+.result-answer { padding: 14px 0; border-top: 1px solid var(--line); }
+.result-answer-title { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.result-answer-title h5 { font-size: 15px; margin: 0; }
+.result-answer-title span { font-size: 13px; color: var(--accent); }
+.result-answer dl { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; margin: 12px 0 0; }
+.result-answer dt { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.result-answer dd { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.result-rules { margin-top: 20px; }
+.result-rules summary { min-height: 44px; padding-block: 12px; cursor: pointer; }
+.result-rules p { font-size: 14px; line-height: 1.6; }
+.results-ranking table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.results-ranking th, .results-ranking td { padding: 16px 10px; text-align: left; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.results-ranking th:first-child { width: 56px; }
+.results-ranking th:last-child { width: 80px; }
+.results-ranking td:last-child, .results-ranking th:last-child { text-align: right; }
+.results-ranking small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; margin-top: 4px; }
+.results-ranking .is-self { background: var(--blue); }
+.results-ranking td strong { font: 600 26px var(--display); }
+.result-public-note { border-top: 1px solid var(--line); padding-top: 20px; color: var(--muted); }
+@media(min-width:850px) {
+  .result-wine { grid-template-columns: minmax(180px,1fr) minmax(0,2fr); }
+  .result-photo { height: 420px; }
+  .result-photo img { max-height: 420px; }
+  .results-presentation .result-wine { grid-template-columns: minmax(220px,2fr) minmax(0,3fr); }
+  .results-presentation .result-facts { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .results-presentation .result-facts dd { font-size: clamp(26px,3vw,44px); }
+  .results-presentation .result-facts dt { font-size: 17px; }
+  .results-presentation .result-wine-content > h3 { font-size: clamp(36px,4.5vw,64px); }
+  .results-presentation .results-ranking th, .results-presentation .results-ranking td { font-size: 24px; }
+  .results-presentation .results-ranking small { font-size: 16px; }
+}
+.projector-view.projector-active { display: block; }
+.projector-active .projector-invite { margin-bottom: 20px; }
+.projector-active .projector-invite h1 { font-size: clamp(26px,3vw,42px); }
+.projector-active .lobby-panel { background: var(--sheet); }
+.projector-results .lobby-roster { display: none; }
+.projector-results .results-panel { margin-top: 0; }
+
+/* Projection keeps the wine and its facts together within a normal 720p screen. */
+.projector-view.projector-active .lobby-panel { background: var(--sheet); }
+.projector-results .live-results > summary { display: none; }
+.projector-results .results-panel { border-top: 0; padding-top: 12px; }
+.projector-results .projector-invite > .eyebrow { display: none; }
+.projector-results .projector-invite h1 { margin: 0; }
+@media(min-width:850px) {
+  .projector-shell:has(.projector-results) .projector-toolbar { position: static; display: flex; justify-content: flex-end; padding: 8px 24px 0; }
+  .projector-main:has(.projector-results) { min-height: 0; padding: 12px 24px 24px; align-items: start; }
+  .projector-results .projector-invite { margin-bottom: 12px; }
+  .projector-results .projector-invite h1 { font-size: 28px; }
+  .projector-results .lobby-panel { padding: 14px 24px; }
+  .results-presentation { display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: 20px; }
+  .results-presentation > .results-heading { grid-column: 1; grid-row: 1; }
+  .results-presentation > .results-switch { grid-column: 2; grid-row: 1; margin: 0; align-self: center; }
+  .results-presentation > :not(.results-heading):not(.results-switch) { grid-column: 1 / -1; }
+  .results-presentation .results-heading .eyebrow { display: none; }
+  .results-presentation .results-heading h2 { font-size: 28px; }
+  .results-presentation .results-heading p { margin: 6px 0; font-size: 14px; }
+  .results-presentation > .small-note { margin: 4px 0; }
+  .results-presentation .result-navigation { margin: 8px 0; }
+  .results-presentation .result-wine { padding: 16px 0; }
+  .results-presentation .result-photo { height: clamp(260px,42vh,480px); }
+  .results-presentation .result-photo img { max-height: clamp(260px,42vh,480px); }
+  .results-presentation .result-wine-content > h3 { font-size: clamp(32px,3.3vw,58px); margin-bottom: 20px; }
+  .results-presentation .result-facts .result-fact-note { font: 16px/1.5 Arial,sans-serif; }
+  .results-presentation .result-public-note { font-size: 14px; margin-bottom: 0; padding-top: 12px; }
+  .results-presentation .results-ranking h3 { font-size: 26px; margin: 12px 0 4px; }
+  .results-presentation .results-ranking th, .results-presentation .results-ranking td { font-size: 22px; padding: 6px 12px; line-height: 1.15; }
+  .results-presentation .results-ranking th:first-child { width: 84px; }
+  .results-presentation .results-ranking small { font-size: 13px; margin-top: 2px; }
+  .results-presentation .results-ranking .small-note { margin: 6px 0; }
+}
+@media(max-width:500px) {
+  .result-navigation { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); }
+  .result-navigation button { font-size: 12px; padding: 8px; }
+  .result-navigation select { font-size: 14px; padding: 8px 2px; }
+}
+@media(min-width:850px) {
+  .projector-results .results-panel { margin: 0; }
+  .projector-results .lobby-panel { padding: 10px 24px; }
+  .projector-main:has(.projector-results) { padding: 8px 24px 16px; }
+}

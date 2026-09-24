@@ -35,7 +35,7 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | implementáció és helyi Supabase-próba kész; fizikai eszközök hátravannak |
 | Első élő kör és válaszadás | idempotens indítás, szerverhatáridő, saját mentett tipp és visszatérés | helyi implementáció és valódi Supabase-próba kész |
 | Menetszerkesztés és körvezérlés | hátralévő borok/szünetek, egyedi szöveg, korai zárás, időállítás, következő lépés és blokkhatár | helyi implementáció, mobil/asztali E2E és valódi Supabase-próba kész |
-| Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | blokkos adatfelfedés kész; pontozás és ranglista következik |
+| Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | blokkos felfedés, szerverpontozás, saját eredmény és fotós prezentáció kész; fizikai pilot hátravan |
 
 Az utolsó két egység további, külön ellenőrizhető szeletekre bontandó a megvalósításkor.
 A belépés/váró mérföldkő csak valódi Supabase Auth és több kliens integrációs
@@ -51,8 +51,8 @@ A host Auth és a játék létrehozásának helyi implementációja elkészült.
 A meghívó/QR, anonim vendégbelépés és közös váró snapshot/Realtime elkészült.
 Az első kör szerveroldali indítása és a saját tippek beküldése is elkészült.
 A menetszerkesztés, korai körzárás, időállítás, egyedi szünetek, következő tétel
-és blokkos adatfelfedés elkészült. A következő egység a szerveroldali pontozás
-és a ranglista; részletek: [szerkeszthető menet](tasting-schedule.md).
+és blokkos adatfelfedés elkészült. A szerveroldali pontozás és fotós eredménynézet is elkészült. Következik a
+fizikai telefonos/kivetítős pilot; részletek: [szerkeszthető menet](tasting-schedule.md).
 A fizikai telefonos és hosztolt integráció külön ellenőrzési kapu.
 A külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
 Az adapter a migrációból generált Supabase TypeScript-típusokat használja;

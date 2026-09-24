@@ -231,6 +231,7 @@ export type Database = {
     Functions: {
       control_tasting: { Args: { p_game_id: string; p_expected_version: number; p_request_id: string; p_action: string; p_seconds?: number }; Returns: string };
       create_game: { Args: { p_request_id: string; p_title: string; p_round_seconds: number; p_reveal_every: number; p_wines: Json }; Returns: string };
+      get_game_results: { Args: { p_game_id: string }; Returns: Json };
       get_game_snapshot: { Args: { p_game_id: string }; Returns: Json };
       get_host_game: { Args: { p_game_id: string }; Returns: Json };
       get_lobby_snapshot: { Args: { p_game_id: string }; Returns: Json };

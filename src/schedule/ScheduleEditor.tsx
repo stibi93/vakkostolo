@@ -68,8 +68,9 @@ export function ScheduleEditor({ api, gameId, onSaved }: { api: ScheduleApi; gam
               <label>Valódi palackár (Ft)<input type="number" required min="1" max="1000000" step="1" value={s.price_huf ?? ''} onChange={e => patch(s.id,{price_huf:e.target.value === '' ? null : Number(e.target.value)})} /></label>
               <label>Valódi alkoholfok (% vol)<input type="number" required min="0" max="25" step="0.1" value={s.alcohol_tenths === null ? '' : s.alcohol_tenths/10} onChange={e => patch(s.id,{alcohol_tenths:e.target.value === '' ? null : Math.round(Number(e.target.value)*10)})} /></label>
             </div> : <label>Játékosoknak megjelenő szöveg<textarea rows={3} maxLength={2000} value={s.message} onChange={e => patch(s.id,{message:e.target.value})} /></label>}
-            <label>{s.kind === 'wine' ? 'Beküldési idő (másodperc)' : 'Szünet hossza (másodperc, 0 = óra nélkül)'}
-              <input type="number" required min={s.kind === 'wine' ? 30 : 0} max={s.kind === 'wine' ? 1800 : 7200} step="1" value={Number.isFinite(s.seconds) ? s.seconds : ''} onChange={e => patch(s.id,{seconds:e.target.value === '' ? NaN : Number(e.target.value)})} /></label>
+            {s.kind === 'wine' && <label className="timer-toggle"><input type="checkbox" checked={s.seconds !== 0} onChange={e => patch(s.id,{seconds:e.target.checked ? 120 : 0})} />Időkorlát használata</label>}
+            {(s.kind === 'break' || s.seconds !== 0) && <label>{s.kind === 'wine' ? 'Beküldési idő (másodperc)' : 'Szünet hossza (másodperc, 0 = óra nélkül)'}
+              <input type="number" required min={s.kind === 'wine' ? 30 : 0} max={s.kind === 'wine' ? 1800 : 7200} step="1" value={Number.isFinite(s.seconds) ? s.seconds : ''} onChange={e => patch(s.id,{seconds:e.target.value === '' ? NaN : Number(e.target.value)})} /></label>}
             {s.kind === 'break' && <p className="small-note">A folytatást te indítod el. Az idő lejárta nem indít új bort. Ez a cím és szöveg a szünet kezdetén minden játékosnál megjelenik.</p>}
           </li>)}</ol>
           <div className="schedule-actions"><button className="button-secondary" type="button" disabled={wineCount >= 12 || history.length+steps.length >= 60} onClick={() => add('wine')}>Bor hozzáadása</button>
