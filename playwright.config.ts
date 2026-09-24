@@ -31,9 +31,9 @@ export default defineConfig({
     },
   ],
   projects: [
-    { name: 'desktop-chromium', testIgnore: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts'], use: desktop },
-    { name: 'mobile-chromium', testIgnore: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts'], use: mobile },
-    { name: 'auth-desktop', testMatch: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts'], use: { ...desktop, baseURL: authUrl } },
-    { name: 'auth-mobile', testMatch: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts'], use: { ...mobile, baseURL: authUrl } },
+    { name: 'desktop-chromium', testIgnore: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts', 'lobby.spec.ts'], use: desktop },
+    { name: 'mobile-chromium', testIgnore: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts', 'lobby.spec.ts'], use: mobile },
+    { name: 'auth-desktop', testMatch: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts', 'lobby.spec.ts'], use: { ...desktop, baseURL: authUrl } },
+    { name: 'auth-mobile', testMatch: ['auth.spec.ts', 'games.spec.ts', 'invite.spec.ts', 'lobby.spec.ts'], use: { ...mobile, baseURL: authUrl } },
   ],
 });

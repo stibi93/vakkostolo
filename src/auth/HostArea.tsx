@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { Link, Navigate, useLocation } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { HostWorkspace } from '../games/HostWorkspace';
+import type { LobbyApi } from '../lobby/model';
 import type { GamesApi } from '../games/model';
 import type { InvitesApi } from '../invites/model';
 import { authRuntime } from './runtime';
@@ -14,7 +15,7 @@ export function HostArea() {
         <p className="eyebrow">ONLINE BELÉPÉS</p>
         <h1 id="host-title">Játékmester</h1>
         {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} games={authRuntime.games}
-          invites={authRuntime.invites} /> : <>
+          invites={authRuntime.invites} lobby={authRuntime.lobby} /> : <>
           <h2>A belépés még nem elérhető.</h2>
           <p>{authRuntime.status === 'missing'
             ? 'Az online kapcsolat még nincs beállítva. Addig a próbakóstolóban végigjárhatod a játék menetét.'
@@ -26,8 +27,8 @@ export function HostArea() {
   );
 }
 
-function HostSession({ store, games, invites }: {
-  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi;
+function HostSession({ store, games, invites, lobby }: {
+  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi; lobby: LobbyApi;
 }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const location = useLocation();
@@ -64,7 +65,7 @@ function HostSession({ store, games, invites }: {
       {state.user.is_anonymous === false ? <>
         <h2>Játékmesteri fiók</h2>
         <p>Bejelentkezve{state.user.email ? `: ${state.user.email}` : '.'}</p>
-        <HostWorkspace key={state.user.id} api={games} invites={invites} />
+        <HostWorkspace key={state.user.id} api={games} invites={invites} lobby={lobby} />
       </> : <>
         <h2>Most vendégként vagy belépve.</h2>
         <p>Játékmesterként tartós fiókra van szükséged. Előbb jelentkezz ki, majd lépj be Google-fiókkal.</p>

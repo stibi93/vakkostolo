@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, Navigate, useParams } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { authRuntime } from '../auth/runtime';
 import { inviteErrorMessage } from './api';
@@ -20,7 +20,7 @@ export function JoinPage() {
       </> : !isInviteToken(token) ? <>
         <h1 id="join-title">Ez a meghívó nem érvényes.</h1>
         <p>Ellenőrizd, hogy a teljes linket nyitottad-e meg, vagy olvasd be újra a QR-kódot.</p>
-      </> : <GuestJoin api={authRuntime.invites} token={token} />}
+      </> : <GuestJoin key={token} api={authRuntime.invites} token={token} />}
     </section>
   </PageFrame>;
 }
@@ -64,18 +64,7 @@ function GuestJoin({ api, token }: { api: InvitesApi; token: string }) {
     <button className="button-primary" onClick={() => { setState({ status: 'checking' }); setAttempt((value) => value + 1); }}>
       Újrapróbálás</button>
   </>;
-  if (state.status === 'joined') {
-    const { membership } = state;
-    return <>
-      <h1 id="join-title">{membership.title}</h1>
-      <p className="join-status" role="status">Bent vagy a váróban <strong>{membership.nickname}</strong> néven.</p>
-      <p>{membership.status === 'lobby' ? 'A játékmester indítja az első bort.'
-        : 'A kóstoló már elkezdődött; a következő bortól kapcsolódhatsz be.'}</p>
-      <p className="small-note">A belépésed ebben a böngészőben megmarad. Másik eszközről vagy privát ablakból
-        új játékosként lépnél be.</p>
-      <p className="small-note">Fejlesztés alatt: a belépés és a váró már működik, a kóstolólap még készül.</p>
-    </>;
-  }
+  if (state.status === 'joined') return <Navigate to={`/play/${state.membership.gameId}`} replace />;
   return <>
     <h1 id="join-title">Belépés a kóstolóba</h1>
     <p>Adj meg egy becenevet. Ezt látja a játékmester és a többi játékos. Regisztráció nem kell.</p>

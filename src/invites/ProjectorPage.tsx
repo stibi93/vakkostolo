@@ -4,10 +4,11 @@ import { authRuntime } from '../auth/runtime';
 import type { createAuthStore } from '../auth/store';
 import { gameErrorMessage } from '../games/api';
 import type { GamesApi } from '../games/model';
-import { ParticipantList } from './InvitePanel';
+import { LobbyPanel } from '../lobby/LobbyPanel';
+import type { LobbyApi } from '../lobby/model';
 import { QrCode } from './QrCode';
 import { inviteUrl, publicAppOrigin, readStoredInvite } from './model';
-import type { Invite, InvitesApi } from './model';
+import type { Invite } from './model';
 import './invites.css';
 
 /** Projector view: title, QR, link and nicknames only; wine data is never requested here. */
@@ -16,7 +17,7 @@ export function ProjectorPage() {
   return <div className="projector-shell">
     <main className="projector-main">
       {authRuntime.status === 'ready'
-        ? <ProjectorSession store={authRuntime.store} games={authRuntime.games} invites={authRuntime.invites} gameId={gameId} />
+        ? <ProjectorSession store={authRuntime.store} games={authRuntime.games} lobby={authRuntime.lobby} gameId={gameId} />
         : <ProjectorNotice text="Az online kapcsolat nincs beállítva, ezért a kivetítő nem érhető el." />}
     </main>
   </div>;
@@ -30,8 +31,8 @@ function ProjectorNotice({ text }: { text: string }) {
   </section>;
 }
 
-function ProjectorSession({ store, games, invites, gameId }: {
-  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi; gameId: string;
+function ProjectorSession({ store, games, lobby, gameId }: {
+  store: ReturnType<typeof createAuthStore>; games: GamesApi; lobby: LobbyApi; gameId: string;
 }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   useEffect(() => { void store.start(); }, [store]);
@@ -40,7 +41,7 @@ function ProjectorSession({ store, games, invites, gameId }: {
   if (!state.user || state.user.is_anonymous !== false) {
     return <ProjectorNotice text="A kivetítőt abban a böngészőben nyisd meg, ahol játékmesterként beléptél." />;
   }
-  return <ProjectorView key={state.user.id} games={games} invites={invites} gameId={gameId} />;
+  return <ProjectorView key={state.user.id} games={games} lobby={lobby} gameId={gameId} />;
 }
 
 function useStoredInvite(gameId: string) {
@@ -55,7 +56,7 @@ function useStoredInvite(gameId: string) {
   return invite;
 }
 
-function ProjectorView({ games, invites, gameId }: { games: GamesApi; invites: InvitesApi; gameId: string }) {
+function ProjectorView({ games, lobby, gameId }: { games: GamesApi; lobby: LobbyApi; gameId: string }) {
   const invite = useStoredInvite(gameId);
   const [title, setTitle] = useState<{ status: 'loading' } | { status: 'ready'; value: string | null } |
     { status: 'error'; message: string }>({ status: 'loading' });
@@ -82,6 +83,6 @@ function ProjectorView({ games, invites, gameId }: { games: GamesApi; invites: I
       <QrCode value={url} label="QR-kód a kóstolóba való belépéshez" />
       <p className="projector-link"><code>{url}</code></p>
     </div>
-    <ParticipantList api={invites} gameId={gameId} />
+    <LobbyPanel api={lobby} gameId={gameId} showTitle={false} />
   </section>;
 }

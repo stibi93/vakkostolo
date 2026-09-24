@@ -91,6 +91,13 @@ rövid kód bevezetésekor kötelező. Az anonim Auth IP-alapú limitje (közös
 továbbra is az üzemeltetési ellenőrzés része. Nem tesztelt élesben: valódi Supabase
 Auth/JWT, anonim belépés engedélyezése a hosztolt projektben, több eszköz.
 
+## Közös váró RPC
+
+`get_lobby_snapshot(p_game_id uuid) → jsonb`: jogosult host vagy tag, szerveridő,
+játékállapot és résztvevőlista, titkos adat nélkül. A `202609240003` migráció
+a `games` és `participants` Realtime-publicationjét is bekapcsolja.
+Szerződés, eseménykezelés és próbák: [közös váró](lobby.md).
+
 ## Következő RPC-k terve
 
 | Művelet | Ellenőrzés / tranzakció |
@@ -108,7 +115,8 @@ A felfedés a `revealed_wines`-ba másol és `rounds.status`-t állít, ugyanabb
 tranzakcióban. Nem olvassuk át közvetlenül a titkos táblát publikus view-n keresztül.
 Realtime-publicationbe csak `games`, `rounds`, `participants` kerülhet induláskor.
 Beküldési állapot hostoldalon külön lekérdezés; sem titkos bor, sem rating payload
-nem broadcastolható a szobának. A publication bekapcsolása a következő fázis feladata.
+nem broadcastolható a szobának. A váró migrációja a `games` és `participants` publicationjét már bekapcsolja;
+a `rounds` bekapcsolása az élő kör egységében szükséges.
 
 ## Tesztelés és migráció
 

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { GameStatus } from '../domain/game';
 import { QrCode } from './QrCode';
 import { inviteErrorMessage } from './api';
 import { inviteUrl, publicAppOrigin, readStoredInvite, storeInvite } from './model';
-import type { Invite, InvitesApi, Participant } from './model';
+import type { Invite, InvitesApi } from './model';
 import './invites.css';
 
 export function InvitePanel({ api, gameId, status, onStatusChange }: {
@@ -71,41 +71,5 @@ export function InvitePanel({ api, gameId, status, onStatusChange }: {
       <p className="game-hint">A régi link és QR-kód ezzel érvényét veszti; aki már belépett, bent marad.</p>
     </>}
     {message && <p role="alert" className="auth-message">{message}</p>}
-    {status !== 'draft' && <ParticipantList api={api} gameId={gameId} />}
   </section>;
-}
-
-type ListState = { status: 'loading' } | { status: 'error'; message: string } |
-  { status: 'ready'; data: Participant[]; stale: boolean };
-
-export function ParticipantList({ api, gameId }: { api: InvitesApi; gameId: string }) {
-  const [state, setState] = useState<ListState>({ status: 'loading' });
-  useEffect(() => {
-    let active = true;
-    const refresh = () => {
-      if (document.visibilityState !== 'visible') return;
-      api.participants(gameId).then((data) => { if (active) setState({ status: 'ready', data, stale: false }); },
-        (error: unknown) => {
-          if (active) setState((previous) => previous.status === 'ready' ? { ...previous, stale: true }
-            : { status: 'error', message: inviteErrorMessage(error) });
-        });
-    };
-    refresh();
-    // Realtime arrives with the shared lobby unit; until then a slow poll keeps the list current.
-    const timer = setInterval(refresh, 10_000);
-    document.addEventListener('visibilitychange', refresh);
-    return () => { active = false; clearInterval(timer); document.removeEventListener('visibilitychange', refresh); };
-  }, [api, gameId]);
-
-  return <div className="participant-list">
-    <h4 aria-live="polite">Résztvevők{state.status === 'ready' ? ` (${state.data.length})` : ''}</h4>
-    {state.status === 'loading' && <p role="status">A résztvevők betöltése…</p>}
-    {state.status === 'error' && <p role="alert" className="auth-message">{state.message}</p>}
-    {state.status === 'ready' && (state.data.length
-      ? <ul>{state.data.map((participant) => <li key={participant.id}>{participant.nickname}</li>)}</ul>
-      : <p>Még senki nem lépett be.</p>)}
-    {state.status === 'ready' && state.stale &&
-      <p className="game-hint">A lista frissítése most nem sikerült; a kapcsolat helyreállása után újrapróbáljuk.</p>}
-    <p className="game-hint">A lista 10 másodpercenként frissül.</p>
-  </div>;
 }

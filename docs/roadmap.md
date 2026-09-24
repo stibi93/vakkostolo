@@ -8,7 +8,7 @@ várakozás nincs bennük. AI-támogatott fejlesztés mellett is szükséges ell
 | --- | --- | ---: | --- |
 | 0. Projektalap | termékterv, architektúra, frontend-váz, CI, DB-alap és tesztek | 8–12 | helyi alap kész |
 | 1. Fejlesztői AI és memória | AGENTS, skillek, rövid/hosszú memória, átadás | 3–5 | alap kész |
-| 2. Belépés és váró | host Auth, vendég Auth, meghívó/QR, tagság, visszatérés | 8–12 | folyamatban; host Auth kliens kész |
+| 2. Belépés és váró | host Auth, vendég Auth, meghívó/QR, tagság, visszatérés | 8–12 | helyi Auth, meghívó és közös váró kész; fizikai eszközpróba hátravan |
 | 3. Élő játék | host szerkesztő, RPC állapotgép, Realtime, időzítés, értékelő | 14–22 | tervezett |
 | 4. Felfedés és eredmények | blokkos felfedés, szerverpontozás, kivetítő, ranglista | 10–16 | tervezett |
 | 5. Pilot és kiadás | jogosultsági integráció, eszközök, hálózati hibák, deploy, mentés | 10–16 | tervezett |
@@ -31,7 +31,7 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Játék létrehozása | atomikus, idempotens `create_game`, hostlista/részletek, típusos adapter és magyar űrlap | helyi implementáció és tesztek kész; Supabase-integráció hátravan |
 | Meghívó és vendégbelépés | `issue_invite`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | kliens és DB kész; helyi Supabase-en valódi próba lefutott; LAN-próba `npm run dev:lan`-nal; telefonos próba hátravan |
 | Kivetítő váró | `/present/:gameId`: cím, QR, link, becenevek, boradat nélkül | kész (host böngészőjének másik lapja) |
-| Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | tervezett |
+| Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | implementáció és helyi Supabase-próba kész; fizikai eszközök hátravannak |
 | Élő kör és válaszadás | host szerkesztő, zárolás, lifecycle RPC-k, szerveridő, visszaigazolt tippek | tervezett |
 | Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | tervezett |
 
@@ -46,8 +46,9 @@ ugyanazon QR-ról anonim vendégként belép, újratöltéskor megőrzi tagság�
 Ehhez create_game/open_lobby/join_game RPC, Supabase Auth-konfiguráció,
 meghívókezelés, QR-generálás és a demo helyett valódi adatadapter szükséges.
 A host Auth és a játék létrehozásának helyi implementációja elkészült.
-A következő egység a meghívó/QR és anonim vendégbelépés, külön ágon;
-utána a közös váró snapshot/Realtime és visszatérés következik.
+A meghívó/QR, anonim vendégbelépés és közös váró snapshot/Realtime elkészült.
+A következő egység az első élő kör szerveroldali indítása és a játékos kóstolólapja.
+A fizikai telefonos és hosztolt integráció külön ellenőrzési kapu.
 A külső tesztprojekt Google/Supabase beállítása a `docs/auth.md` alapján végezhető.
 Az adapter a migrációból generált Supabase TypeScript-típusokat használja;
 a snapshot válaszát futásidőben is validálni kell a határon.

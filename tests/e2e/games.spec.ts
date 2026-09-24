@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { lobbyResponse } from './support/lobby';
 import { authSession, authUser } from '../fixtures/auth';
 
 const gameId = '10000000-0000-0000-0000-000000000001';
@@ -13,6 +14,7 @@ interface CreatePayload {
   p_wines: { name: string; price_huf: number; alcohol_tenths: number }[];
 }
 async function setup(page: Page) {
+  await page.routeWebSocket('wss://auth.vakkostolo.test/**', (ws) => ws.close());
   await page.addInitScript((session) => {
     if (!sessionStorage.getItem('fixture-ready')) {
       localStorage.setItem('sb-auth-auth-token', JSON.stringify(session));
@@ -39,6 +41,9 @@ async function setup(page: Page) {
         wines: body.p_wines.map((wine, i) => ({ ...wine, position: i+1 })) };
       if (state.loseFirstResponse && state.calls.length === 1) return route.abort('failed');
       return route.fulfill({ json: gameId });
+    }
+    if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+      return route.fulfill({ json: { ...lobbyResponse(gameId), game: { id: gameId, title: state.game?.title, status: state.game?.status, version: 0 } } });
     }
     if (url.pathname === '/rest/v1/rpc/get_host_game') {
       const body = route.request().postDataJSON() as { p_game_id: string };

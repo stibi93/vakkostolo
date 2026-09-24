@@ -2,6 +2,7 @@ import { readSupabaseConfig } from '../lib/config';
 import { createSupabaseClient } from '../lib/supabase';
 import { readAuthCallback } from './callback';
 import { createGamesApi } from '../games/api';
+import { createLobbyApi } from '../lobby/api';
 import { createInvitesApi } from '../invites/api';
 import { createAuthStore } from './store';
 
@@ -17,7 +18,7 @@ function createRuntime() {
     const client = createSupabaseClient(config.config);
     const store = createAuthStore(client.auth, callback, `${window.location.origin}/auth/callback`,
       (url) => window.location.assign(url));
-    return { status: 'ready', store, games: createGamesApi(client), invites: createInvitesApi(client) } as const;
+    return { status: 'ready', store, games: createGamesApi(client), invites: createInvitesApi(client), lobby: createLobbyApi(client) } as const;
   } catch {
     return { status: 'invalid' } as const;
   }

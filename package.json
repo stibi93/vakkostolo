@@ -13,13 +13,14 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:db": "vitest run tests/database.test.ts tests/game-creation-db.test.ts",
+    "test:db": "vitest run tests/database.test.ts tests/game-creation-db.test.ts tests/lobby-db.test.ts",
     "test:e2e": "playwright test",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "check": "npm run db:types:check && npm run typecheck && npm run lint && npm test && npm run build",
     "db:types": "node scripts/generate-db-types.mjs",
-    "db:types:check": "node scripts/generate-db-types.mjs --check"
+    "db:types:check": "node scripts/generate-db-types.mjs --check",
+    "test:lobby:local": "node scripts/test-lobby-local.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",

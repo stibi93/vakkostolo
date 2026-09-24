@@ -228,6 +228,7 @@ export type Database = {
     Functions: {
       create_game: { Args: { p_request_id: string; p_title: string; p_round_seconds: number; p_reveal_every: number; p_wines: Json }; Returns: string };
       get_host_game: { Args: { p_game_id: string }; Returns: Json };
+      get_lobby_snapshot: { Args: { p_game_id: string }; Returns: Json };
       issue_invite: { Args: { p_game_id: string }; Returns: Json };
       join_game: { Args: { p_token: string; p_nickname?: string }; Returns: Json };
       list_host_games: { Args: Record<never, never>; Returns: Json };

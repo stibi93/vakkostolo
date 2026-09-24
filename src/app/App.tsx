@@ -9,6 +9,8 @@ const HostArea = lazy(() => import('../auth/HostArea').then((module) => ({ defau
 const ProjectorPage = lazy(() => import('../invites/ProjectorPage').then((module) => ({ default: module.ProjectorPage })));
 const JoinPage = lazy(() => import('../invites/JoinPage').then((module) => ({ default: module.JoinPage })));
 
+const LobbyPage = lazy(() => import('../lobby/LobbyPage').then((module) => ({ default: module.LobbyPage })));
+
 export function App() {
   return (
     <Suspense fallback={<PageFrame><p role="status">Az oldal betöltése…</p></PageFrame>}>
@@ -19,6 +21,7 @@ export function App() {
         <Route path="/host/:gameId" element={<HostArea />} />
         <Route path="/present/:gameId" element={<ProjectorPage />} />
         <Route path="/auth/callback" element={<HostArea />} />
+        <Route path="/play/:gameId" element={<LobbyPage />} />
         <Route path="/join/:token" element={<JoinPage />} />
         <Route path="*" element={<PageFrame>
           <p className="eyebrow">404 · ISMERETLEN OLDAL</p>

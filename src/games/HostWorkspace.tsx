@@ -4,6 +4,8 @@ import { CreateGameForm } from './CreateGameForm';
 import { gameErrorMessage } from './api';
 import { gameStatusLabels } from './model';
 import type { GameStatus } from '../domain/game';
+import { LobbyPanel } from '../lobby/LobbyPanel';
+import type { LobbyApi } from '../lobby/model';
 import { InvitePanel } from '../invites/InvitePanel';
 import type { InvitesApi } from '../invites/model';
 import type { GamesApi } from './model';
@@ -22,9 +24,9 @@ function useGameQuery<T>(load: () => Promise<T>) {
   return { state, retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
 }
 
-export function HostWorkspace({ api, invites }: { api: GamesApi; invites: InvitesApi }) {
+export function HostWorkspace({ api, invites, lobby }: { api: GamesApi; invites: InvitesApi; lobby: LobbyApi }) {
   const { gameId } = useParams();
-  return gameId ? <HostGameDetails key={gameId} api={api} invites={invites} gameId={gameId} />
+  return gameId ? <HostGameDetails key={gameId} api={api} invites={invites} lobby={lobby} gameId={gameId} />
     : <><HostGameList api={api} /><CreateGameForm api={api} /></>;
 }
 function HostGameList({ api }: { api: GamesApi }) {
@@ -44,7 +46,7 @@ function HostGameList({ api }: { api: GamesApi }) {
     <button className="button-secondary" disabled={state.status === 'loading'} onClick={retry}>Lista frissítése</button>
   </section>;
 }
-function HostGameDetails({ api, invites, gameId }: { api: GamesApi; invites: InvitesApi; gameId: string }) {
+function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invites: InvitesApi; lobby: LobbyApi; gameId: string }) {
   const load = useCallback(() => api.get(gameId), [api, gameId]);
   const { state, retry } = useGameQuery(load);
   const [statusOverride, setStatusOverride] = useState<GameStatus | null>(null);
@@ -65,6 +67,7 @@ function HostGameDetails({ api, invites, gameId }: { api: GamesApi; invites: Inv
       </li>)}</ol>
       <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
         onStatusChange={setStatusOverride} />
+      <LobbyPanel showTitle={false} api={lobby} gameId={gameId} />
       <p>A boradatok mentve vannak. A szerkesztés és a kóstolás indítása még nem érhető el.</p>
     </>}
   </section>;

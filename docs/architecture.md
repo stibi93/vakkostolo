@@ -31,6 +31,8 @@ flowchart LR
 - `src/auth/`: lazy betöltött hostfelület, PKCE-callback és Reacttól független
   munkamenet-kezelő. Egy Supabase-kliens/böngészőlap; szerverrel ellenőrzött user,
   Auth-események, visszatérés, időkorlát és késői válaszok elleni védelem.
+- `src/lobby/`: biztonságos snapshot-adapter, Realtime, játékhoz kötött kliensállapot
+  és közös host/vendég váró. Részletek: [közös váró](lobby.md).
 - `src/domain/`: keretrendszertől független validáció, pontozás, állapotgép.
 - `src/games/`: típusos RPC-adapter futásidejű válaszvalidációval; létrehozó
   űrlap, saját játéklista és kizárólag hostnak szánt részletes boradatok.
@@ -95,7 +97,8 @@ módosítást korlátozott RPC-n végez, táblák közvetlen módosítására ni
 ## Ami most szándékosan előkészítés
 
 Az első és a létrehozási migráció még nem teljes játékbackend: nincs
-join/start/reveal/finish RPC, éles QR, Realtime-előfizetés vagy hosztolás.
+start/reveal/finish RPC vagy hosztolás. Meghívó, anonim belépés, QR és a közös
+váró Realtime-előfizetése már elkészült.
 A `create_game`, saját hostlista és hostrészletek elkészültek. A host Auth és OAuth callback már
 elkészült, beállítása és integrációs ellenőrzése a [belépési útmutatóban](auth.md).
 A hiányzó műveleteknél nem

@@ -1,0 +1,67 @@
+# Közös váró
+
+A host saját játékoldalán és a vendég `/play/:gameId` oldalán ugyanaz a friss
+résztvevőlista látszik. A `/join/:token` sikeres belépés után erre a játékútvonalra
+irányít. Az újratöltéshez így már nem kell érvényes meghívó: a meglévő Auth és
+tagság elég. Elveszett anonim munkamenet továbbra is új résztvevőt jelent.
+
+## Adathatár
+
+A `202609240003_shared_lobby.sql` migráció `get_lobby_snapshot(p_game_id uuid)`
+RPC-je egy lekérdezés pillanatképét adja. Csak saját host vagy játékhoz tartozó
+résztvevő hívhatja. Hiányzó UID: `AUTH_REQUIRED`; idegen/hiányzó játék: egyaránt
+`GAME_NOT_FOUND`; signed-out `anon` szerepnek nincs EXECUTE-joga.
+
+A válasz mezői:
+
+- `game`: `id`, `title`, `status`, `version`.
+- `role`: `host` vagy `player`; `self_participant_id`: saját résztvevő vagy null.
+- `server_now`: szerveridő.
+- `participants`: `id`, `nickname`, `joined_at`, `seat`.
+
+A sorszám a `joined_at, id` szerinti jelenlegi sorrend; azonos nevek mellett is
+különbözik. Résztvevő törlése után változhat, nem tartós játékosazonosító és nem
+online jelenlétjelzés. Nincs boradat, kép, tipp, pontszám vagy meghívó a DTO-ban,
+még hostnak sem. A kliens futásidőben validál és eldobja a többletmezőket.
+
+## Frissítés és visszatérés
+
+A Realtime `games` UPDATE és `participants` INSERT/UPDATE eseményeire feliratkozik,
+játékazonosító szerinti szűrővel. Az esemény csak új snapshotot kér, adata nem kerül
+közvetlenül a felületre. A csatorna a Postgres-előfizetés visszaigazolását is várja
+(`postgres_changes_options.wait`), nem csak a websocket-csatlakozást.
+
+A publication kizárólag a `games` és `participants` táblával bővül, meglévő RLS-sel.
+Ezek jelenlegi soradatai (köztük belső user/host UUID-k) megjelenhetnek a jogosult
+Realtime kliens hálózati válaszában; titkos bor, rating, meghívó és audit nem
+publikálható. Nincs szobába küldött saját broadcast vagy anonim publikus csatorna.
+DELETE-feliratkozás nincs: a törlés és az elveszett esemény 15 másodperces teljes
+újraolvasással láthatóvá válik.
+
+Fókusz, láthatóvá válás, `pageshow`, hálózati visszatérés, Auth-frissítés és
+Realtime-újracsatlakozás is lekérdez. Párhuzamos események egy újabb kérésbe
+összevonódnak. Kijelentkezés/fiókváltás és lecsatolás után késői válasz nem térhet
+vissza. Hálózati hibánál a régi lista elavultként jelölt; jogosultságvesztéskor
+eltűnik. Az offline jelzés letiltja a kézi frissítést. Offline játék nincs.
+
+## Ellenőrzés
+
+- `npm run check`: DB-jogosultságok, DTO, kliensversengések és hibák.
+- Playwright: host + két külön böngészőkörnyezetű vendég, azonos becenevek,
+  websocket esemény, újratöltés, offline/HTTP-hiba, visszatérés, polling,
+  idegen játék és hozzáférésvesztés. Valódi SDK, szintetikus HTTP/websocket.
+- `npm run test:lobby:local`: opt-in valódi helyi Supabase Auth/REST/RLS/Realtime
+  próba. Futó helyi stack, alkalmazott migrációk és Supabase CLI kell hozzá.
+  Négy saját szintetikus fiókot hoz létre; a végén csak ezeket és a kapcsolódó
+  játékadatokat törli. Csak localhost célt enged, titkot nem ír ki. A szerveroldali
+  tesztfolyamat helyi admin-kulcsot használ a fiókok létrehozásához/takarításához;
+  ez soha nem kerül a frontendbe vagy VITE-változóba.
+
+2026-09-24: a migráció a helyi stackre alkalmazva; a valódi próba sikeres, beleértve
+az idegen Realtime-előfizető kizárását, meghívócserét és új feliratkozást.
+Google OAuth, hosztolt környezet, fizikai telefon és Windows LAN-továbbítás
+ellenőrzését ez nem helyettesíti. A kör indítása, kóstolólap és eredmények a
+következő fejlesztési egységek.
+
+Forrás: [Supabase Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
+és a rögzített `@supabase/realtime-js` csomag `RealtimeChannel.ts` előfizetési szerződése.

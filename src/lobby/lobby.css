@@ -1,0 +1,11 @@
+.lobby-panel { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.lobby-panel h2, .lobby-panel h3 { overflow-wrap: anywhere; }
+.lobby-panel h3 { margin-top: 24px; font-size: 24px; }
+.lobby-connection { font-size: 14px; }
+.lobby-participants { list-style: none; padding: 0; margin: 16px 0; }
+.lobby-participants li { display: flex; gap: 16px; align-items: baseline; border-bottom: 1px solid var(--line); padding: 16px 0; }
+.lobby-participants li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.lobby-seat { flex-shrink: 0; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); }
+.lobby-self { color: var(--accent); white-space: nowrap; }
+.lobby-panel .button-secondary { margin-top: 12px; }
+@media (max-width: 600px) { .lobby-panel > .button-secondary { width: 100%; } }

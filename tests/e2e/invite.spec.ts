@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page, Route } from '@playwright/test';
+import { lobbyResponse, realtimeHub } from './support/lobby';
 import { authSession, authUser } from '../fixtures/auth';
 
 // Real Supabase JS client, synthetic HTTP responses: not a live Auth/RLS integration test.
@@ -13,6 +14,7 @@ const postgrestError = (message: string) => ({ status: 400, json: { code: 'P0001
 
 async function mockSupabase(page: Page, handle: (route: Route, url: URL) => Promise<boolean>) {
   const unexpected: string[] = [];
+  await realtimeHub().attach(page);
   await page.route('https://auth.vakkostolo.test/**', async (route) => {
     const url = new URL(route.request().url());
     if (!await handle(route, url)) {
@@ -25,7 +27,7 @@ async function mockSupabase(page: Page, handle: (route: Route, url: URL) => Prom
 
 test('host: váró megnyitása, QR és link, újratöltés után is látható', async ({ page }) => {
   const calls = { issue: 0 };
-  let participants: unknown[] = [];
+  let participants: Record<string, unknown>[] = [];
   const unexpected = await mockSupabase(page, async (route, url) => {
     if (url.pathname === '/auth/v1/user') await route.fulfill({ json: authUser });
     else if (url.pathname === '/rest/v1/rpc/get_host_game') {
@@ -35,6 +37,8 @@ test('host: váró megnyitása, QR és link, újratöltés után is látható', 
     } else if (url.pathname === '/rest/v1/rpc/issue_invite') {
       calls.issue++;
       await route.fulfill({ json: { token, expires_at: new Date(Date.now() + 12 * 3600_000).toISOString(), status: 'lobby' } });
+    } else if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+      await route.fulfill({ json: lobbyResponse(gameId, participants.map((p, i) => ({ ...p, seat: i+1 })), 'host', null, calls.issue ? 'lobby' : 'draft') });
     } else if (url.pathname === '/rest/v1/participants') {
       expect(url.searchParams.get('game_id')).toBe(`eq.${gameId}`);
       await route.fulfill({ json: participants });
@@ -108,7 +112,9 @@ test('kivetítő: QR, link és becenevek, boradatok lekérése nélkül', async 
 test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagság', async ({ page }) => {
   const calls = { signups: 0, joins: [] as Record<string, unknown>[] };
   const unexpected = await mockSupabase(page, async (route, url) => {
-    if (url.pathname === '/auth/v1/signup') {
+    if (url.pathname === '/rest/v1/rpc/get_lobby_snapshot') {
+      await route.fulfill({ json: lobbyResponse(gameId, [{ id: membership.participant_id, nickname: 'Anna', joined_at: '2026-09-24T08:01:00Z', seat: 1 }], 'player', membership.participant_id) });
+    } else if (url.pathname === '/auth/v1/signup') {
       calls.signups++;
       await route.fulfill({ json: authSession(guestUser) });
     } else if (url.pathname === '/rest/v1/rpc/join_game') {
@@ -129,16 +135,17 @@ test('vendég: becenév, anonim belépés, újratöltés után megmaradó tagsá
   await nickname.fill('  Anna ');
   await nickname.press('Enter');
   await expect(page.getByRole('heading', { name: 'Péntesti kóstoló' })).toBeVisible();
-  await expect(page.getByRole('status')).toContainText('Bent vagy a váróban Anna néven.');
+  await expect(page.getByText('Bent vagy a váróban', { exact: false })).toContainText('Bent vagy a váróban Anna néven.');
   expect(calls.signups).toBe(1);
   expect(calls.joins).toEqual([{ p_token: token, p_nickname: 'Anna' }]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
   await page.reload();
-  await expect(page.getByRole('status')).toContainText('Bent vagy a váróban Anna néven.');
+  await expect(page.getByText('Bent vagy a váróban', { exact: false })).toContainText('Bent vagy a váróban Anna néven.');
   await expect(nickname).toHaveCount(0);
   expect(calls.signups).toBe(1);
-  expect(calls.joins.at(-1)).toEqual({ p_token: token });
+  expect(calls.joins).toEqual([{ p_token: token, p_nickname: 'Anna' }]);
+  await expect(page).toHaveURL(new RegExp(`/play/${gameId}$`));
   expect(unexpected).toEqual([]);
 });
 

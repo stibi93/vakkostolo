@@ -34,11 +34,12 @@ host böngészője tárolja, ezért más böngészőben a kivetítő nem tudja m
    Nem szükséges e-mail vagy Google. Azonos nevű embereket rövid azonosító
    különböztet meg. A résztvevőlista és létszám frissül.
    Elkészült: `/join/:token` (anonim munkamenet csak a beküldéskor jön létre,
-   újratöltéskor a tagság visszatér), host QR/link/új meghívó és 10 másodpercenként
-   frissülő résztvevőlista. A host nem játszhat a saját kóstolóján, mert ismeri a
+   újratöltéskor a tagság visszatér), host QR/link/új meghívó és közös
+   résztvevőlista. A host nem játszhat a saját kóstolóján, mert ismeri a
    borokat. A meghívó 12 óráig érvényes; új meghívó a régit érvényteleníti.
-   Még hiányzik: azonos becenevek megkülönböztetése, Realtime váró, vendégoldali
-   résztvevőlista.
+   Elkészült a `/play/:gameId` közös váró is: számozott résztvevőlista, Realtime,
+   15 másodperces pótló lekérés és visszacsatlakozás. Újratöltéshez a már belépett
+   vendégnek nem kell újra a meghívó. A lista nem online jelenlétjelzés.
 4. A játékmester elindítja az első tételt. Mindenki az aktív értékelőt látja:
    becsült palackár, becsült alkoholfok, tetszési index. Mindhárom kötelező.
 5. A beküldés szerver-visszaigazolást ad. A játékos a kör lejártáig módosíthat.
