@@ -3,6 +3,9 @@ import { Link, useLocation, useParams } from 'react-router';
 import { CreateGameForm } from './CreateGameForm';
 import { gameErrorMessage } from './api';
 import { gameStatusLabels } from './model';
+import type { GameStatus } from '../domain/game';
+import { InvitePanel } from '../invites/InvitePanel';
+import type { InvitesApi } from '../invites/model';
 import type { GamesApi } from './model';
 import './games.css';
 
@@ -19,9 +22,9 @@ function useGameQuery<T>(load: () => Promise<T>) {
   return { state, retry: () => { setState({ status: 'loading' }); setAttempt((value) => value+1); } };
 }
 
-export function HostWorkspace({ api }: { api: GamesApi }) {
+export function HostWorkspace({ api, invites }: { api: GamesApi; invites: InvitesApi }) {
   const { gameId } = useParams();
-  return gameId ? <HostGameDetails key={gameId} api={api} gameId={gameId} />
+  return gameId ? <HostGameDetails key={gameId} api={api} invites={invites} gameId={gameId} />
     : <><HostGameList api={api} /><CreateGameForm api={api} /></>;
 }
 function HostGameList({ api }: { api: GamesApi }) {
@@ -41,9 +44,10 @@ function HostGameList({ api }: { api: GamesApi }) {
     <button className="button-secondary" disabled={state.status === 'loading'} onClick={retry}>Lista frissítése</button>
   </section>;
 }
-function HostGameDetails({ api, gameId }: { api: GamesApi; gameId: string }) {
+function HostGameDetails({ api, invites, gameId }: { api: GamesApi; invites: InvitesApi; gameId: string }) {
   const load = useCallback(() => api.get(gameId), [api, gameId]);
   const { state, retry } = useGameQuery(load);
+  const [statusOverride, setStatusOverride] = useState<GameStatus | null>(null);
   const location = useLocation();
   return <section className="game-section" aria-labelledby="saved-game-title">
     <Link className="button-secondary" to="/host">Saját kóstolóim</Link>
@@ -53,13 +57,15 @@ function HostGameDetails({ api, gameId }: { api: GamesApi; gameId: string }) {
       <p role="alert" className="auth-message">{state.message}</p><button className="button-primary" onClick={retry}>Újrapróbálás</button></>}
     {state.status === 'ready' && <>
       <h2 id="saved-game-title" className="saved-game-title">{state.data.title}</h2>
-      <p>{gameStatusLabels[state.data.status]} · {state.data.roundSeconds} másodperc/bor · Felfedés {state.data.revealEvery} boronként</p>
+      <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds} másodperc/bor · Felfedés {state.data.revealEvery} boronként</p>
       <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok nem láthatók a játékosoknak felfedés előtt.</p>
       <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.position}>
         <h3>{wine.position}. {wine.name}</h3>
         <p>{wine.priceHuf.toLocaleString('hu-HU')} Ft · {(wine.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p>
       </li>)}</ol>
-      <p>A boradatok mentve vannak. A szerkesztés, a meghívó és a váró megnyitása még nem érhető el.</p>
+      <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
+        onStatusChange={setStatusOverride} />
+      <p>A boradatok mentve vannak. A szerkesztés és a kóstolás indítása még nem érhető el.</p>
     </>}
   </section>;
 }

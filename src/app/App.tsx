@@ -6,6 +6,7 @@ import './app.css';
 
 const DemoApp = lazy(() => import('../demo/DemoApp').then((module) => ({ default: module.DemoApp })));
 const HostArea = lazy(() => import('../auth/HostArea').then((module) => ({ default: module.HostArea })));
+const JoinPage = lazy(() => import('../invites/JoinPage').then((module) => ({ default: module.JoinPage })));
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
         <Route path="/host" element={<HostArea />} />
         <Route path="/host/:gameId" element={<HostArea />} />
         <Route path="/auth/callback" element={<HostArea />} />
+        <Route path="/join/:token" element={<JoinPage />} />
         <Route path="*" element={<PageFrame>
           <p className="eyebrow">404 · ISMERETLEN OLDAL</p>
           <h1>Az oldal nem található.</h1>

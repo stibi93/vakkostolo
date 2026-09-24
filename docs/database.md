@@ -65,12 +65,36 @@ Hibakódok: `AUTH_REQUIRED`, `ROUND_NOT_FOUND`, `ROUND_NOT_OPEN`,
 `DEADLINE_PASSED`, `NOT_A_PARTICIPANT`; hibás értéknél constraint violation.
 A körzár megakadályozza, hogy host-zárással egyszerre kicsússzon egy beküldés.
 
+## Meghívó és vendégbelépés — `202609240002_invites_join.sql`
+
+`issue_invite(p_game_id uuid) → { token, expires_at, status }`: csak a játék tartós
+fiókú hostja hívhatja. Draft játéknál ellenőrzi, hogy minden körnek van titkos
+boradata, majd `lobby` állapotba teszi (`version + 1`, `lobby_opened` esemény).
+Később új linket ad és a régit érvényteleníti (`invite_rotated`). A token 43
+karakteres base64url (244 véletlen bit), 12 óráig érvényes; a DB csak SHA-256
+hash-t tárol, ezért a link nem kérhető le újra. A host böngészője `localStorage`-ban
+őrzi a megjelenítéshez; elvesztésekor új meghívó kell. Befejezett játékhoz nem ad ki.
+
+`join_game(p_token text, p_nickname text default null) → { game_id, participant_id,
+nickname, title, status }`: bármely bejelentkezett (anonim vagy tartós) felhasználó.
+A tagságot az Auth UID-ből képzi. Ismeretlen, lecserélt és lejárt link egyformán
+`INVITE_INVALID`. A host a saját játékába nem léphet (`HOST_CANNOT_JOIN`), mert ismeri
+a borokat. Új tag `lobby`, `tasting`, `intermission` vagy `reveal` állapotban léphet be,
+különben `GAME_CLOSED`; meglévő tag mindig visszatérhet. Becenév nélkül csak visszatérés
+(`NICKNAME_REQUIRED`), 1–30 karakter vezérlőkarakter nélkül (`INVALID_NICKNAME`).
+Legfeljebb 50 résztvevő (`GAME_FULL`): visszaélés elleni korlát, nem termékígéret.
+Ismételt belépés nem hoz létre új résztvevőt és nem írja át a becenevet. A játék sorát
+zárolja, így a létszámkorlát párhuzamos belépésnél is tart.
+
+A 244 bites token mellett a találgatás nem reális, ezért külön DB-rate limit nincs;
+rövid kód bevezetésekor kötelező. Az anonim Auth IP-alapú limitje (közös Wi-Fi!)
+továbbra is az üzemeltetési ellenőrzés része. Nem tesztelt élesben: valódi Supabase
+Auth/JWT, anonim belépés engedélyezése a hosztolt projektben, több eszköz.
+
 ## Következő RPC-k terve
 
 | Művelet | Ellenőrzés / tranzakció |
 | --- | --- |
-| open_lobby | host; legalább 1 teljesen kitöltött bor; draft állapot |
-| join_game | tokenhash, lejárat, lobby/engedett késői csatlakozás, létszám, rate limit |
 | get_game_snapshot | tagság; server_now; aktív kör; csak jogosult mezők |
 | start_round | host; sorzár; expected_version; legközelebbi pending kör |
 | extend_round | host; még nem járt le; +30 s, felső korlát |

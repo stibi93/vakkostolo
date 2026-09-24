@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { HostWorkspace } from '../games/HostWorkspace';
 import type { GamesApi } from '../games/model';
+import type { InvitesApi } from '../invites/model';
 import { authRuntime } from './runtime';
 import type { createAuthStore } from './store';
 
@@ -12,7 +13,8 @@ export function HostArea() {
       <section className="auth-panel" aria-labelledby="host-title">
         <p className="eyebrow">ONLINE BELÉPÉS</p>
         <h1 id="host-title">Játékmester</h1>
-        {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} games={authRuntime.games} /> : <>
+        {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} games={authRuntime.games}
+          invites={authRuntime.invites} /> : <>
           <h2>A belépés még nem elérhető.</h2>
           <p>{authRuntime.status === 'missing'
             ? 'Az online kapcsolat még nincs beállítva. Addig a próbakóstolóban végigjárhatod a játék menetét.'
@@ -24,7 +26,9 @@ export function HostArea() {
   );
 }
 
-function HostSession({ store, games }: { store: ReturnType<typeof createAuthStore>; games: GamesApi }) {
+function HostSession({ store, games, invites }: {
+  store: ReturnType<typeof createAuthStore>; games: GamesApi; invites: InvitesApi;
+}) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const location = useLocation();
   useEffect(() => {
@@ -60,7 +64,7 @@ function HostSession({ store, games }: { store: ReturnType<typeof createAuthStor
       {state.user.is_anonymous === false ? <>
         <h2>Játékmesteri fiók</h2>
         <p>Bejelentkezve{state.user.email ? `: ${state.user.email}` : '.'}</p>
-        <HostWorkspace key={state.user.id} api={games} />
+        <HostWorkspace key={state.user.id} api={games} invites={invites} />
       </> : <>
         <h2>Most vendégként vagy belépve.</h2>
         <p>Játékmesterként tartós fiókra van szükséged. Előbb jelentkezz ki, majd lépj be Google-fiókkal.</p>

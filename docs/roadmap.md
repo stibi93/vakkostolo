@@ -29,8 +29,7 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Alkalmazásváz | magyar kezdőlap, külön `/demo`, ismeretlen oldal, mobil navigációs próba | kész |
 | Auth és adatkapcsolat | központi router, host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák kezelése | kliens kész, szimulált Auth-próbákkal; valódi integráció hátravan |
 | Játék létrehozása | atomikus, idempotens `create_game`, hostlista/részletek, típusos adapter és magyar űrlap | helyi implementáció és tesztek kész; Supabase-integráció hátravan |
-| Meghívó és vendégbelépés | `open_lobby`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | következő; külön agent fejleszti |
-| Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | tervezett |
+| Meghívó és vendégbelépés | `issue_invite`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | kliens és DB kész, szimulált Auth-próbákkal; valódi többeszközös integráció hátravan || Közös váró | validált snapshot, Realtime és reconnect; két vendég, újratöltés és idegen játék tiltása | tervezett |
 | Élő kör és válaszadás | host szerkesztő, zárolás, lifecycle RPC-k, szerveridő, visszaigazolt tippek | tervezett |
 | Felfedés és eredmények | szerverpontozás, blokkos felfedés, ranglista és kivetítő | tervezett |
 

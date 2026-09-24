@@ -1,0 +1,12 @@
+.invite-panel { margin: 32px 0; }
+.invite-panel h3 { margin-top: 0; }
+.qr-code { display: block; width: min(100%, 280px); height: auto; margin: 16px 0; border: 1px solid var(--line); }
+.invite-link code { display: block; padding: 12px; background: var(--paper); font-size: 13px; overflow-wrap: anywhere; }
+.participant-list { margin-top: 24px; }
+.participant-list ul { list-style: none; padding: 0; margin: 12px 0; }
+.participant-list li { padding: 10px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.join-form { display: grid; gap: 12px; max-width: 420px; margin-top: 24px; }
+.join-form input { min-height: 48px; font-size: 18px; }
+.join-form button { min-height: 48px; }
+.join-status { font-size: 20px; overflow-wrap: anywhere; }
+.join-panel h1 { overflow-wrap: anywhere; }
