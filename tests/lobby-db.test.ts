@@ -86,7 +86,7 @@ it('játékállapot/version frissül, tippek és boradatok később sem kerülne
 it('Realtime publication csak játékot és résztvevőket publikál, RLS továbbra is él', async () => {
   await db.exec('reset role');
   const { rows } = await db.query<{ tablename: string }>("select tablename from pg_publication_tables where pubname='supabase_realtime' order by tablename");
-  expect(rows.map((r) => r.tablename)).toEqual(['games', 'participants']);
+  expect(rows.map((r) => r.tablename)).toEqual(['games', 'participants', 'rounds']);
   await asUser(other);
   expect((await db.query('select * from public.participants')).rows).toEqual([]);
   expect((await db.query('select * from public.games')).rows).toEqual([]);

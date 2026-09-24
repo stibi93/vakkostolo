@@ -32,6 +32,7 @@ beforeEach(async () => {
       ('${participant}', '${game}', '${guest}', 'Vendég'),
       (gen_random_uuid(), '${game}', '${other}', 'Másik vendég'),
       (gen_random_uuid(), '${otherGame}', '${outsider}', 'Kívülálló');
+    update public.participants set joined_at = now() - interval '2 minutes';
     insert into public.rounds(id, game_id, position, status, opened_at, closes_at) values
       ('${round}', '${game}', 1, 'open', now() - interval '1 minute', now() + interval '5 minutes'),
       ('${otherRound}', '${otherGame}', 1, 'open', now() - interval '1 minute', now() + interval '5 minutes');
