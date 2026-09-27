@@ -1,5 +1,53 @@
 # Aktuális állapot — 2026-09-27
 
+## Összecsukható tételek a szerkesztőben
+
+- Az új kóstoló űrlapján és a menet szerkesztőjében minden bor, szünet és felfedés becsukható. Becsukva a név vagy a cím, a sorrend és a törlés látszik. Az összes becsukása és kinyitása a hozzáadógombok mellett van.
+- Hiányos, becsukott lépés mentéskor kinyílik.
+
+# Aktuális állapot — 2026-09-27
+
+## Kezdőlapi szövegek pontosítása
+
+- Főcím: „Kóstolj vakon. Tippelj telefonon.” A bevezető megnevezi az ár- és
+  alkoholtippet, a tetszést és a telefonon látható eredményt. Belépési súgó:
+  QR/meghívólink, becenév, nincs szükség alkalmazástelepítésre.
+- Az „ÉRZÉKEK, EMLÉKEK, MEGLEPETÉSEK” felirat és a képek alatti ismétlődő
+  témacímkék kikerültek. „Mi befolyásolja a kóstolást?” alatt konkrét kutatási
+  eredmények: leírás és felismerés, előzetes információ, társas értékelések és
+  fizetési hajlandóság. Gyakorlati ötletek és lenyitható kutatási részletek.
+- A három meglévő hivatkozás ellenőrizve a PubMed/kiadói források alapján;
+  vásárlási döntés és ízérzet továbbra sincs összemosva.
+- Renderelt 360/1280 px kezdőlap és információs blokk átnézve; betöltött képek,
+  nyitott részletek és túlcsordulás ellenőrizve (`test-results/home-copy/`).
+  App E2E 16/16 eset átment, az összesítés után a futtató 143-mal lépett ki.
+  Típus/lint sikeres; teljes check 322/323, a korábban is hibás 13. boros
+  teszt miatt megállt. Külön build sikeres.
+- Következő: felhasználói visszajelzés az új főcímről és az informatívabb
+  szövegről; a borlimithez tartozó elavult teszt külön javítandó.
+
+# Aktuális állapot — 2026-09-27
+
+## Kezdőlapi pohár: csuklóból forgatott mozdulat
+
+- A `HarvestArtwork` pohara közel rögzített szárfogás körül köröz. Sima
+  lendületvétel, körön belüli gyorsítás/lassítás, hosszabb lecsengés; alkalmanként
+  enyhén változó irány, amplitúdó, időtartam és pihenő. Az erős méretpulzálást
+  finom perspektíva, rövidülés és a nyílás ellipszisének változása váltja fel.
+- A bor közel vízszintes, kis fáziskésésű hullámzással, a kehelybe vágva.
+  A mozgás továbbra is megállítható, reduced-motion és rejtett nézet leállítja.
+- Ellenőrzés: 360/1280 px renderelt képek és 21 időpillanat átnézve
+  (`test-results/wrist-motion/`). Böngészős billentyűzetes szünet/újraindítás,
+  reduced-motion és túlcsordulás-próba sikeres; célzott mozgás-E2E 4/4.
+  Típusellenőrzés, lint és külön build sikeres.
+- `npm run check`: 322/323 teszt sikeres. Meglévő, ettől független elavult
+  teszt: `tests/live.test.ts:28` még hibásnak várja a 13. bor pozícióját,
+  miközben `maxWines` már 40. Az animációfeladatban nem módosítva.
+- Következő: felhasználói megtekintés a kezdőlapon; külön javítandó a fenti
+  teszt elavult felső határa.
+
+# Aktuális állapot — 2026-09-27
+
 ## Felfedés színe a szerkesztőben
 
 - A felfedéskártya a szünet kékje mellé külön, bordóhoz illő rózsaszín felületet kap az új kóstoló űrlapon és a menet szerkesztőjében.
@@ -19,19 +67,6 @@
 - A másolat a borfotókat is átviszi a privát tárolóban, új körútvonalra. Mentés előtt cserélhetők vagy elhagyhatók.
 - A Bor, Szünet és Felfedés hozzáadása a szerkesztőben és az új kóstoló űrlapon görgetés közben felül marad.
 - Ellenőrzés: create-game-draft és games-api egységteszt; a felület böngészős ellenőrzése a másolás és a rögzített sáv.
-
-# Aktuális állapot — 2026-09-27
-
-## Kezdőlap: köröző pohár
-
-- A szüreti rajz pohara véletlen szünet után kisebb, szabálytalan köröket ír le a vízszintes síkban: oldalaz és közeledik-távolodik, fel-le nem jár. A perem megdől, a tempó egy lögybölésen belül változik. A bor a kehely vonalán belül marad.
-- Csak látható rajz és bekapcsolt háttérmozgás mellett, `prefers-reduced-motion` nélkül. Ellenőrzés: asztali nézet, egy lögybölés oldalirányban 9 px alatt, függőleges elmozdulás nincs, a bor nem lép ki a falon.
-
-# Aktuális állapot — 2026-09-27
-
-## Kezdőlapi pohár
-
-- A pohár a szár körül, egy csuklókör vetületeként mozog: oldalra dől, a kör másik felén méretet vált, a bor felszíne vízszintes marad.
 
 # Aktuális állapot — 2026-09-27
 

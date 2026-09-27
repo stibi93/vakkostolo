@@ -198,6 +198,13 @@ test('új kóstoló: szünet és többboros felfedés már az első mentés elő
   expect(state.calls).toHaveLength(0);
   await page.getByRole('checkbox',{name:'1. Első mintabor 2024',exact:true}).check();
   await page.getByRole('checkbox',{name:'2. Második bor',exact:true}).check();
+  await page.getByRole('button', { name: 'Összes becsukása' }).click();
+  await expect(page.getByRole('group', { name: '1. tétel', exact: true }).getByLabel('Bor neve és évjárata')).toBeHidden();
+  await expect(page.getByRole('group', { name: '1. tétel', exact: true })).toContainText('Első mintabor 2024');
+  await page.getByRole('region', { name: 'Új kóstoló', exact: true }).screenshot({ path: info.outputPath('collapsed-entries.png') });
+  await page.getByRole('button', { name: 'Kinyitás · 1. tétel' }).click();
+  await expect(page.getByRole('group', { name: '1. tétel', exact: true }).getByLabel('Bor neve és évjárata')).toBeVisible();
+  await page.getByRole('button', { name: 'Összes kinyitása' }).click();
   await page.getByRole('region',{name:'Új kóstoló',exact:true}).screenshot({path:info.outputPath('create-full-schedule.png')});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   state.loseFirstResponse=true;

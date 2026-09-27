@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('kezdőlap → játékosbelépés → újratöltés → kezdőlap', async ({ page }, testInfo) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Vakborkóstoló, telefonon.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Kóstolj vakon. Tippelj telefonon.' })).toBeVisible();
   await expect(page.getByText('A közös online kóstoló még készül.', { exact: false })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Játékmestereknek' })).toBeVisible();
   await expect(page.locator('header').getByText('VAKBORKÓSTOLÓ', { exact: true })).toHaveCount(0);
@@ -21,7 +21,7 @@ test('kezdőlap → játékosbelépés → újratöltés → kezdőlap', async (
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
   await page.getByRole('link', { name: 'Vakkóstoló, kezdőlap' }).click();
-  await expect(page.getByRole('heading', { name: 'Vakborkóstoló, telefonon.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Kóstolj vakon. Tippelj telefonon.' })).toBeVisible();
 });
 
 test('ismeretlen útvonalról vissza lehet térni a kezdőlapra', async ({ page }) => {
@@ -107,7 +107,7 @@ test('a kezdőlapi fotó betöltődik, képhibánál is használható a belépé
 
 test('a képes ismeretterjesztő blokk kutatásai billentyűzettel elérhetők', async ({ page }, testInfo) => {
   await page.goto('/');
-  const insights = page.getByRole('region', { name: 'Mit adhat a vakkóstolás?' });
+  const insights = page.getByRole('region', { name: 'Mi befolyásolja a kóstolást?' });
   await expect(insights.getByRole('heading', { level: 3 })).toHaveCount(3);
   const sources = [
     'https://pubmed.ncbi.nlm.nih.gov/18622887/',

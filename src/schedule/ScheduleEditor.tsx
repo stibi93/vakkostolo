@@ -1,4 +1,6 @@
 import { maxWines } from '../domain/game';
+import { CollapseBar } from '../ui/CollapseBar';
+import { useCollapsedIds } from '../ui/useCollapsedIds';
 import { parseQuestions } from '../questions/model';
 import { QuestionEditor } from '../questions/QuestionEditor';
 import { useRef, useState } from 'react';
@@ -17,6 +19,7 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
   const [notice, setNotice] = useState('');
   const [dirty, setDirty] = useState(false);
   const busy = useRef(false), request = useRef(newRequestId());
+  const collapsed = useCollapsedIds();
   function change(next: ScheduleStep[]) { setSteps(next); setDirty(true); setNotice(''); request.current = newRequestId(); }
   async function load(addKind?: 'break' | 'reveal') {
     if (busy.current) return;
@@ -28,6 +31,8 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
   async function save(event: FormEvent) {
     event.preventDefault();
     if (!plan || busy.current) return;
+    const closedGaps = steps.filter(s => collapsed.has(s.id) && (!s.title.trim() || (s.kind === 'wine' && (s.price_huf == null || s.alcohol_tenths == null)) || (s.kind === 'reveal' && !(s.reveal_round_ids ?? []).length)));
+    if (closedGaps.length) { collapsed.expand(closedGaps.map(s => s.id)); setError('A hiányos, becsukott lépés megnyílt. Ellenőrizd a mezőket, majd mentsd újra.'); return; }
     if (steps.some(s => s.kind === 'reveal' && !(s.reveal_round_ids ?? []).length)) { setError('Minden Felfedés kártyához válassz legalább egy bort.'); return; }
     try { steps.filter(s=>s.kind==='wine').forEach(s=>parseQuestions(s.questions,true)); } catch (error) { setError((error as Error).message); return; }
     busy.current = true; setPending(true); setError(''); setNotice('');
@@ -92,14 +97,23 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
           {!steps.length && <p>Nincs hátralévő lépés. Itt további bort vagy szünetet is beilleszthetsz.</p>}
           <div className="schedule-actions schedule-add-bar"><button className="button-secondary" type="button" disabled={wineCount >= maxWines || history.length+steps.length >= 60} onClick={() => add('wine')}>Bor hozzáadása</button>
             <button className="button-secondary" type="button" disabled={history.length+steps.length >= 60} onClick={() => add('break')}>Szünet hozzáadása</button>
-            <button className="button-secondary" type="button" disabled={history.length+steps.length >= 60} onClick={() => add('reveal')}>Felfedés hozzáadása</button></div>
-          <ol className="schedule-list">{steps.map((s, i) => <li id={`schedule-step-${s.id}`} key={s.id} className={`schedule-step schedule-step-${s.kind}`}>
-            <div className="schedule-step-heading"><strong>{String(history.length+i+1).padStart(2,'0')} / {kindLabel(s)}</strong>
+            <button className="button-secondary" type="button" disabled={history.length+steps.length >= 60} onClick={() => add('reveal')}>Felfedés hozzáadása</button>
+            {steps.length > 1 && <>
+              <button className="button-secondary" type="button" onClick={() => collapsed.collapseAll(steps.map(s => s.id))}>Összes becsukása</button>
+              <button className="button-secondary" type="button" onClick={() => collapsed.expandAll()}>Összes kinyitása</button>
+            </>}</div>
+          <ol className="schedule-list">{steps.map((s, i) => {
+            const closed = collapsed.has(s.id);
+            const summary = s.title.trim() || (s.kind === 'wine' ? 'Névtelen bor' : s.kind === 'reveal' ? 'Felfedés' : 'Szünet');
+            return <li id={`schedule-step-${s.id}`} key={s.id} className={`schedule-step schedule-step-${s.kind}${closed ? ' is-collapsed' : ''}`}>
+            <div className="schedule-step-heading"><strong>{String(history.length+i+1).padStart(2,'0')} / {kindLabel(s)}{closed ? ` · ${summary}` : ''}</strong>
               <div className="schedule-order">
+                <CollapseBar compact closed={closed} onToggle={() => collapsed.toggle(s.id)} label={`${i+1}. lépés`} summary={summary} controls={`schedule-body-${s.id}`} />
                 <button type="button" disabled={i === 0} aria-label={`${i+1}. lépés előrébb`} onClick={() => move(i,-1)}>↑</button>
                 <button type="button" disabled={i === steps.length-1} aria-label={`${i+1}. lépés hátrébb`} onClick={() => move(i,1)}>↓</button>
                 <button type="button" disabled={s.kind === 'wine' && wineCount === 1} aria-label={`${i+1}. lépés eltávolítása`} onClick={() => change(steps.filter(x => x.id !== s.id))}>Eltávolítás</button>
               </div></div>
+            <div id={`schedule-body-${s.id}`} hidden={closed}>
             <label>{s.kind === 'wine' ? 'Bor neve és évjárata' : s.kind === 'reveal' ? 'Felfedés címe' : 'Átvezető képernyő címe'}<input required maxLength={s.kind === 'wine' ? 200 : 100} value={s.title} onChange={e => patch(s.id,{title:e.target.value})} /></label>
             {s.kind === 'wine' ? <div className="schedule-wine-fields">
               <label>Valódi palackár (Ft)<input type="number" required min="1" max="1000000" step="1" value={s.price_huf ?? ''} onChange={e => patch(s.id,{price_huf:e.target.value === '' ? null : Number(e.target.value)})} /></label>
@@ -120,7 +134,8 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
             {(s.kind === 'break' || s.seconds !== 0) && <label>{s.kind === 'wine' ? 'Beküldési idő (másodperc)' : 'Szünet hossza (másodperc, 0 = óra nélkül)'}
               <input type="number" required min={s.kind === 'wine' ? 30 : 0} max={s.kind === 'wine' ? 1800 : 7200} step="1" value={Number.isFinite(s.seconds) ? s.seconds : ''} onChange={e => patch(s.id,{seconds:e.target.value === '' ? NaN : Number(e.target.value)})} /></label>}
             {s.kind === 'break' && <p className="small-note">A folytatást te indítod el. Az idő lejárta nem indít új bort. Ez a cím és szöveg a szünet kezdetén minden játékosnál megjelenik.</p>}
-          </li>)}</ol>
+            </div>
+          </li>;})}</ol>
 
           <p className="small-note">A nyilakkal tedd a kártyákat a kívánt helyre. A játékosok csak az aktuális lépést látják.</p>
           <div className="schedule-actions"><button className="button-primary" type="submit" disabled={!dirty}>{pending ? 'Mentés…' : 'Menet mentése'}</button>

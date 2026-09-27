@@ -59,6 +59,12 @@ test('mentett menet: egyedi szünet, sorrend, új bor, törlés és konfliktus',
   await editor.getByRole('button',{name:'3. lépés előrébb',exact:true}).focus(); await page.keyboard.press('Enter');
   await editor.getByRole('button',{name:'Bor hozzáadása',exact:true}).click();
   await editor.getByLabel('Bor neve és évjárata').last().fill('Új tétel 2024');
+  await editor.getByRole('button', { name: 'Összes becsukása' }).click();
+  await expect(editor.getByLabel('Bor neve és évjárata').last()).toBeHidden();
+  await expect(editor.getByText('Új tétel 2024')).toBeVisible();
+  await editor.getByRole('button', { name: 'Kinyitás · 1. lépés' }).click();
+  await expect(editor.getByLabel('Bor neve és évjárata').first()).toBeVisible();
+  await editor.getByRole('button', { name: 'Összes kinyitása' }).click();
   await editor.getByRole('button',{name:'3. lépés eltávolítása',exact:true}).click();
   f.state.conflict=true; await editor.getByRole('button',{name:'Menet mentése',exact:true}).click();
   await expect(editor.getByRole('alert')).toContainText('piszkozatod megmaradt');

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { maxWines } from '../domain/game';
+import { CollapseBar } from '../ui/CollapseBar';
+import { useCollapsedIds } from '../ui/useCollapsedIds';
 import { WinePhoto } from '../ui/WinePhoto';
 import { gameErrorMessage } from './api';
 import type { CreateEntryDraft, CreateGameDraft } from './createGameDraft';
@@ -46,6 +48,7 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
   const [seconds, setSeconds] = useState(draft?.seconds ?? '120');
   const [entries, setEntries] = useState<Entry[]>(() => entriesFromDraft(draft));
   const wines = entries.filter((e): e is WineFields => e.kind === 'wine');
+  const collapsed = useCollapsedIds();
   const [requestId] = useState(() => crypto.randomUUID());
   const [pending, setPending] = useState<false | 'game' | 'photos'>(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -127,7 +130,7 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
       if (e.kind === 'reveal' && (!e.targets.length || e.targets.some(id=>!entries.slice(0,i).some(w=>w.kind==='wine' && w.id===id)))) invalid.push(`${i+1}. lépés: válassz legalább egy, a felfedés előtt szereplő bort. Ellenőrizd a kijelöléseket és a sorrendet.`);
     });
     setErrors(invalid);
-    if (invalid.length) return;
+    if (invalid.length) { collapsed.expandAll(); return; }
     submitting.current = true;
     setPending('game');
     try {
@@ -174,11 +177,19 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
           <button type="button" className="button-secondary" disabled={wines.length >= maxWines || entries.length >= 60} onClick={addWine}>Bor hozzáadása</button>
           <button type="button" className="button-secondary" disabled={entries.length >= 60} onClick={() => addCard('break')}>Szünet hozzáadása</button>
           <button type="button" className="button-secondary" disabled={entries.length >= 60} onClick={() => addCard('reveal')}>Felfedés hozzáadása</button>
+          {entries.length > 1 && <>
+            <button type="button" className="button-secondary" onClick={() => collapsed.collapseAll(entries.map(entry => entry.id))}>Összes becsukása</button>
+            <button type="button" className="button-secondary" onClick={() => collapsed.expandAll()}>Összes kinyitása</button>
+          </>}
         </div>
         <p id="wine-privacy" className="game-hint">A borok adatait és fotóit csak te láthatod a felfedésig.</p>
         {entries.map((entry, stepIndex) => {
-          if (entry.kind !== 'wine') return <fieldset id={`entry-${entry.id}`} key={entry.id} className={`wine-fields schedule-step-${entry.kind}`}>
+          const closed = collapsed.has(entry.id);
+          const bodyId = `entry-body-${entry.id}`;
+          if (entry.kind !== 'wine') return <fieldset id={`entry-${entry.id}`} key={entry.id} className={`wine-fields schedule-step-${entry.kind}${closed ? ' is-collapsed' : ''}`}>
             <legend>{stepIndex+1}. lépés · {entry.kind === 'break' ? 'Szünet' : 'Felfedés'}</legend>
+            <CollapseBar closed={closed} onToggle={() => collapsed.toggle(entry.id)} label={`${stepIndex+1}. lépés`} summary={entry.title.trim() || (entry.kind === 'break' ? 'Szünet' : 'Felfedés')} controls={bodyId} />
+            <div id={bodyId} hidden={closed}>
             <label>{entry.kind === 'break' ? 'Szünet címe' : 'Felfedés címe'}<input required maxLength={100} value={entry.title} onChange={e=>patchCard(entry.id,{title:e.target.value})} /></label>
             <label>Játékosoknak megjelenő szöveg<textarea rows={3} maxLength={2000} value={entry.message} onChange={e=>patchCard(entry.id,{message:e.target.value})} /></label>
             {entry.kind === 'break' ? <label>Szünet hossza (másodperc, 0 = óra nélkül)<input type="number" min={0} max={7200} step={1} value={Number.isFinite(entry.seconds)?entry.seconds:''} onChange={e=>patchCard(entry.id,{seconds:e.target.value===''?NaN:Number(e.target.value)})} /></label>
@@ -191,6 +202,7 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
                   <input type="checkbox" checked onChange={()=>patchCard(entry.id,{targets:entry.targets.filter(x=>x!==id)})} />Érvénytelen kijelölés — töröld vagy állítsd helyre a sorrendet
                 </label>)}
               </fieldset>}
+            </div>
             <div className="wine-actions">
               <button type="button" className="button-secondary" disabled={stepIndex===0} aria-label={`${stepIndex+1}. lépés előrébb`} onClick={()=>moveStep(stepIndex,-1)}>Előrébb</button>
               <button type="button" className="button-secondary" disabled={stepIndex===entries.length-1} aria-label={`${stepIndex+1}. lépés hátrébb`} onClick={()=>moveStep(stepIndex,1)}>Hátrébb</button>
@@ -199,8 +211,10 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
           </fieldset>;
           const wine=entry,index=wines.findIndex(w=>w.id===entry.id);
           const keptPhoto = Boolean(wine.photo || wine.sourcePhoto);
-          return <fieldset id={`entry-${wine.id}`} className="wine-fields" key={wine.id} aria-describedby="wine-privacy">
+          return <fieldset id={`entry-${wine.id}`} className={`wine-fields${closed ? ' is-collapsed' : ''}`} key={wine.id} aria-describedby="wine-privacy">
           <legend>{index+1}. tétel</legend>
+          <CollapseBar closed={closed} onToggle={() => collapsed.toggle(wine.id)} label={`${index+1}. tétel`} summary={wine.name.trim() || 'Névtelen bor'} controls={bodyId} />
+          <div id={bodyId} hidden={closed}>
           <label>Bor neve és évjárata<input value={wine.name} onChange={(event) => updateWine(wine.id, 'name', event.target.value)} maxLength={200} required autoComplete="off" /></label>
           <div className="game-settings">
             <label>Valódi palackár (Ft / 0,75 l)<input type="number" inputMode="numeric" min="1" max="1000000" step="1" value={wine.price} onChange={(event) => updateWine(wine.id, 'price', event.target.value)} required /></label>
@@ -221,6 +235,7 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
               {keptPhoto && <div className="photo-actions"><button type="button" className="button-secondary" onClick={() => setPhoto(wine.id, null, 'Fotó eltávolítva.')}>Fotó eltávolítása<span className="sr-only"> · {index+1}. tétel</span></button></div>}
               <p className="small-note" id={`new-wine-photo-${wine.id}-message`} aria-live="polite">{wine.photoMessage || 'Nem kötelező. A címkefotó a felfedésnél és az eredményeknél jelenik meg.'}</p>
             </div>
+          </div>
           </div>
           <div className="wine-actions">
             <button type="button" className="button-secondary" disabled={stepIndex === 0} aria-label={`${index+1}. tétel előrébb`} onClick={() => moveStep(stepIndex, -1)}>Előrébb</button>

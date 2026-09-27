@@ -12,10 +12,10 @@
   .harvest-breeze { animation: harvest-breeze-drift 8s ease-in-out infinite alternate; animation-play-state: paused; }
   .harvest-light { animation: harvest-light-drift 16s ease-in-out infinite alternate; animation-play-state: paused; }
   .harvest-running .harvest-vine, .harvest-running .harvest-light, .harvest-running .harvest-breeze { animation-play-state: running; }
-  .harvest-glass, .harvest-glass-tilt, .harvest-wine { transform-box: view-box; }
-  .harvest-glass { transform-origin: 30.8% 82%; }
-  .harvest-glass-tilt { transform-origin: 30.8% 82%; }
-  .harvest-wine { transform-origin: 30.8% 62.7%; }
+  .harvest-glass-tilt, .harvest-glass-rim, .harvest-wine { transform-box: view-box; }
+  .harvest-glass-tilt { transform-origin: 185px 489px; }
+  .harvest-glass-rim { transform-origin: 185px 314px; }
+  .harvest-wine { transform-origin: 185px 376px; }
   @keyframes harvest-breeze-drift { from { transform: translate(-16px, 10px) rotate(-4deg); opacity: .4; } to { transform: translate(20px, -12px) rotate(4deg); opacity: .8; } }
   @keyframes harvest-vine-sway { from { transform: rotate(-6deg) translate(-3px, -3px); } to { transform: rotate(7deg) translate(6px, 9px); } }
   @keyframes harvest-light-drift { from { transform: translate(-8px, 4px); } to { transform: translate(12px, -10px); } }

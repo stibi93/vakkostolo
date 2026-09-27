@@ -7,7 +7,6 @@
 .tasting-insights .editorial-photo figcaption { display: block; padding: 24px 0; font: inherit; }
 .insight-copy h3 { font-size: clamp(23px, 2.2vw, 29px); }
 .insight-copy p { font-size: 15px; line-height: 1.7; color: var(--muted); margin: 0 0 16px; }
-.insight-copy .insight-topic { color: var(--accent); font-size: 10px; letter-spacing: 1px; margin-bottom: 12px; }
 .insight-experiment { margin: 24px 0 12px; padding: 16px 0 0 16px; border-left: 2px solid var(--accent); }
 .insight-experiment h4 { font-size: 16px; margin: 0 0 8px; }
 .insight-experiment p { font-size: 14px; }
