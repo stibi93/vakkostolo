@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { FormEvent } from 'react';
-import { Link, Navigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { clearReturnPath, rememberReturnPath } from '../auth/return-path';
 import { authRuntime } from '../auth/runtime';
@@ -17,8 +17,7 @@ export function JoinPage() {
       <p className="eyebrow">MEGHÍVÓ</p>
       {authRuntime.status !== 'ready' ? <>
         <h1 id="join-title">A belépés most nem elérhető.</h1>
-        <p>Az online kapcsolat nincs beállítva ezen a címen. Addig a próbakóstolóban végigjárhatod a játék menetét.</p>
-        <Link className="button-secondary" to="/demo">Próbakóstoló megnyitása</Link>
+        <p>Az online kapcsolat nincs beállítva ezen a címen. Kérd el a játékmestertől a kóstoló működő meghívólinkjét.</p>
       </> : !isInviteToken(token) ? <>
         <h1 id="join-title">Ez a meghívó nem érvényes.</h1>
         <p>Ellenőrizd, hogy a teljes linket nyitottad-e meg, vagy olvasd be újra a QR-kódot.</p>

@@ -66,6 +66,7 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
   useEffect(() => { const timer = setInterval(() => setNow(performance.now()), 1000); return () => clearInterval(timer); }, []);
   const pause = snapshot.pause;
   const remaining = pause?.endsAt ? Math.max(0, Math.ceil((Date.parse(pause.endsAt)-snapshot.serverTime-Math.max(0,now-snapshot.receivedAt))/1000)) : null;
+  const guessing = !presentation && snapshot.role === 'player' && !!snapshot.round && snapshot.round.status !== 'revealed';
   return <>
     {pause && <section className="live-break" aria-label="Szünet">
       <p className="eyebrow">SZÜNET / ÁTVEZETÉS</p><h3>{pause.title}</h3>
@@ -84,11 +85,11 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
     {snapshot.results && snapshot.role === 'host' && !presentation && <p>
       <a className="button-secondary" href={`/present/${snapshot.game.id}`} target="_blank" rel="noopener">Eredmények kivetítése</a>
     </p>}
-    {snapshot.results && <details className="live-results" open={presentation || snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
+    {snapshot.results && !guessing && <details className="live-results" open={presentation || snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
       <summary>Eredmények ({snapshot.results.revealedCount} bor)</summary>
       <ResultsPanel key={snapshot.revealCard?.id ?? snapshot.results.revealedCount} roundIds={snapshot.revealCard?.roundIds} intro={presentation ? snapshot.revealCard : undefined} results={snapshot.results} gameId={snapshot.game.id} selfId={snapshot.selfParticipantId} photos={api.resultPhotos} presentation={presentation} />
     </details>}
-    {!snapshot.results && !!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
+    {!snapshot.results && !guessing && !!snapshot.revealed?.length && <details open={snapshot.game.status === 'reveal' || snapshot.game.status === 'finished'}>
       <summary>Felfedett borok ({snapshot.revealed.length})</summary><ol className="live-revealed">
         {snapshot.revealed.map(w => <li key={w.id}><h3>{String(w.position).padStart(2,'0')}. {w.name}</h3>
           <RevealedWinePhoto api={api} gameId={snapshot.game.id} wine={w} />

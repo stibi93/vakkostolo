@@ -1,5 +1,27 @@
 # Aktuális állapot — 2026-09-27
 
+## Demó mód kivéve
+
+- A `/demo` útvonal, a `src/demo` felület és a próbakóstoló gombok kikerültek. A `/demo` 404. A dokumentáció sem ír le helyi demót.
+- A tesztek mintafotója: `tests/fixtures/sample-wine.png`.
+
+# Aktuális állapot — 2026-09-27
+
+## Játékos felfedési borlap
+
+- A fotó és a valódi adatok maradnak felül. Az átlagos tetszés mellett ott a saját tetszés is.
+- Alatta a saját eredmény, majd az egyedi kérdések ugyanabban a sorformában: saját tipp, valódi érték, pont. A szürke kérdéskártya és a telefonos tippeloszlás kikerült. A kivetítő Tippeloszlása megmaradt.
+- Ellenőrzés: results E2E játékos, egyedi kérdés és kivetítő, mobilon és asztalon.
+
+# Aktuális állapot — 2026-09-27
+
+## Tippelés közben rejtett korábbi eredmények
+
+- Nyitott vagy lezárt körnél a játékos nem látja az „Eredmények” és a „Felfedett borok” blokkot. A kivetítő és a játékmester továbbra is látja. Felfedéskor, szünetben és a végén a játékosnál is megjelenik.
+- Ellenőrzés: results E2E „csak felfedés után” mobilon és asztalon átment.
+
+# Aktuális állapot — 2026-09-27
+
 ## Játékos visszatérése ugyanarra a helyre
 
 - Az anonim belépés elvesztése (bezárt telefon, lejárt munkamenet) eddig új

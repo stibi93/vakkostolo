@@ -23,7 +23,7 @@ A 30 fős cél nem kapacitásgarancia; hostlapok és kivetítő is kapcsolatot h
 
 `.env.example` alapján hozz létre helyi `.env.local` fájlt. Csak a Supabase URL
 és publishable key publikus; service-role/secret key soha nem kezdődhet `VITE_`-tal.
-A demo konfiguráció nélkül fut; a `/host` belépéshez ezek a változók szükségesek.
+A `/host` belépéshez ezek a változók szükségesek.
 A Google provider és a pontos callbackcímek beállítása: [Auth-útmutató](auth.md).
 
 Supabase: EU-régió, anonim bejelentkezés engedélyezése, Google OAuth a hostnak,
@@ -53,8 +53,8 @@ A platform alapértéke jelenleg 30/IP/óra. A QR-belépés pilotjában ezt is t
 4. A `public/_redirects` biztosítja a kliensoldali útvonalak SPA-fallbackjét, az Auth callbackhez is.
 5. HTTPS-címről teszteld a kamerával olvasható belépési URL-t, majd két külön eszközzel a játékot.
 
-Ez recept, a projektből most nem történt publikálás. A build kezdőlapot, demót és
-konfigurációfüggő host-belépést ad; többjátékos eseményre még nem alkalmas.
+Ez recept, a projektből most nem történt publikálás. A build a kezdőlapot és a
+konfigurációfüggő belépést adja.
 CI: `.github/workflows/ci.yml`; lint + típus + tesztek + build minden PR/push esetén.
 A CI nem deployol, és nem futtat migrációt az éles adatbázison.
 Dependabot-konfiguráció heti npm és GitHub Actions frissítési javaslatokat készít
@@ -73,5 +73,4 @@ Az adatkezelési tájékoztatót és a konkrét törlési folyamatot élesítés
 Vendégekhez becenév és technikai Auth UID elég; a Google e-mail ne kerüljön játékoslistába.
 
 Mentés: Free csomagban saját adatbázisexport és időszakos restore-próba szükséges.
-A migráció csak sémát állít vissza, az elveszett válaszokat nem. Helyi demo semmit
-nem ment, frissítéskor újraindul — ezt a felület jelzi.
+A migráció csak sémát állít vissza, az elveszett válaszokat nem.

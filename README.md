@@ -5,10 +5,7 @@ borokat, a vendégek QR-rel vagy meghívólinkkel belépnek, tippelnek, majd
 közösen felfeditek az eredményeket.
 
 Az első kiadás kis, személyes kóstolókat céloz: nincs kötelező fizetés, és a
-játékhoz nem kell futásidejű AI.
-
-A demó (`/demo`) egy böngészőlapon, helyi mintadatokkal mutatja a három nézetet.
-Az éles játék (`/host`, `/join`, `/play`) Supabase-t használ.
+játékhoz nem kell futásidejű AI. A kóstoló Supabase-t használ (`/host`, `/join`, `/play`).
 
 ## Mit csinál az alkalmazás?
 
@@ -35,25 +32,13 @@ Részletes szabályok: [termékterv](docs/product.md). Hiányzó kiadási lépé
 ## Előfeltételek
 
 - Node.js 22.22 vagy újabb, npm
-- A demóhoz ennyi elég
-- Élő kóstolóhoz: [Docker](https://docs.docker.com/engine/install/) és
+- [Docker](https://docs.docker.com/engine/install/) és
   [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started)
   (`supabase` a `PATH`-on, vagy `npx supabase`)
 
-## Gyors próba (csak demó)
-
-```sh
-npm ci
-npm run dev
-```
-
-A terminálban kiírt címet nyisd meg, majd a **Próbakóstoló** linket, vagy menj
-közvetlenül a `/demo` oldalra. Kulcs nem kell. A demó nem ment szerverre;
-frissítéskor a tippek és a saját képek elvesznek.
-
 A fejlesztői szervert ne tedd ki az internetre.
 
-## Helyi élő kóstoló
+## Helyi kóstoló
 
 ### 1. Függőségek
 

@@ -13,7 +13,7 @@ de több üzemeltetés. Firebase — lehetséges, de a relációs kör/válasz m
 tranzakciók PostgreSQL-ben közvetlenül kifejezhetők.
 
 Fejlesztői memória Markdownban; nincs futásidejű LLM vagy agentkeretrendszer.
-A tisztán helyi demo nem az éles játék adatbiztonsági vagy többeszközös megoldása.
+Nincs helyi demó: a kóstoló a Supabase-kapcsolaton fut.
 
 A felhasználó külön kérte a praktikus, jelenleg elfogadott fejlesztői megoldásokat.
 Ennek megfelelően a függőségek kiadott verziói és npm-lockfile rögzítik a buildet;

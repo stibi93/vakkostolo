@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { SupabaseConfig } from './config';
 import { createTimeoutFetch } from './fetch';
 
-/** Created once by the Auth runtime; the demo never imports this module. */
+/** Created once by the Auth runtime. */
 export function createSupabaseClient({ url, key }: SupabaseConfig) {
   return createClient<Database>(url, key, {
     auth: {

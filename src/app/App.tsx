@@ -7,7 +7,6 @@ import { HomeAtmosphere } from '../ui/HomeAtmosphere';
 import { useAmbientMotion } from '../ui/useAmbientMotion';
 import { AppMotionContext } from '../ui/useAppMotion';
 
-const DemoApp = lazy(() => import('../demo/DemoApp').then((module) => ({ default: module.DemoApp })));
 const OrganizerPage = lazy(() => import('./OrganizerPage').then((module) => ({ default: module.OrganizerPage })));
 const HostArea = lazy(() => import('../auth/HostArea').then((module) => ({ default: module.HostArea })));
 const ProjectorPage = lazy(() => import('../invites/ProjectorPage').then((module) => ({ default: module.ProjectorPage })));
@@ -23,7 +22,6 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/jatekmester" element={<OrganizerPage />} />
-        <Route path="/demo" element={<DemoApp />} />
         <Route path="/host/*" element={<HostArea />} />
         <Route path="/present/:gameId" element={<ProjectorPage />} />
         <Route path="/auth/callback" element={<HostArea />} />

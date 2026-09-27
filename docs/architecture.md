@@ -25,9 +25,9 @@ flowchart LR
 ## Rétegek a kódban
 
 - `src/app/`: alkalmazásbelépési pont, kezdőlap, közös keret és útvonalválasztás.
-  React Router kezeli a `/`, `/demo`, `/host`, `/host/new`, `/host/:gameId`, `/auth/callback` útvonalakat.
-  A demo dinamikus importtal külön JS-csomagba kerül; a kezdőlap nem tölti le
-  a mintaborokat. Ez betöltési határ, nem biztonsági védelem: a demo csomagja publikus.
+  React Router kezeli a `/`, `/host`, `/host/new`, `/host/:gameId`, `/auth/callback`,
+  `/join`, `/play/:gameId` és `/present/:gameId` útvonalakat. A host, a játékos
+  és a kivetítő külön JS-csomagba kerül.
 - `src/auth/`: lazy betöltött hostfelület, PKCE-callback és Reacttól független
   munkamenet-kezelő. Egy Supabase-kliens/böngészőlap; szerverrel ellenőrzött user,
   Auth-események, visszatérés, időkorlát és késői válaszok elleni védelem.
@@ -38,7 +38,6 @@ flowchart LR
 - `src/domain/`: keretrendszertől független validáció, pontozás, állapotgép.
 - `src/games/`: típusos RPC-adapter futásidejű válaszvalidációval; létrehozó
   űrlap, saját játéklista és kizárólag hostnak szánt részletes boradatok.
-- `src/demo/`: csak a helyi demonstráció adatai és React-felülete.
 - `src/lib/`: publikus konfiguráció validálása, közös kliensgyár és a végrehajtott
   migrációk katalógusából generált DB-típusok (`npm run db:types`).
 - `src/ai/`: kikapcsolt, szolgáltatófüggetlen összefoglaló-szerződés.

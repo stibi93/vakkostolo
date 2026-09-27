@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { FormEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 import { PageFrame } from '../app/PageFrame';
 import { HostWorkspace } from '../games/HostWorkspace';
 import type { LiveApi } from '../live/model';
@@ -23,9 +23,8 @@ export function HostArea() {
           games={authRuntime.games} invites={authRuntime.invites} lobby={authRuntime.lobby} /> : <>
           <h2>A belépés még nem elérhető.</h2>
           <p>{authRuntime.status === 'missing'
-            ? 'Az online kapcsolat még nincs beállítva. Addig a próbakóstolóban végigjárhatod a játék menetét.'
+            ? 'Az online kapcsolat még nincs beállítva. A belépéshez az üzemeltető állítja be a Supabase-kapcsolatot.'
             : 'Az online kapcsolat beállítása hibás. A belépéshez az üzemeltető segítsége szükséges.'}</p>
-          <Link className="button-secondary" to="/demo">Próbakóstoló megnyitása</Link>
         </>}
       </section>
     </PageFrame>

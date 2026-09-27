@@ -1,24 +1,18 @@
 import { expect, test } from '@playwright/test';
 
 test('kezdőlap → játékosbelépés → újratöltés → kezdőlap', async ({ page }, testInfo) => {
-  const demoRequests: string[] = [];
-  page.on('request', (request) => {
-    if (/\/src\/demo\/|\/assets\/DemoApp-/.test(request.url())) demoRequests.push(request.url());
-  });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Vakborkóstoló, telefonon.' })).toBeVisible();
   await expect(page.getByText('A közös online kóstoló még készül.', { exact: false })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Játékmestereknek' })).toBeVisible();
   await expect(page.locator('header').getByText('VAKBORKÓSTOLÓ', { exact: true })).toHaveCount(0);
   await expect(page.locator('footer')).toHaveCount(0);
-  expect(demoRequests).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Ugrás a tartalomhoz' })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('main')).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('home.png'), fullPage: true });
-  await expect(page.locator('a[href="/demo"]')).toHaveCount(0);
   await page.getByRole('link', { name: 'Csatlakozás a játékhoz' }).click();
   await expect(page).toHaveURL(/\/join$/);
   await expect(page.getByRole('heading', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
@@ -31,6 +25,8 @@ test('kezdőlap → játékosbelépés → újratöltés → kezdőlap', async (
 });
 
 test('ismeretlen útvonalról vissza lehet térni a kezdőlapra', async ({ page }) => {
+  await page.goto('/demo');
+  await expect(page.getByRole('heading', { name: 'Az oldal nem található.' })).toBeVisible();
   await page.goto('/missing-page');
   await expect(page.getByRole('heading', { name: 'Az oldal nem található.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toHaveCount(0);
@@ -38,7 +34,7 @@ test('ismeretlen útvonalról vissza lehet térni a kezdőlapra', async ({ page 
   await expect(page.getByRole('link', { name: 'Csatlakozás a játékhoz' })).toBeVisible();
 });
 
-test('konfiguráció nélkül a hostoldal tájékoztat és a demo elérhető marad', async ({ page }) => {
+test('konfiguráció nélkül a hostoldal jelzi, hogy a belépés nem elérhető', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Játékmestereknek', exact: true }).click();
   await expect(page).toHaveURL(/\/jatekmester$/);
@@ -52,8 +48,8 @@ test('konfiguráció nélkül a hostoldal tájékoztat és a demo elérhető mar
   await expect(page.getByRole('button', { name: 'Belépés Google-fiókkal' })).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'A belépés még nem elérhető.' })).toBeVisible();
-  await page.getByRole('link', { name: 'Próbakóstoló megnyitása' }).click();
-  await expect(page.getByRole('button', { name: 'Kóstoló indítása' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Próbakóstoló megnyitása' })).toHaveCount(0);
+  await expect(page.getByText('Supabase-kapcsolatot')).toBeVisible();
 });
 
 test('kezdőlapi háttérmozgás megállítható és követi a csökkentett mozgást', async ({ page }) => {
@@ -140,7 +136,7 @@ test('a képes ismeretterjesztő blokk kutatásai billentyűzettel elérhetők',
 test('közös háttér minden útvonalon, navigáláskor megmaradó szüneteltetéssel', async ({ page }, info) => {
   test.setTimeout(60_000);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  const routes = ['/', '/join', '/join/invalid', '/jatekmester', '/host', '/host/new', '/host/invalid', '/auth/callback', '/play/invalid', '/present/invalid', '/demo', '/missing'];
+  const routes = ['/', '/join', '/join/invalid', '/jatekmester', '/host', '/host/new', '/host/invalid', '/auth/callback', '/play/invalid', '/present/invalid', '/missing'];
   for (const [index, route] of routes.entries()) {
     await page.goto(route);
     await expect(page.getByText('Az oldal betöltése…', { exact: true })).toHaveCount(0);

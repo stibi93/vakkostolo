@@ -48,34 +48,12 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
           <dl className="result-facts"><div><dt><CategoryIcon category="price" />Valódi palackár</dt><dd>{money(wine.priceHuf)}</dd><dd className="result-fact-note">{priceBucketLabel(wine.priceBucket)}</dd></div>
             <div><dt><CategoryIcon category="alcohol" />Alkoholtartalom</dt><dd>{alcohol(wine.alcoholTenths)}</dd></div>
             <div><dt><CategoryIcon category="liking" />Átlagos tetszés</dt><dd>{wine.averageLiking===null?'—':`${numeric(wine.averageLiking)} / 10`}</dd><dd className="result-fact-note">{wine.responseCount} értékelés</dd></div>
+            {!presentation && selfId && <div><dt><CategoryIcon category="liking" />Saját tetszés</dt><dd>{wine.own ? `${wine.own.liking} / 10` : '—'}</dd><dd className="result-fact-note">{wine.own ? 'Nem ad versenypontot.' : 'Nincs leadott tetszés.'}</dd></div>}
           </dl>
-          {!!wine.questions?.length && <section className="question-results" aria-label="Egyedi kérdések eredménye">
-            <h4>Egyedi kérdések</h4>
-            <div className="question-grid">
-              {wine.questions.map(q=>{
-                const correct=q.options.find(o=>o.id===q.correctOptionId)?.label;
-                const guess=q.options.find(o=>o.id===q.ownOptionId)?.label;
-                return <article className="question-card" key={q.id}>
-                  <h5>{q.prompt}</h5>
-                  <ul>
-                    {q.options.map(option=>{
-                      const isCorrect=option.id===q.correctOptionId;
-                      const isOwn=!presentation && selfId && option.id===q.ownOptionId;
-                      return <li key={option.id} className={[isCorrect && 'is-correct', isOwn && 'is-own'].filter(Boolean).join(' ') || undefined}>
-                        <span>{option.label}</span>
-                        {isCorrect && <em>helyes</em>}
-                        {isOwn && <em>a tipped</em>}
-                      </li>;
-                    })}
-                  </ul>
-                  <p>Helyes válasz: <strong>{correct}</strong></p>
-                  {!presentation && selfId && <p>{q.ownOptionId ? <>A tipped: {guess} · <strong>{q.ownOptionId===q.correctOptionId?'Eltaláltad':'Nem talált'}</strong>{results.scoringVersion===3 ? (q.ownOptionId===q.correctOptionId?' · 1 pont':' · 0 pont') : ''}</> : 'Ehhez a kérdéshez nincs leadott válaszod.'}</p>}
-                </article>;
-              })}
-            </div>
-          </section>}
           {!presentation && selfId && <OwnComparison wine={wine} version={results.scoringVersion} />}
-          {!presentation && <GuessCharts wine={wine} own={selfId ? wine.own : null} />}
+          {!!wine.questions?.length && (presentation
+            ? <QuestionCards wine={wine} />
+            : <QuestionAnswers wine={wine} version={results.scoringVersion} showOwn={!!selfId} />)}
           {presentation && <p className="result-public-note">A játékosonkénti tippek és a kategóriapontok a Ranglistán vannak. Az összesített tippek a Tippeloszlás nézetben.</p>}
         </div>
       </article>
@@ -129,6 +107,46 @@ function OwnComparison({wine,version}:{wine:WineResult;version:1|2|3}) {
       <span>{pointText(row.points, simple)}</span></div>
       <dl><div><dt>Saját tipped</dt><dd>{row.guess}</dd></div><div><dt>Valódi érték</dt><dd>{row.truth}</dd></div></dl>
     </div>)}
-    <p className="small-note">A te tetszésed: {own.liking}/10. Ez nem ad versenypontot.</p>
+  </section>;
+}
+function QuestionCards({ wine }: { wine: WineResult }) {
+  return <section className="question-results" aria-label="Egyedi kérdések eredménye">
+    <h4>Egyedi kérdések</h4>
+    <div className="question-grid">
+      {wine.questions?.map(q => {
+        const correct = q.options.find(o => o.id === q.correctOptionId)?.label;
+        return <article className="question-card" key={q.id}>
+          <h5>{q.prompt}</h5>
+          <ul>
+            {q.options.map(option => {
+              const isCorrect = option.id === q.correctOptionId;
+              return <li key={option.id} className={isCorrect ? 'is-correct' : undefined}>
+                <span>{option.label}</span>
+                {isCorrect && <em>helyes</em>}
+              </li>;
+            })}
+          </ul>
+          <p>Helyes válasz: <strong>{correct}</strong></p>
+        </article>;
+      })}
+    </div>
+  </section>;
+}
+function QuestionAnswers({ wine, version, showOwn }: { wine: WineResult; version: 1 | 2 | 3; showOwn: boolean }) {
+  return <section className="result-questions" aria-label="Egyedi kérdések eredménye">
+    <h4>Egyedi kérdések</h4>
+    {wine.questions?.map(q => {
+      const correct = q.options.find(o => o.id === q.correctOptionId)?.label ?? '—';
+      const guess = q.options.find(o => o.id === q.ownOptionId)?.label;
+      const points = version === 3 ? (q.ownOptionId === q.correctOptionId ? 1 : 0) : null;
+      return <div className="result-answer" key={q.id}>
+        <div className="result-answer-title"><h5>{q.prompt}</h5>{points !== null && <span>{points} pont</span>}</div>
+        <dl>
+          {showOwn && <div><dt>Saját tipped</dt><dd>{guess ?? '—'}</dd></div>}
+          <div><dt>Valódi érték</dt><dd>{correct}</dd></div>
+        </dl>
+        {showOwn && !q.ownOptionId && <p className="small-note">Ehhez a kérdéshez nincs leadott válaszod.</p>}
+      </div>;
+    })}
   </section>;
 }

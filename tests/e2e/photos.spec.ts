@@ -7,7 +7,7 @@ const round = (n: number) => `20000000-0000-0000-0000-${String(n).padStart(12,'0
 
 test('borfotó: mentés, hibás csere, újratöltés, menetátrendezés és törlés', async ({page},info) => {
   test.setTimeout(60_000);
-  const photo = await readFile('public/demo/sample-wine-01.png');
+  const photo = await readFile('tests/fixtures/sample-wine.png');
   const stored = new Set<string>();
   let failUpload = false, version = 1;
   let steps = [1,2].map(n => ({id:round(n),kind:'wine',title:`Próbabor ${n}`,message:'',seconds:120,status:'pending',round_position:n,price_huf:4500,alcohol_tenths:130}));
@@ -64,7 +64,7 @@ test('borfotó: mentés, hibás csere, újratöltés, menetátrendezés és tör
 });
 
 test('játékos csak a szerver által felfedett borhoz kér és lát fotót', async ({page},info) => {
-  const photo=await readFile('public/demo/sample-wine-01.png');
+  const photo=await readFile('tests/fixtures/sample-wine.png');
   const member='30000000-0000-0000-0000-000000000001';
   const user={...authUser,id:member,is_anonymous:true};
   let revealed=false, signedRequests=0;

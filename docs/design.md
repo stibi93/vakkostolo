@@ -44,30 +44,22 @@ A közös tokenek a `src/styles.css`-ben, a kezdőlap és belépés stílusai a
 A Bricolage latin és latin-ext WOFF2 fájljai helyben, a `src/ui/fonts/`
 könyvtárból töltődnek, OFL licencükkel együtt. Külső fontszolgáltató nem kell.
 
-Az arculat a kezdőlapon, a demó három nézetében, a belépésnél, a kóstoló
-létrehozásánál és mentett adatainál, valamint a meghívó és kivetítő oldalain
-jelenik meg. A játékszabály, Auth és adatbázis működése ettől nem változik.
+Az arculat a kezdőlapon, a belépésnél, a kóstoló létrehozásánál és mentett
+adatainál, valamint a meghívó és kivetítő oldalain jelenik meg. A játékszabály,
+Auth és adatbázis működése ettől nem változik.
 
 ## Képek és mozgás
 
-Három kitalált bor AI-val készített mintafotója a `public/demo/` könyvtárban
-van. Eredetük és promptjaik: `public/demo/IMAGE-SOURCES.md`.
-A demó játékmesteri „Mintaborok képei” részében a kép cserélhető, törölhető,
-és a minta visszaállítható. JPEG, PNG és WebP választható, legfeljebb 8 MB
-és 40 megapixel méretig. Hibás kép esetén az előző marad meg. A kép arányait
-megőrizzük, a teljes palack látszik; betöltési, hiányzó és hibaállapot is van.
-
-Ez **helyi demófunkció**: nincs feltöltés és tartós mentés, frissítéskor a
-saját képek elvesznek. Fotó csak a nyitott játékmesteri képszerkesztőben és a
-felfedett eredménynél kerül a DOM-ba. A publikus, kitalált minták nem jelentenek
-éles adatvédelmi megoldást. Online borfotóhoz privát tárolás és szerveroldali,
-felfedéshez kötött hozzáférés szükséges; ez külön fejlesztési egység.
+A borfotót a játékmester tölti fel. JPEG, PNG és WebP választható, legfeljebb
+8 MB és 40 megapixel méretig. Hibás kép esetén az előző marad meg. A kép
+arányait megőrizzük, a teljes palack látszik; betöltési, hiányzó és hibaállapot
+is van. A fotó privát tárolóban van, és csak felfedés után kerül a játékos elé.
 
 A kezdőlap saját, közvetlenül SVG-ben rajzolt szüreti csendéletet használ:
 szőlőfürt és levelek, számozott/letakart címkéjű palack, pohár és dűlősorok.
 Forrás: `src/ui/HarvestArtwork.tsx`, stílus: `src/ui/harvest.css`. Nincs külső
 illusztráció vagy képszolgáltatás; ez dekoráció, nem egy játékbeli bor képe.
-A demó kis címkegrafikája megmarad, a csendélet csak a kezdőlapon látható.
+A csendélet csak a kezdőlapon látható.
 
 Az illusztráció három rétege mozog: a többszínű szőlőág 4,8 másodperces
 félciklussal, −6 és +7 fok között leng; mögötte a rétegzett színfoltok
@@ -112,11 +104,10 @@ A kezdőlap főművelete „Csatlakozás a játékhoz”, célja a `/join` belé
 Az oldal a közös űrlaparculattal fogadja a meghívólinket, majd a meglévő
 meghívó-ellenőrzéshez és beceneves váróbelépéshez vezet. Hibás linknél a mező fókuszt és kapcsolt hibaüzenetet kap;
 online konfiguráció nélkül a felület egyértelműen jelzi a belépés hiányát.
-A kezdőlapi képes útmutató harmadik eleme is a valódi játékhoz csatlakozást
-magyarázza, nem a demót. A demó útvonala megmarad külön fejlesztői próbához.
+A kezdőlapi képes útmutató harmadik eleme is a játékhoz csatlakozást magyarázza.
 
 Felhasználói kérésre minden oldalon fut a közös háttér: a belépésnél, hostnál,
-játékosnál aktív körben is, demóban, kivetítőn, betöltéskor és a 404 oldalon.
+játékosnál aktív körben is, kivetítőn, betöltéskor és a 404 oldalon.
 A mezők, QR-kódok és tartalmi panelek stabilak maradnak. Ez felülírja a korábbi,
 csak kezdőlapra és váróra korlátozott mozgási szabályt.
 
@@ -136,8 +127,8 @@ nem egyes szerverüzenetek érkezését.
 
 Természetes, tárgyilagos magyar szövegek, tegezéssel. A cím a funkciót vagy
 állapotot nevezi meg, a gomb a műveletet, a súgó a következő lépést.
-Nincsenek erőltetett szlogenek és boros szóviccek. A demó, online előkészítés,
-határidő és visszaigazolt beküldés jelentése maradjon pontos.
+Nincsenek erőltetett szlogenek és boros szóviccek. Az online előkészítés,
+a határidő és a visszaigazolt beküldés jelentése maradjon pontos.
 
 360, 768 és 1440 px szélességen a ténylegesen renderelt nézeteket ellenőrizzük.
 Legalább 44 px érintési cél, olvasható mező, látható fókusz és túlcsordulás

@@ -103,6 +103,9 @@
   to { transform: scaleY(1); }
 }
 .result-public-note { border-top: 1px solid var(--line); padding-top: 20px; color: var(--muted); }
+.result-questions { margin: 8px 0 0; }
+.result-questions > h4 { margin: 12px 0 0; font-size: 18px; }
+.result-questions .small-note { margin: 6px 0 0; }
 .question-results { margin: 0 0 20px; }
 .question-results > h4 { margin: 0 0 10px; font-size: 16px; }
 .question-grid { display: grid; gap: 10px; }

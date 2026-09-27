@@ -3,17 +3,18 @@
 Felfedéskor a játékos `/play/:gameId` oldalán automatikusan megjelenik az
 **Eredmények** rész. A már felfedett borok között a nyilakkal vagy a
 választómezővel lehet lapozni; a **Ranglista** gomb a közös állást mutatja.
-Újabb kör közben a korábbi eredmények lenyithatók, a kitöltés marad előtérben.
+Újabb kör tippelése közben a korábbi eredmények nem látszanak. Felfedéskor és a kóstoló végén, illetve szünetben újra megjelennek.
 
 ## Telefonos borlap
 
 - A mentett borfotó, a bor neve, valódi palackára és árkategóriája,
   alkoholtartalma, átlagos tetszése és a beérkezett értékelések száma.
-- A saját ár- és alkoholtipp a valódi érték mellett; részpontok és összpont.
-- Saját tetszés külön, versenypont nélkül. Hiányzó tippnél kifejezett jelzés,
-  0 pont; hiányzó értékelés nem kerül nulla tetszésként az átlagba.
-- Ugyanaz az összesített tippeloszlás, mint a kivetítőn, plusz „a te tipped”
-  a saját sávon. A név nélküli eloszlás nem sorolja fel, ki mit mondott.
+  Az átlagos tetszés mellett a saját leadott tetszés is látszik; versenypontot nem ad.
+  Hiányzó értékelés nem kerül nulla tetszésként az átlagba.
+- Ez alatt a saját eredmény: ár- és alkoholtipp a valódi érték mellett, részpontok és összpont.
+  Hiányzó tippnél kifejezett jelzés, 0 pont.
+- Az egyedi kérdések ugyanezekben a sorokban állnak: saját tipp, valódi válasz, pont.
+  A telefonos borlapon nincs összesített tippeloszlás; azt a játékmester a kivetítőn mondja el.
 - A **Ranglista** háromfokú dobogó. Holtversenynél a nevek egy fokon, egymás mellett állnak; üres 2. vagy 3. hely is kint marad.
   Alatta minden játékos egy sor. Az oszlopok összesített pontok: árkategória, alkoholfok és az egyedi kérdések együtt, Egyéb címmel. A konkrét tippek és kérdésszövegek nem ismétlődnek.
   A még fel nem fedett bor válasza itt sem látszik.

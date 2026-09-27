@@ -21,7 +21,7 @@
 - Szerveridő és sorzár védi a beküldést; egy játékos/kör egy válasz.
 - Pontozás v1: 50 ár + 50 alkohol; tetszés nem versenypont. Javasolt szabály.
 - AI a fejlesztéshez fájlalapú emlékezettel; termék-AI opcionális, kikapcsolva.
-- A kész alap demo, nem éles többjátékos alkalmazás. A hiányzó funkciók a roadmapben.
+- Nincs helyi demó. A kóstoló a Supabase-kapcsolaton fut. A hiányzó kiadási lépések a roadmapben.
 
 Indokok: `docs/decisions/001-foundation.md`. Változáskor ezt a lapot javítsd,
 ne tarts meg egymásnak ellentmondó döntéseket aktív szabályként.

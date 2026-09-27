@@ -9,7 +9,7 @@ import './rating.css';
 
 const likingScale = Array.from({ length: 10 }, (_, index) => index + 1);
 
-/** Price range cards, half-degree alcohol stepper and 1–10 liking cards. Used by the live game and the demo. */
+/** Price range cards, half-degree alcohol stepper and 1–10 liking cards. */
 export function RatingFields({ value, onChange }: { value: RatingDraft; onChange: (value: RatingDraft) => void }) {
   const id = useId();
   const set = (patch: Partial<RatingDraft>) => onChange({ ...value, ...patch });

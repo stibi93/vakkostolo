@@ -27,7 +27,7 @@ több összetartozó commit megengedett. Új migráció külön fájlba kerül.
 | Egység | Kimenet és ellenőrzési feltétel | Állapot |
 | --- | --- | --- |
 | Projektalap rögzítése | meglévő források, tervek és lockfile helyi Gitben; `npm run check` | kész |
-| Alkalmazásváz | magyar kezdőlap, külön `/demo`, ismeretlen oldal, mobil navigációs próba | kész |
+| Alkalmazásváz | magyar kezdőlap, ismeretlen oldal, mobil navigációs próba | kész |
 | Auth és adatkapcsolat | központi router, host-belépés/kilépés, munkamenet-visszaállítás, konfigurációs és hálózati hibák kezelése | kliens kész, szimulált Auth-próbákkal; valódi integráció hátravan |
 | Játék létrehozása | atomikus, idempotens `create_game`, hostlista/részletek, típusos adapter és magyar űrlap | helyi implementáció és tesztek kész; Supabase-integráció hátravan |
 | Meghívó és vendégbelépés | `issue_invite`/`join_game`, QR, anonim Auth; meghívó nem ad hostjogot | kliens és DB kész; helyi Supabase-en valódi próba lefutott; LAN-próba `npm run dev:lan`-nal; telefonos próba hátravan |
@@ -46,7 +46,7 @@ próbája után tekinthető késznek; a helyi PGlite-próba önmagában nem elé
 Egy host bejelentkezik, létrehoz egy játékot, megnyitja a várót; két telefon
 ugyanazon QR-ról anonim vendégként belép, újratöltéskor megőrzi tagságát.
 Ehhez create_game/open_lobby/join_game RPC, Supabase Auth-konfiguráció,
-meghívókezelés, QR-generálás és a demo helyett valódi adatadapter szükséges.
+meghívókezelés és QR-generálás szükséges.
 A host Auth és a játék létrehozásának helyi implementációja elkészült.
 A meghívó/QR, anonim vendégbelépés és közös váró snapshot/Realtime elkészült.
 Az első kör szerveroldali indítása és a saját tippek beküldése is elkészült.
@@ -72,7 +72,6 @@ determinista eredmények után kapcsolható be; nem blokkolja a játékot.
 - 10 eszközös próbakóstoló; háttérbe tett telefon, reconnect, két hostlap tesztelve.
 - Telefonon a titkos adatok nem szerepelnek API-válaszban vagy éles bundle-ben.
 - Esemény előtt projekt aktív, kvóták elegendők, mentés visszaállítása kipróbálva.
-- A demo nincs összetéveszthetően éles játék néven közzétéve.
 
 ## Később eldönthető preferenciák
 

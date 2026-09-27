@@ -10,7 +10,7 @@ jogosultságokat. Az időt és a módosítható állapotot élesben PostgreSQL e
 
 Módosításkor az érintett határt teszteld: lejárt beküldés; ismételt beküldés;
 másik játék vagy másik játékos adatai; felfedés előtti titkok; párhuzamos
-körindítás. A demo kizárólag helyi UX-próba, tartalmazhat mintaborokat.
+körindítás.
 
 A bor titkos adatai külön táblában maradjanak. Felfedéstől független publikus
 DTO-ba ne kerüljenek. Az adatbázisfüggvény a hívó jogosultságát ellenőrizze,

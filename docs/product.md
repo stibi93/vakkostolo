@@ -16,14 +16,12 @@ a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
 | Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
 
 A hostbelépés, játéklétrehozás, meghívás, közös váró és az első élő kör
-beküldése elkészült. A szerkeszthető menet, szünetek, időállítás és további körvezérlés is elkészült; a szerveroldali pontozás, saját eredmény és prezentációs ranglista is elkészült. Részletek: [eredmények](results.md). A kezdőlap a `/` címen van;
-a jelenlegi demo a `/demo` alatt három nézetkapcsolóval egy oldalon fut.
+beküldése elkészült. A szerkeszthető menet, szünetek, időállítás és további körvezérlés is elkészült; a szerveroldali pontozás, saját eredmény és prezentációs ranglista is elkészült. Részletek: [eredmények](results.md). A kezdőlap a `/` címen van.
 A kezdőlap főgombja a `/join` játékosbelépésre vezet. Itt a játékmestertől
 kapott teljes meghívólink illeszthető be; a QR közvetlenül a `/join/:token`
 oldalt nyitja. A meghívó ellenőrzése és a becenév megadása után a játékos a
 közös váróba kerül, a játékmester indításakor automatikusan a kóstolólapra vált.
-Nincs nyilvános játéklista vagy külön, rövid belépőkód. A demó nem a kezdőlap
-elsődleges belépési folyamata.
+Nincs nyilvános játéklista vagy külön, rövid belépőkód.
 Az MVP-kivetítő a játékmester bejelentkezett böngészőjének másik lapja;
 megosztható, csak olvasható prezentációtoken későbbi bővítés. A váróállapota kész:
 kóstolócím, QR-kód, link és becenevek; boradatot nem kér le. A meghívó tokenjét a
@@ -134,7 +132,7 @@ tetszés, a beküldések száma, valamint a többiek tippeloszlása. A ranglista
 összpontot és dobogót mutat, és külön nézetben ár, alkohol és egyedi kérdés
 szerint is: ki mit tippelt, és arra mennyi pontot kapott. Ez csak a már
 felfedett borokra vonatkozik.
-A projektben megjelenő mintaszámok demonstrációs adatok, nem valódi esemény adatai.
+A dokumentációban szereplő mintaszámok nem valódi esemény adatai.
 
 ## Mobil és hozzáférhetőség
 

@@ -27,7 +27,7 @@ Ne ments kulcsot, tokent, játékosadatot vagy teljes beszélgetést a memóriá
 - A játékosnak küldött adat nem tartalmazhat fel nem fedett borazonosságot,
   valós árat, alkoholfokot vagy más játékos rejtett válaszát.
 - Az éles állapotváltás, pontozás és beküldési határidő szerveroldali döntés.
-  A kliens számlálója csak kijelzés. A demo nem biztonsági referencia.
+  A kliens számlálója csak kijelzés.
 - Egy játékos egy körhöz egy választ tárolhat, a határidőig felülírhatóan.
 - A tetszési index szubjektív: nem ad versenypontot.
 - A vendég azonosított anonim felhasználó, nem közös publikus adatbázisszerep.
@@ -39,5 +39,4 @@ Node 22.22+, npm, React, TypeScript, Vite. `npm run check` futtatja a típuselle
 lintet, teszteket és buildet. A SQL-migrációkat is érintő tesztek PGlite-ban futnak;
 ez nem helyettesíti az élesítés előtti Supabase Auth/Realtime integrációs próbát.
 Új DB-változtatás új migráció legyen, az alkalmazott migrációt ne írd át.
-Az interfész magyar; a kódbeli azonosítók angolok. A demo és az éles működés
-közötti határ maradjon látható a felületen és a dokumentációban.
+Az interfész magyar; a kódbeli azonosítók angolok.

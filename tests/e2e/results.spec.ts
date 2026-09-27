@@ -26,7 +26,7 @@ function fixture(revealed=true) {
         game:{id:game,title:'Őszi kóstoló',status:state.revealed?(state.finished?'finished':'reveal'):'tasting',version:state.revealed?4:2},
         round:state.card ? null : {id:second,position:2,status:state.revealed?'revealed':'open',opened_at:new Date(Date.now()-30000).toISOString(),closes_at:new Date(Date.now()+60000).toISOString(),eligible:!host,can_submit:!host&&!state.revealed},own_rating:null,
         ...(state.card ? {reveal_card:state.card} : {}),
-        ...(state.revealed?{revealed:publicWines,results:{scoring_version:2,final:state.finished,revealed_count:2,max_points:200,
+        ...(state.revealed||!host?{revealed:publicWines,results:{scoring_version:2,final:state.finished,revealed_count:2,max_points:200,
           wines:publicWines.map((w,i)=>({...w,guesses:w.response_count?{price:[0,0,0,0,1,1,0,0],alcohol:[{tenths:135,count:1},{tenths:140,count:1}],liking:[0,0,0,0,0,0,1,1,0,0]}:{price:[0,0,0,0,0,0,0,0],alcohol:[],liking:[0,0,0,0,0,0,0,0,0,0]},
             ...(state.questions?{questions:[{id:'grape',prompt:'Melyik szőlőfajta?',options:[{id:'a',label:'Furmint',count:w.response_count?1:0},{id:'b',label:'Olaszrizling',count:w.response_count?1:0}],correctOptionId:'a',ownOptionId:host?null:'b'}]}:{}),own:host||i===1?null:{price_bucket:6,price_huf:null,alcohol_tenths:140,liking:8,price_points:25,alcohol_points:41.6666666666667,total:67}})),
           leaderboard:participants.map((p,i)=>({id:p.id,nickname:p.nickname,seat:p.seat,rank:i<2?1:3,points:i<2?67:0,answered:i<2?1:0,unscored:0})),
@@ -40,7 +40,7 @@ function fixture(revealed=true) {
       }});
       if(path===`/storage/v1/object/wine-photos/${game}/${first}.jpg`) {
         state.photoReads++; if(state.failPhoto)return route.fulfill({status:503,json:{message:'unavailable'}});
-        return route.fulfill({contentType:'image/png',body:await readFile('public/demo/sample-wine-01.png')});
+        return route.fulfill({contentType:'image/png',body:await readFile('tests/fixtures/sample-wine.png')});
       }
       return route.abort();
     });
@@ -49,6 +49,7 @@ function fixture(revealed=true) {
 test('játékos: csak felfedés után fotó, saját összevetés, részpont, hiányzó tipp és ranglista',async({page},info)=>{
   const f=fixture(false);await f.attach(page);await page.goto(`/play/${game}`);
   await expect(page.getByRole('heading',{name:'02. tétel'})).toBeVisible();expect(f.state.photoReads).toBe(0);
+  await expect(page.getByText('Eredmények (2 bor)')).toHaveCount(0);
   await expect(page.getByText('Dűlőválogatás Furmint 2024')).toHaveCount(0);
   f.state.revealed=true;f.hub.change(game,'games');
   await expect(page.getByRole('heading',{name:'Eddigi eredmények'})).toBeVisible();
@@ -58,11 +59,13 @@ test('játékos: csak felfedés után fotó, saját összevetés, részpont, hi�
   const photo=page.getByRole('img',{name:'Dűlőválogatás Furmint 2024 – a borhoz feltöltött fotó'});
   await expect(photo).toBeVisible();await expect.poll(()=>photo.evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);
   await expect(page.getByText('67 / 100 pont')).toBeVisible();
+  await expect(page.getByText('Saját tetszés')).toBeVisible();
+  await expect(page.getByText('8 / 10')).toHaveCount(2);
+  await expect(page.getByText('Nem ad versenypontot.')).toBeVisible();
   const comparison=page.getByRole('region',{name:'Saját tipp és valódi érték'});
   await expect(comparison).toContainText('6 001–8 000 Ft');await expect(comparison).toContainText('4 001–6 000 Ft');
   await expect(comparison).toContainText('14% vol');await expect(comparison).toContainText('13,5% vol');
-  const distribution=page.getByRole('region',{name:'Tippeloszlás'});
-  await expect(distribution).toContainText('helyes');await expect(distribution).toContainText('a te tipped');
+  await expect(page.getByRole('region',{name:'Tippeloszlás'})).toHaveCount(0);
   await page.getByRole('region',{name:'Kóstoló eredményei'}).screenshot({path:info.outputPath('player-results.png')});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('button',{name:'Ranglista',exact:true}).click();
@@ -148,7 +151,8 @@ for (const host of [false,true]) test(`felfedési kártya kiválasztott borai a 
 test('egyedi kérdések felfedésnél: saját tipp és helyes válasz',async({page},info)=>{
  const f=fixture();f.state.questions=true;await f.attach(page);await page.goto(`/play/${game}`);
  const result=page.getByRole('region',{name:'Egyedi kérdések eredménye'});
- await expect(result).toContainText('Helyes válasz: Furmint');await expect(result).toContainText('A tipped: Olaszrizling');await expect(result).toContainText('Nem talált');
+ await expect(result).toContainText('Saját tipped');await expect(result).toContainText('Olaszrizling');await expect(result).toContainText('Valódi érték');await expect(result).toContainText('Furmint');
+ await expect(page.getByRole('region',{name:'Tippeloszlás'})).toHaveCount(0);
  await result.screenshot({path:info.outputPath('question-result.png')});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('egyedi kérdések kivetítőn: helyes válasz saját tipp nélkül',async({page},info)=>{
