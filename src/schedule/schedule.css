@@ -32,7 +32,7 @@
 
 .schedule-overview { margin-top: 24px; }
 .schedule-overview .schedule-step-heading strong { overflow-wrap: anywhere; min-width: 0; }
-.schedule-step-reveal { border-left-color: var(--accent); background: var(--paper); border-top: 2px solid var(--accent); }
+.schedule-step-reveal { border-left-color: var(--accent); background: var(--reveal); }
 .reveal-targets { border: 1px solid var(--line); margin-bottom: 20px; padding: 16px; min-width: 0; }
 .schedule-section .timer-toggle { display: flex; align-items: center; gap: 12px; }
 .schedule-section .timer-toggle input { width: 20px; height: 20px; flex-shrink: 0; padding: 0; }

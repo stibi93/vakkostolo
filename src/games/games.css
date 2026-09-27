@@ -52,3 +52,4 @@
 .game-fields .timer-toggle { display: flex; align-items: center; gap: 10px; }
 .game-fields .timer-toggle input { width: 20px; height: 20px; flex-shrink: 0; }
 .game-fields .schedule-step-break { background: var(--blue); }
+.game-fields .schedule-step-reveal { background: var(--reveal); }

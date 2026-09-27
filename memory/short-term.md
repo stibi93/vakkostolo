@@ -1,5 +1,11 @@
 # Aktuális állapot — 2026-09-27
 
+## Felfedés színe a szerkesztőben
+
+- A felfedéskártya a szünet kékje mellé külön, bordóhoz illő rózsaszín felületet kap az új kóstoló űrlapon és a menet szerkesztőjében.
+
+# Aktuális állapot — 2026-09-27
+
 ## Több bor, egyszerűbb játékmesteri lista
 
 - Egy kóstoló 1–40 bort fogadhat; a menet továbbra is legfeljebb 60 lépés. Új migráció: `202609270005_more_wines.sql`.
