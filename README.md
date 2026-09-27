@@ -7,6 +7,8 @@ közösen felfeditek az eredményeket.
 Az első kiadás kis, személyes kóstolókat céloz: nincs kötelező fizetés, és a
 játékhoz nem kell futásidejű AI. A kóstoló Supabase-t használ (`/host`, `/join`, `/play`).
 
+![A Vakkóstoló kezdőlapja: „Kóstolj vakon.” és a szüreti csendélet.](docs/images/home.jpg)
+
 ## Mit csinál az alkalmazás?
 
 | Szerep | Hol | Feladat |

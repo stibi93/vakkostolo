@@ -1,5 +1,14 @@
 # Aktuális állapot — 2026-09-27
 
+## README kezdőlapkép
+
+- A `README.md` a bevezető után a kezdőlap felső részét mutatja:
+  `docs/images/home.jpg` (fejléc, „Kóstolj vakon.”, szüreti csendélet).
+  A kép a helyi fejlesztői szerverről készült, a háttérmozgás szüneteltetve.
+- Nincs commit. A pohármozgás és a README-kép is commitolatlan.
+
+# Aktuális állapot — 2026-09-27
+
 ## Összecsukható tételek a szerkesztőben
 
 - Az új kóstoló űrlapján és a menet szerkesztőjében minden bor, szünet és felfedés becsukható. Becsukva a név vagy a cím, a sorrend és a törlés látszik. Az összes becsukása és kinyitása a hozzáadógombok mellett van.
