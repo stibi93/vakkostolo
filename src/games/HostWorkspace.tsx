@@ -60,7 +60,7 @@ function HostGameList({ api }: { api: GamesApi }) {
           <time dateTime={game.createdAt}>{new Date(game.createdAt).toLocaleDateString('hu-HU')}</time>
         </p>
         <div className="host-game-actions">
-          <Link className="button-secondary" to={`/host/new?from=${game.id}`}>Másolat alapján</Link>
+          <Link className="button-secondary" to={`/host/new?from=${game.id}`}>Kóstoló másolása</Link>
           <DeleteGameButton api={api} id={game.id} title={game.title} onDeleted={() => { setNotice('A kóstoló törölve.'); refresh(); }} />
         </div>
       </li>)}</ul>
@@ -87,7 +87,7 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
     <nav className="host-subnav" aria-label="Játékmesteri navigáció">
       <Link className="button-secondary" to="/host">Saját kóstolóim</Link>
       <Link className="button-secondary" to="/host/new">Új kóstoló</Link>
-      <Link className="button-secondary" to={`/host/new?from=${gameId}`}>Másolat alapján</Link>
+      <Link className="button-secondary" to={`/host/new?from=${gameId}`}>Kóstoló másolása</Link>
     </nav>
     {location.state?.created === true && <p role="status">A kóstoló létrejött.</p>}
     {typeof location.state?.photoFailures === 'number' && location.state.photoFailures > 0 &&

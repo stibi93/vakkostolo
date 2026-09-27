@@ -241,7 +241,7 @@ test('meglévő kóstoló másolata kitölti az új űrlapot', async ({ page }) 
   await fillGame(page);
   await page.getByRole('button', { name: 'Kóstoló létrehozása', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/host/${gameId}$`));
-  await page.getByRole('link', { name: 'Másolat alapján', exact: true }).click();
+  await page.getByRole('link', { name: 'Kóstoló másolása', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/host/new\\?from=${gameId}$`));
   await expect(page.getByLabel('Kóstoló címe')).toHaveValue('Őszi kóstoló – másolat');
   await expect(page.getByRole('group', { name: '1. tétel', exact: true }).getByLabel('Bor neve és évjárata')).toHaveValue('Első mintabor 2024');

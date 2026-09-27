@@ -87,7 +87,7 @@
 - `/host`: csak saját kóstolók listája és „Új kóstoló” gomb.
 - `/host/new`: üres létrehozó űrlap; `/host/new?from=<id>` meglévő másolata
   (cím, idő, borok, menet, kérdések; fotók nem).
-- Kóstoló részletein is elérhető „Másolat alapján”.
+- Kóstoló részletein is elérhető a „Kóstoló másolása”.
 - `buildCreateDraftFromGame` + unit teszt; games E2E frissítve (új útvonal, másolás).
 - Ellenőrzés: `npm run check` 312/312; következő: `npm run test:e2e` games fájl
   felhasználói környezetben, ha még nem futott.
