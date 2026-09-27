@@ -4,7 +4,7 @@ import { createGamesApi } from '../games/api';
 import { createScheduleApi } from '../schedule/api';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
-import { validateRating } from '../domain/game';
+import { maxWines, validateRating } from '../domain/game';
 import { isUuid } from '../games/model';
 import { createLobbyApi, LobbyError, parseLobbySnapshot } from '../lobby/api';
 import { createPresenceApi } from '../lobby/presence';
@@ -33,7 +33,7 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
   let round: GameSnapshot['round'] = null;
   if (row.round !== null) {
     const r = record(row.round);
-    if (!isUuid(r.id) || !Number.isInteger(r.position) || Number(r.position) < 1 || Number(r.position) > 12 ||
+    if (!isUuid(r.id) || !Number.isInteger(r.position) || Number(r.position) < 1 || Number(r.position) > maxWines ||
       !['open', 'closed', 'revealed'].includes(String(r.status)) || typeof r.eligible !== 'boolean' ||
       typeof r.can_submit !== 'boolean') return invalid();
     round = { ...(r.questions === undefined ? {} : {questions:parseQuestions(r.questions)}), id: r.id, position: Number(r.position), status: r.status as 'open' | 'closed' | 'revealed',
@@ -53,10 +53,10 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
   }
   let revealed: GameSnapshot['revealed'];
   if (row.revealed !== undefined) {
-    if (!Array.isArray(row.revealed) || row.revealed.length > 12) return invalid();
+    if (!Array.isArray(row.revealed) || row.revealed.length > maxWines) return invalid();
     revealed = row.revealed.map(value => {
       const w = record(value);
-      if (!isUuid(w.id) || typeof w.name !== 'string' || !Number.isInteger(w.position) || Number(w.position) < 1 || Number(w.position) > 12 ||
+      if (!isUuid(w.id) || typeof w.name !== 'string' || !Number.isInteger(w.position) || Number(w.position) < 1 || Number(w.position) > maxWines ||
         !Number.isInteger(w.price_huf) || Number(w.price_huf) < 1 || Number(w.price_huf) > 1000000 ||
         !Number.isInteger(w.alcohol_tenths) || Number(w.alcohol_tenths) < 0 || Number(w.alcohol_tenths) > 250) return invalid();
       return { id: w.id, name: w.name, position: Number(w.position), priceHuf: Number(w.price_huf), alcoholTenths: Number(w.alcohol_tenths) };
@@ -67,7 +67,7 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
     const c = record(row.reveal_card);
     if (!isUuid(c.id) || typeof c.title !== 'string' || !c.title.trim() || c.title.length > 100 ||
       typeof c.message !== 'string' || c.message.length > 2000 || base.game.status !== 'reveal' || round !== null || ownRating !== null ||
-      !Array.isArray(c.round_ids) || !c.round_ids.length || c.round_ids.length > 12 ||
+      !Array.isArray(c.round_ids) || !c.round_ids.length || c.round_ids.length > maxWines ||
       c.round_ids.some(id => !isUuid(id) || !revealed?.some(w => w.id === id)) || new Set(c.round_ids).size !== c.round_ids.length) return invalid();
     revealCard = { id: c.id, title: c.title, message: c.message, roundIds: c.round_ids };
   }

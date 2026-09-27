@@ -10,7 +10,7 @@ const baseGame = (): HostGame => ({
   revealEvery: 2,
   createdAt: '2026-01-01T12:00:00.000Z',
   wines: [
-    { position: 1, roundId: '20000000-0000-0000-0000-000000000001', name: 'Első bor', priceHuf: 4500, alcoholTenths: 135, photoUpdatedAt: null, photoLocked: false },
+    { position: 1, roundId: '20000000-0000-0000-0000-000000000001', name: 'Első bor', priceHuf: 4500, alcoholTenths: 135, photoUpdatedAt: '2026-09-27T10:00:00.000Z', photoLocked: false },
     { position: 2, roundId: '20000000-0000-0000-0000-000000000002', name: 'Második bor', priceHuf: 6000, alcoholTenths: 120, photoUpdatedAt: null, photoLocked: false },
   ],
 });
@@ -38,6 +38,8 @@ describe('buildCreateDraftFromGame', () => {
     expect(reveal.targets).toHaveLength(2);
     expect(reveal.targets[0]).toBe(draft.entries[0].id);
     expect(reveal.targets[1]).toBe(draft.entries[2].id);
+    expect(draft.entries[0].kind === 'wine' && draft.entries[0].sourcePhoto).toEqual({ gameId: game.id, roundId: '20000000-0000-0000-0000-000000000001' });
+    expect(draft.entries[2].kind === 'wine' && draft.entries[2].sourcePhoto).toBeNull();
   });
 
   it('falls back to wines only when schedule is missing', () => {

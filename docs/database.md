@@ -37,7 +37,7 @@ pending köröket, a titkos boradatokat és a `game_created` auditeseményt.
 Meghívó nem keletkezik; az a következő fejlesztési egység külön művelete.
 
 A cím trim után 1–100 karakter, az idő 30–1800 egész másodperc, a felfedési
-gyakoriság 1–12. A borlista 1–12 eleme pontosan a `name` (1–200 karakter),
+gyakoriság 1–12. A borlista 1–40 eleme pontosan a `name` (1–200 karakter),
 `price_huf` (1–1 000 000 egész Ft) és `alcohol_tenths` (0–250 egész) mezőket kapja.
 A lista sorrendje adja a körök sorszámát. Hibás elemnél semmi nem marad mentve.
 

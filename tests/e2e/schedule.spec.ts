@@ -73,6 +73,9 @@ test('mentett menet: egyedi szünet, sorrend, új bor, törlés és konfliktus',
   await expect(page.getByRole('list',{name:'Mentett kóstolómenet'})).toContainText('Víz és kenyér');
   await page.getByRole('button',{name:'Menet szerkesztése'}).click();
   await expect(page.getByLabel('Átvezető képernyő címe')).toHaveValue('Víz és kenyér');
+  for (let i = 0; i < 6; i++) await editor.getByRole('button', { name: 'Bor hozzáadása', exact: true }).click();
+  await editor.locator('.schedule-step').last().scrollIntoViewIfNeeded();
+  await expect.poll(async () => (await editor.locator('.schedule-add-bar').boundingBox())?.y ?? 999).toBeLessThan(24);
 });
 test('élő időállítás megőrzi a játékos piszkozatát, lezárás után egyedi átvezetés',async({page,browser},info)=>{
   const f=fixture(true);await f.attach(page); await page.goto(`/host/${game}`);

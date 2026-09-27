@@ -1,0 +1,3 @@
+[      87ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:5173/node_modules/.vite/deps/react-dom_client.js?v=99e8ac61:15804
+[   70118ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/src/ui/HarvestArtwork.tsx?t=1790539091358:0
+[   70120ms] [ERROR] [vite] Failed to reload /src/ui/HarvestArtwork.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://127.0.0.1:5173/@vite/client:962

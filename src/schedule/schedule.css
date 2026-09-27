@@ -10,6 +10,8 @@
 .schedule-step-heading { margin-bottom: 16px; }
 .schedule-step-heading strong { font: 500 14px 'IBM Plex Mono', monospace; }
 .schedule-order, .schedule-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.schedule-add-bar { position: sticky; top: 8px; z-index: 4; margin-bottom: 16px; padding: 12px; background: var(--sheet); border: 1px solid var(--line); box-shadow: 0 8px 18px rgb(48 32 46 / 8%); }
+.schedule-step { scroll-margin-top: 88px; }
 .schedule-order button { min-width: 44px; min-height: 44px; padding: 8px 12px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); cursor: pointer; }
 .schedule-order button:disabled { opacity: .4; cursor: default; }
 .schedule-section label, .schedule-time label { display: grid; gap: 8px; margin-bottom: 16px; font-weight: 500; }

@@ -14,7 +14,7 @@ export function OrganizerPage() {
           <Link className="button-primary" to="/host">Játékmesteri belépés <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
-      <EditorialPhoto src="/images/blind-tasting-table.jpg" alt="Borospoharak és textillel letakart palackok egy kóstolóasztalon." number="01" caption="A kóstoló előkészítése" eager />
+      <EditorialPhoto src="/images/blind-tasting-table.jpg" alt="Borospoharak és textillel letakart palackok egy kóstolóasztalon." number="01" caption="" eager />
     </section>
     <section className="organizer-steps" aria-labelledby="organizer-steps-title">
       <h2 id="organizer-steps-title">Így készítsd elő</h2>

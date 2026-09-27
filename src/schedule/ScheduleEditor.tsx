@@ -1,3 +1,4 @@
+import { maxWines } from '../domain/game';
 import { parseQuestions } from '../questions/model';
 import { QuestionEditor } from '../questions/QuestionEditor';
 import { useRef, useState } from 'react';
@@ -47,7 +48,11 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
     return { id: newRequestId(), kind, title: kind === 'break' ? 'Szünet' : kind === 'reveal' ? 'Felfedés' : '', message: '', seconds: kind === 'reveal' ? 0 : kind === 'break' ? 300 : 120, reveal_round_ids: [],
       status: 'pending', price_huf: kind === 'wine' ? 3000 : null, alcohol_tenths: kind === 'wine' ? 120 : null, round_position: null };
   }
-  function add(kind: ScheduleStep['kind']) { change([...steps, makeStep(kind)]); }
+  function add(kind: ScheduleStep['kind']) {
+    const step = makeStep(kind);
+    change([...steps, step]);
+    requestAnimationFrame(() => document.getElementById(`schedule-step-${step.id}`)?.scrollIntoView({ block: 'nearest' }));
+  }
   const history = plan?.steps.filter(s => s.status !== 'pending') ?? [];
   const wineCount = [...history, ...steps].filter(s => s.kind === 'wine').length;
   const saved = initialPlan && (!plan || initialPlan.version >= plan.version) ? initialPlan : plan;
@@ -55,7 +60,7 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
   return <section className="schedule-section" aria-labelledby="schedule-title">
     <div className="schedule-heading"><div><p className="eyebrow">JÁTÉKMESTERI MENET</p><h3 id="schedule-title">Borok és szünetek</h3></div>
       {!editing && <button className="button-secondary" disabled={pending} onClick={() => void load()}>{pending ? 'Betöltés…' : 'Menet szerkesztése'}</button>}</div>
-    {!editing && saved?.status !== 'finished' && <div className="schedule-actions">
+    {!editing && saved?.status !== 'finished' && <div className="schedule-actions schedule-add-bar">
       <button type="button" className="button-secondary" disabled={pending || (saved?.steps.length ?? 0) >= 60} onClick={() => void load('break')}>Szünet hozzáadása</button>
       <button type="button" className="button-secondary" disabled={pending || (saved?.steps.length ?? 0) >= 60} onClick={() => void load('reveal')}>Felfedés hozzáadása</button>
     </div>}
@@ -85,10 +90,10 @@ export function ScheduleEditor({ api, gameId, onSaved, initialPlan }: { initialP
         <fieldset className="schedule-fields" disabled={pending}>
           <legend>Hátralévő lépések</legend>
           {!steps.length && <p>Nincs hátralévő lépés. Itt további bort vagy szünetet is beilleszthetsz.</p>}
-          <div className="schedule-actions"><button className="button-secondary" type="button" disabled={wineCount >= 12 || history.length+steps.length >= 60} onClick={() => add('wine')}>Bor hozzáadása</button>
+          <div className="schedule-actions schedule-add-bar"><button className="button-secondary" type="button" disabled={wineCount >= maxWines || history.length+steps.length >= 60} onClick={() => add('wine')}>Bor hozzáadása</button>
             <button className="button-secondary" type="button" disabled={history.length+steps.length >= 60} onClick={() => add('break')}>Szünet hozzáadása</button>
             <button className="button-secondary" type="button" disabled={history.length+steps.length >= 60} onClick={() => add('reveal')}>Felfedés hozzáadása</button></div>
-          <ol className="schedule-list">{steps.map((s, i) => <li key={s.id} className={`schedule-step schedule-step-${s.kind}`}>
+          <ol className="schedule-list">{steps.map((s, i) => <li id={`schedule-step-${s.id}`} key={s.id} className={`schedule-step schedule-step-${s.kind}`}>
             <div className="schedule-step-heading"><strong>{String(history.length+i+1).padStart(2,'0')} / {kindLabel(s)}</strong>
               <div className="schedule-order">
                 <button type="button" disabled={i === 0} aria-label={`${i+1}. lépés előrébb`} onClick={() => move(i,-1)}>↑</button>

@@ -3,7 +3,7 @@
 A játékmester a mentett kóstolóban, a **Borok és szünetek → Menet szerkesztése**
 gombbal nyitja meg a szerkesztőt. A teljes mentett menet a szerkesztőn kívül is
 látható, újratöltés után is, a szünetek címével és szövegével együtt. Mentett draftban, a váróban és futás közben is
-módosíthatók a még meg nem kezdett lépések. Egy menet 1–12 bort és összesen
+módosíthatók a még meg nem kezdett lépések. Egy menet 1–40 bort és összesen
 legfeljebb 60 lépést tartalmazhat.
 
 - Bor felvehető, kivehető, átrendezhető; neve, ára, alkoholfoka és saját
@@ -77,7 +77,7 @@ a megadott idő a mentéstől számít. Az eredménysnapshot külső projekciój
 ## Felfedési kártyák — 0014
 
 A `202609240014_reveal_cards.sql` bővíti a privát menetet: `kind='reveal'`,
-`reveal_round_ids uuid[]`. Mentéskor ugyanazon játék korábbi borai, 1–12 egyedi
+`reveal_round_ids uuid[]`. Mentéskor ugyanazon játék korábbi borai, 1–40 egyedi
 azonosító engedélyezett. Végrehajtáskor minden kiválasztott kör closed/revealed.
 A kijelölés, a felfedési másolat és a verzióváltás egy tranzakció.
 A régi `reveal` vezérlőakció is kizárólag a soron következő Felfedés kártyát
@@ -96,8 +96,9 @@ automatikusan kártyák: a játékmester a hátralévő menethez adhatja hozzá 
 
 A mentett kóstoló tetején, az élő vezérlő előtt látható a menet.
 A **Szünet hozzáadása** és **Felfedés hozzáadása** gomb közvetlenül megnyitja
-a szerkesztőt az új kártyával. A szerkesztőben a hozzáadógombok a lista fölött
-vannak. A kártyák továbbra is a **Menet mentése** gombbal rögzülnek.
+a szerkesztőt az új kártyával. A hozzáadógombok a lista görgetése közben
+a képernyő tetején maradnak, így hosszú menetnél nem kell visszagörgetni.
+A kártyák továbbra is a **Menet mentése** gombbal rögzülnek.
 Új kóstolónál a Bor hozzáadása, Szünet hozzáadása és Felfedés hozzáadása már
 az első mentés előtt elérhető. Közös listában rendezhetők, a felfedési kártya
 előtti borok jelölhetők ki. A teljes menet egyetlen létrehozással mentődik.

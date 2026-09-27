@@ -3,9 +3,45 @@ import type { AmbientMotion } from './useAmbientMotion';
 import './harvest.css';
 
 /** Original decorative SVG still life; never represents a wine in the game. */
+function randomSwirl() {
+  const direction = Math.random() < 0.5 ? 1 : -1;
+  const turns = 1.35 + Math.random() * 0.4;
+  const lean = 16 + Math.random() * 4;
+  const depth = 0.08;
+  const steps = 56;
+  const speeds = Array.from({ length: steps }, (_, index) => {
+    const place = (index + 0.5) / steps;
+    return 0.35 + Math.sin(Math.PI * place);
+  });
+  const total = speeds.reduce((sum, speed) => sum + speed, 0);
+  let covered = 0;
+  const progress = speeds.map(speed => {
+    covered += speed / total;
+    return covered;
+  });
+  progress[progress.length - 1] = 1;
+  const round = (value: number) => Math.round(value * 1000) / 1000;
+  const tilt: Keyframe[] = [];
+  const wine: Keyframe[] = [];
+  for (let index = 0; index <= steps; index += 1) {
+    const offset = index / steps;
+    const along = index === 0 ? 0 : progress[index - 1];
+    const envelope = Math.sin(Math.PI * along);
+    const azimuth = direction * along * turns * Math.PI * 2;
+    const alpha = lean * envelope * Math.PI / 180;
+    const rot = Math.atan2(Math.sin(alpha) * Math.cos(azimuth), Math.cos(alpha)) * 180 / Math.PI;
+    const scale = 1 + depth * envelope * Math.sin(azimuth);
+    tilt.push({ transform: `rotate(${round(rot)}deg) scale(${round(scale)})`, offset });
+    wine.push({ transform: `rotate(${round(-rot)}deg)`, offset });
+  }
+  return { tilt, wine, duration: 3800 + Math.random() * 900 };
+}
+
 export function HarvestArtwork({ motion }: { motion: AmbientMotion }) {
   const stage = useRef<HTMLDivElement>(null);
+  const glass = useRef<SVGGElement>(null);
   const [visible, setVisible] = useState(false);
+  const running = motion.running && visible;
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
@@ -15,7 +51,33 @@ export function HarvestArtwork({ motion }: { motion: AmbientMotion }) {
     };
   }, []);
 
-  const running = motion.running && visible;
+  useEffect(() => {
+    const node = glass.current;
+    const tilt = node?.querySelector<SVGGElement>('.harvest-glass-tilt');
+    const wine = node?.querySelector<SVGGElement>('.harvest-wine');
+    if (!running || !node || !tilt || !wine) return;
+    let wait = 0;
+    let playing: Animation[] = [];
+    let stopped = false;
+    const arm = () => {
+      wait = window.setTimeout(() => {
+        const swirl = randomSwirl();
+        const options: KeyframeAnimationOptions = { duration: swirl.duration, easing: 'linear', fill: 'none' };
+        playing = [tilt.animate(swirl.tilt, options), wine.animate(swirl.wine, options)];
+        playing[0].finished.then(() => {
+          playing = [];
+          if (!stopped) arm();
+        }).catch(() => undefined);
+      }, 700 + Math.random() * 2800);
+    };
+    arm();
+    return () => {
+      stopped = true;
+      window.clearTimeout(wait);
+      for (const animation of playing) animation.cancel();
+    };
+  }, [running]);
+
   return <div ref={stage} className={`harvest-artwork${running ? ' harvest-running' : ''}`}>
     <div className="harvest-scene" aria-hidden="true">
       <div className="harvest-light" />
@@ -45,11 +107,24 @@ export function HarvestArtwork({ motion }: { motion: AmbientMotion }) {
           <path d="m290 385 149-12 2 27-149 12Z" fill="var(--sheet)" strokeWidth="1.5" />
           <path d="m343 394 49-4" stroke="var(--accent)" strokeWidth="2" />
         </g>
-        <g stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M136 314c-10 36-14 81 6 109 10 15 27 23 44 23s35-8 45-24c18-30 14-69 4-108Z" fill="var(--sheet)" fillOpacity=".75" />
-          <path d="M130 369c1 29 7 65 56 67 38-2 52-30 54-62-35 11-68-14-110-5Z" fill="var(--accent)" stroke="none" />
+        <defs>
+          <clipPath id="harvest-bowl-clip">
+            <path d="M136 314c-10 36-14 81 6 109 10 15 27 23 44 23s35-8 45-24c18-30 14-69 4-108Z" />
+          </clipPath>
+        </defs>
+        <g ref={glass} className="harvest-glass">
+          <g className="harvest-glass-tilt" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M136 314c-10 36-14 81 6 109 10 15 27 23 44 23s35-8 45-24c18-30 14-69 4-108Z" fill="var(--sheet)" fillOpacity=".75" stroke="none" />
+          <g clipPath="url(#harvest-bowl-clip)">
+            <g className="harvest-wine">
+              <path d="M40 376c48-20 232-20 292 12l24 170H16Z" fill="var(--accent)" stroke="none" />
+              <path d="M48 372c54-14 196-12 276 16" stroke="var(--paper)" strokeWidth="1.6" opacity=".7" />
+            </g>
+          </g>
+          <path d="M136 314c-10 36-14 81 6 109 10 15 27 23 44 23s35-8 45-24c18-30 14-69 4-108Z" fill="none" />
           <path d="M136 314c27 8 68 8 99 0M186 448l-1 73m-39 13c10-7 27-9 39-13 13 4 31 7 41 13-25 7-54 7-80 0Z" />
           <path d="M145 331c-4 14-5 25-4 37m6 24c2 8 6 15 11 20" stroke="var(--paper)" strokeWidth="3" />
+          </g>
         </g>
         <g stroke="var(--accent)" strokeWidth="2" strokeLinecap="round">
           <path d="m83 533 5-21m4 13 18-2m-4 14 11 6" />

@@ -1,3 +1,4 @@
+import { maxWines } from '../domain/game';
 import { parseQuestionResults } from '../questions/model';
 import type { GameResults, OwnResult, ScoreQuestion, ScoreWine, WineGuesses } from './model';
 import { isUuid } from '../games/model';
@@ -30,7 +31,7 @@ function parseGuesses(value: unknown, responseCount: number): WineGuesses {
 }
 export function parseResults(value: unknown, role: 'host' | 'player'): GameResults {
   const r=record(value);
-  const revealedCount=number(r.revealed_count,0,12), maxPoints=number(r.max_points,0,1200);
+  const revealedCount=number(r.revealed_count,0,maxWines), maxPoints=number(r.max_points,0,maxWines * 250);
   const scoringVersion = Number(r.scoring_version);
   if (![1,2,3].includes(scoringVersion) || typeof r.scoring_version!=='number' || typeof r.final!=='boolean' ||
     !Array.isArray(r.wines) || r.wines.length!==revealedCount || !Array.isArray(r.leaderboard) || r.leaderboard.length>50) return invalid();
@@ -49,7 +50,7 @@ export function parseResults(value: unknown, role: 'host' | 'player'): GameResul
     if(photoUpdatedAt && !Number.isFinite(Date.parse(photoUpdatedAt))) return invalid();
     const responseCount=number(w.response_count,0,50), averageLiking=w.average_liking===null?null:number(w.average_liking,1,10,false);
     if((responseCount===0)!==(averageLiking===null) || (own!==null && responseCount===0)) return invalid();
-    return {...(w.questions === undefined ? {} : {questions:parseQuestionResults(w.questions,role)}),id:w.id,position:number(w.position,1,12),name:text(w.name,200),priceHuf:number(w.price_huf,1,1000000),
+    return {...(w.questions === undefined ? {} : {questions:parseQuestionResults(w.questions,role)}),id:w.id,position:number(w.position,1,maxWines),name:text(w.name,200),priceHuf:number(w.price_huf,1,1000000),
       priceBucket:number(w.price_bucket,1,8),alcoholTenths:number(w.alcohol_tenths,0,250),photoUpdatedAt,responseCount,averageLiking,own,
       guesses:parseGuesses(w.guesses,responseCount)};
   });

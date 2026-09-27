@@ -2,7 +2,8 @@
 
 ## Cél és induló feltételezések
 
-Baráti, személyes kóstoló, kezdetben 2–30 játékos és 1–12 bor. Tervezési cél,
+Baráti, személyes kóstoló, kezdetben 2–30 játékos. Egy kóstoló 1–40 bort
+tartalmazhat, a menet pedig legfeljebb 60 lépést. A létszám tervezési cél,
 nem bemért kapacitás. Magyar felület, HUF palackár (0,75 liter), alkoholtartalom
 % vol, 1–10 egész tetszési érték. A játékmester kezeli a fizikai borokat és
 a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.

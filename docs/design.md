@@ -65,7 +65,7 @@ Az illusztráció három rétege mozog: a többszínű szőlőág 4,8 másodperc
 félciklussal, −6 és +7 fok között leng; mögötte a rétegzett színfoltok
 16 másodperces, a levéllel kísért szélvonalak 8 másodperces félciklussal mozdulnak.
 Kizárólag CSS `transform` és `opacity` animáció, JavaScript képkockahurok, videó, blur és
-új függőség nélkül. A szöveg, palack és pohár stabil. A megállító gomb a
+új függőség nélkül. A szöveg és a palack stabil. A pohár szára a csukló tengelye: a kehely ebből a pontból ír kört, oldalra dől, majd a kör túlsó felén közelebb vagy távolabb látszik, és a mozdulat végén visszaáll. A megállító gomb a
 jelenlegi fázisban szüneteltet; újraindításkor onnan folytatja. Képernyőn kívül
 IntersectionObserver, háttérlapon Page Visibility állítja le a mozgást.
 A rendszer csökkentett mozgás beállítását induláskor és változáskor is követjük.

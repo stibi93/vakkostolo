@@ -15,7 +15,7 @@
 ## Tervezési döntések — 2026-09-23
 
 - React/TypeScript/Vite + Supabase, statikus hosting: kevesebb üzemeltetés.
-- Magyar UI, HUF; 2–30 fő / 1–12 bor induló feltételezés, nem felhasználói korlát.
+- Magyar UI, HUF; 2–30 fő induló feltételezés, nem felhasználói korlát. Egy kóstoló legfeljebb 40 bor.
 - Vendég = anonim Auth-felhasználó. A host tartós bejelentkezést kap.
 - Valós boradat külön titkos táblában, felfedéshez külön pillanatkép.
 - Szerveridő és sorzár védi a beküldést; egy játékos/kör egy válasz.

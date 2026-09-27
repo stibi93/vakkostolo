@@ -5,7 +5,7 @@ Dátum: 2026-09-24. Állapot: elfogadott felhasználói kérés, implementálva.
 A korábbi N boronként kötelező felfedés korlátozta a bemutató menetét.
 A bor lezárását ezért elválasztjuk a boradatok nyilvánossá tételétől.
 
-A privát menet wine/break/reveal kártyákból áll. Egy Felfedés kártya 1–12
+A privát menet wine/break/reveal kártyákból áll. Egy Felfedés kártya 1–40
 egyedi, ugyanazon játékban előtte szereplő bort választ ki, címmel és üzenettel.
 A sorrendet mentéskor, a lezárt állapotot végrehajtáskor ellenőrzi a szerver.
 A kártya indítása és az adatok publikálása atomi, verzióvédett és idempotens.

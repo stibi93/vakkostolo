@@ -2,6 +2,7 @@ import { QuestionEditor } from '../questions/QuestionEditor';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router';
+import { maxWines } from '../domain/game';
 import { WinePhoto } from '../ui/WinePhoto';
 import { gameErrorMessage } from './api';
 import type { CreateEntryDraft, CreateGameDraft } from './createGameDraft';
@@ -10,16 +11,32 @@ import type { GamesApi, InitialStep } from './model';
 import { prepareWinePhoto, WinePhotoError } from './winePhoto';
 
 type PickedPhoto = { blob: Blob; url: string };
-type WineFields = CreateEntryDraft & { kind: 'wine'; photo: PickedPhoto | null; photoMessage: string };
+type WineFields = Extract<CreateEntryDraft, { kind: 'wine' }> & { photo: PickedPhoto | null; photoMessage: string };
 type CardFields = Extract<CreateEntryDraft, { kind: 'break' | 'reveal' }>;
 type Entry = WineFields | CardFields;
-const emptyWine = (): WineFields => ({ questions: [], kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
+const emptyWine = (): WineFields => ({ questions: [], kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '', sourcePhoto: null });
 
 function entriesFromDraft(draft: CreateGameDraft | undefined): Entry[] {
   if (!draft?.entries.length) return [emptyWine()];
   return draft.entries.map((entry) => entry.kind === 'wine'
-    ? { ...entry, photo: null, photoMessage: '' }
+    ? { ...entry, photo: null, photoMessage: entry.sourcePhoto ? 'A meglévő fotó az új kóstolóval együtt mentődik.' : '' }
     : { ...entry });
+}
+
+function showEntry(id: string) {
+  requestAnimationFrame(() => document.getElementById(`entry-${id}`)?.scrollIntoView({ block: 'nearest' }));
+}
+
+function DraftWinePhoto({ api, wine, index }: { api: GamesApi; wine: WineFields; index: number }) {
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const source = wine.sourcePhoto;
+  useEffect(() => {
+    if (!source || wine.photo) return;
+    let active = true;
+    api.photoUrl(source.gameId, source.roundId).then((url) => { if (active) setCopiedUrl(url); }, () => { if (active) setCopiedUrl(null); });
+    return () => { active = false; };
+  }, [api, source, wine.photo]);
+  return <WinePhoto src={wine.photo?.url ?? copiedUrl} alt={`${wine.name || `${index + 1}. tétel`} – kiválasztott borfotó`} number={String(index + 1).padStart(2, '0')} />;
 }
 
 export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGameDraft }) {
@@ -50,7 +67,7 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
     setEntries((current) => current.map((wine) => {
       if (wine.kind !== 'wine' || wine.id !== id) return wine;
       if (wine.photo && wine.photo !== photo) { URL.revokeObjectURL(wine.photo.url); photoUrls.current.delete(wine.photo.url); }
-      return { ...wine, photo, photoMessage };
+      return { ...wine, photo, photoMessage, sourcePhoto: null };
     }));
   }
   async function pickPhoto(id: string, file: File) {
@@ -81,7 +98,14 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
     });
   }
   function addCard(kind: CardFields['kind']) {
-    setEntries(current => [...current, {kind,id:crypto.randomUUID(),title:kind === 'break' ? 'Szünet' : 'Felfedés',message:'',seconds:kind === 'break' ? 300 : 0,targets:[]}]);
+    const id = crypto.randomUUID();
+    setEntries(current => [...current, {kind,id,title:kind === 'break' ? 'Szünet' : 'Felfedés',message:'',seconds:kind === 'break' ? 300 : 0,targets:[]}]);
+    showEntry(id);
+  }
+  function addWine() {
+    const wine = emptyWine();
+    setEntries(current => [...current, wine]);
+    showEntry(wine.id);
   }
   function patchCard(id: string, value: Partial<CardFields>) {
     setEntries(current => current.map(e => e.id === id && e.kind !== 'wine' ? {...e,...value} : e));
@@ -109,15 +133,19 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
     try {
       const id = await api.create(input, requestId);
       const photos = wines.flatMap((wine, index) => wine.photo ? [{ index, blob: wine.photo.blob }] : []);
+      const copies = wines.flatMap((wine, index) => !wine.photo && wine.sourcePhoto ? [{ index, source: wine.sourcePhoto }] : []);
       let photoFailures = 0;
-      if (photos.length) {
+      if (photos.length || copies.length) {
         if (mounted.current) setPending('photos');
         try {
           const game = await api.get(id);
           for (const photo of photos) {
             try { await api.uploadPhoto(id, game.wines[photo.index].roundId, photo.blob); } catch { photoFailures++; }
           }
-        } catch { photoFailures = photos.length; }
+          for (const copy of copies) {
+            try { await api.copyPhoto(copy.source.gameId, copy.source.roundId, id, game.wines[copy.index].roundId); } catch { photoFailures++; }
+          }
+        } catch { photoFailures = photos.length + copies.length; }
       }
       if (mounted.current) navigate(`/host/${id}`, { state: { created: true, photoFailures } });
     } catch (error) {
@@ -142,14 +170,14 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
         </div>
         <p className="game-hint">A borokat, szüneteket és felfedéseket már itt sorba rendezheted. A felfedéshez egy vagy több, előtte szereplő bort válassz.</p>
         <h3>A kóstoló menete</h3>
-        <div className="schedule-actions">
-          <button type="button" className="button-secondary" disabled={wines.length >= 12 || entries.length >= 60} onClick={() => setEntries(current => [...current, emptyWine()])}>Bor hozzáadása ({wines.length}/12)</button>
+        <div className="schedule-actions schedule-add-bar">
+          <button type="button" className="button-secondary" disabled={wines.length >= maxWines || entries.length >= 60} onClick={addWine}>Bor hozzáadása</button>
           <button type="button" className="button-secondary" disabled={entries.length >= 60} onClick={() => addCard('break')}>Szünet hozzáadása</button>
           <button type="button" className="button-secondary" disabled={entries.length >= 60} onClick={() => addCard('reveal')}>Felfedés hozzáadása</button>
         </div>
         <p id="wine-privacy" className="game-hint">A borok adatait és fotóit csak te láthatod a felfedésig.</p>
         {entries.map((entry, stepIndex) => {
-          if (entry.kind !== 'wine') return <fieldset key={entry.id} className={`wine-fields schedule-step-${entry.kind}`}>
+          if (entry.kind !== 'wine') return <fieldset id={`entry-${entry.id}`} key={entry.id} className={`wine-fields schedule-step-${entry.kind}`}>
             <legend>{stepIndex+1}. lépés · {entry.kind === 'break' ? 'Szünet' : 'Felfedés'}</legend>
             <label>{entry.kind === 'break' ? 'Szünet címe' : 'Felfedés címe'}<input required maxLength={100} value={entry.title} onChange={e=>patchCard(entry.id,{title:e.target.value})} /></label>
             <label>Játékosoknak megjelenő szöveg<textarea rows={3} maxLength={2000} value={entry.message} onChange={e=>patchCard(entry.id,{message:e.target.value})} /></label>
@@ -170,7 +198,8 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
             </div>
           </fieldset>;
           const wine=entry,index=wines.findIndex(w=>w.id===entry.id);
-          return <fieldset className="wine-fields" key={wine.id} aria-describedby="wine-privacy">
+          const keptPhoto = Boolean(wine.photo || wine.sourcePhoto);
+          return <fieldset id={`entry-${wine.id}`} className="wine-fields" key={wine.id} aria-describedby="wine-privacy">
           <legend>{index+1}. tétel</legend>
           <label>Bor neve és évjárata<input value={wine.name} onChange={(event) => updateWine(wine.id, 'name', event.target.value)} maxLength={200} required autoComplete="off" /></label>
           <div className="game-settings">
@@ -179,17 +208,17 @@ export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGa
           </div>
           <QuestionEditor questions={wine.questions} onChange={questions=>setEntries(current=>current.map(e=>e.id===wine.id && e.kind==='wine'?{...e,questions}:e))} />
           <div className="wine-photo-pick">
-            <WinePhoto src={wine.photo?.url ?? null} alt={`${wine.name || `${index+1}. tétel`} – kiválasztott borfotó`} number={String(index+1).padStart(2, '0')} />
+            <DraftWinePhoto api={api} wine={wine} index={index} />
             <div>
               <div className="upload-control">
-                <label htmlFor={`new-wine-photo-${wine.id}`}>{wine.photo ? 'Fotó cseréje' : 'Fotó hozzáadása'}<span className="sr-only"> · {index+1}. tétel</span></label>
+                <label htmlFor={`new-wine-photo-${wine.id}`}>{keptPhoto ? 'Fotó cseréje' : 'Fotó hozzáadása'}<span className="sr-only"> · {index+1}. tétel</span></label>
                 <input id={`new-wine-photo-${wine.id}`} type="file" accept="image/*" aria-describedby={`new-wine-photo-${wine.id}-message`} onChange={(event) => {
                   const file = event.currentTarget.files?.[0];
                   event.currentTarget.value = '';
                   if (file) void pickPhoto(wine.id, file);
                 }} />
               </div>
-              {wine.photo && <div className="photo-actions"><button type="button" className="button-secondary" onClick={() => setPhoto(wine.id, null, 'Fotó eltávolítva.')}>Fotó eltávolítása<span className="sr-only"> · {index+1}. tétel</span></button></div>}
+              {keptPhoto && <div className="photo-actions"><button type="button" className="button-secondary" onClick={() => setPhoto(wine.id, null, 'Fotó eltávolítva.')}>Fotó eltávolítása<span className="sr-only"> · {index+1}. tétel</span></button></div>}
               <p className="small-note" id={`new-wine-photo-${wine.id}-message`} aria-live="polite">{wine.photoMessage || 'Nem kötelező. A címkefotó a felfedésnél és az eredményeknél jelenik meg.'}</p>
             </div>
           </div>

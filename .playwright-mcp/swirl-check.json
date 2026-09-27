@@ -1,0 +1,26 @@
+{
+  "mean": 0,
+  "spread": 0,
+  "leaks": [
+    {
+      "time": 0,
+      "wine": 0,
+      "outside": 0
+    },
+    {
+      "time": 850,
+      "wine": 0,
+      "outside": 0
+    },
+    {
+      "time": 1418,
+      "wine": 0,
+      "outside": 0
+    },
+    {
+      "time": 2550,
+      "wine": 0,
+      "outside": 0
+    }
+  ]
+}

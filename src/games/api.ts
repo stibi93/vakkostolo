@@ -2,6 +2,7 @@ import { parseSchedule } from '../schedule/api';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import type { GameStatus } from '../domain/game';
+import { maxWines } from '../domain/game';
 import { gameStatusLabels, isUuid, validateGameInput } from './model';
 import type { GamesApi, HostGame, HostGameSummary } from './model';
 import { maxWinePhotoBytes, winePhotoBucket, winePhotoPath } from './winePhoto';
@@ -29,7 +30,7 @@ export function parseHostSummary(value: unknown): HostGameSummary {
 }
 export function parseHostGame(value: unknown): HostGame {
   const row = record(value);
-  if (!Array.isArray(row.wines) || row.wines.length < 1 || row.wines.length > 12) throw invalidResponse();
+  if (!Array.isArray(row.wines) || row.wines.length < 1 || row.wines.length > maxWines) throw invalidResponse();
   return { ...parseHostSummary(row), ...(row.schedule === undefined ? {} : { schedule: parseSchedule(row.schedule) }), wines: row.wines.map((value, index) => {
     const wine = record(value);
     const photoUpdatedAt = wine.photo_updated_at ?? null;
@@ -47,7 +48,7 @@ function fromServer(error: { message: string; code?: string }): GameServiceError
     GAME_NOT_FOUND: 'A kóstoló nem található, vagy nem te vagy a játékmestere.',
     REQUEST_ID_CONFLICT: 'Ezzel a kéréssel már létrejött egy kóstoló. Nyisd meg a saját kóstolóid listáját, mielőtt újat készítesz.',
     INVALID_TITLE: 'Ellenőrizd a kóstoló címét.', INVALID_SETTINGS: 'Ellenőrizd az időt és a felfedési gyakoriságot.',
-    INVALID_WINES: 'Adj meg 1–12 bort.', INVALID_WINE: 'Ellenőrizd a borok nevét, árát és alkoholfokát.',
+    INVALID_WINES: `Adj meg 1–${maxWines} bort.`, INVALID_WINE: 'Ellenőrizd a borok nevét, árát és alkoholfokát.',
   };
   return new GameServiceError((Object.hasOwn(messages, error.message) ? messages[error.message] : undefined) ?? (error.code === 'PGRST202'
     ? 'A játéklétrehozás még nem érhető el ezen a szerveren.'
@@ -114,6 +115,12 @@ export function createGamesApi(client: SupabaseClient<Database>): GamesApi {
       const path = photoPath(gameId, roundId);
       if (photo.type !== 'image/jpeg' || photo.size > maxWinePhotoBytes) throw new GameServiceError('A kép túl nagy (legfeljebb 2 MB).');
       const { error } = await client.storage.from(winePhotoBucket).upload(path, photo, { upsert: true, contentType: 'image/jpeg', cacheControl: '60' });
+      if (error) throw fromStorage(error);
+    },
+    async copyPhoto(fromGameId, fromRoundId, gameId, roundId) {
+      const from = photoPath(fromGameId, fromRoundId);
+      const to = photoPath(gameId, roundId);
+      const { error } = await client.storage.from(winePhotoBucket).copy(from, to);
       if (error) throw fromStorage(error);
     },
     async removePhoto(gameId, roundId) {

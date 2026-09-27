@@ -95,6 +95,17 @@ describe('borfotó: privát Storage-adapter', () => {
     expect(gameErrorMessage(error)).toContain('felfedve');
     expect(gameErrorMessage(error)).not.toContain('row-level');
   });
+  it('a másolat a forrás fotót az új kör útvonalára másolja', async () => {
+    const destination = '20000000-0000-0000-0000-000000000002';
+    const { api, fetch } = setup({ path: `${id}/${destination}.jpg` });
+    await api.copyPhoto(id, roundId, destination, destination);
+    const [url, options] = fetch.mock.calls[0];
+    expect(String(url)).toContain('/storage/v1/object/copy');
+    expect(JSON.parse(String(options?.body))).toMatchObject({
+      sourceKey: `${id}/${roundId}.jpg`,
+      destinationKey: `${destination}/${destination}.jpg`,
+    });
+  });
   it('rövid élettartamú aláírt URL-t kér és törölni is tud', async () => {
     const signed = setup({ signedURL: `/object/sign/wine-photos/${id}/${roundId}.jpg?token=t` });
     expect(await signed.api.photoUrl(id, roundId)).toContain('/storage/v1/object/sign/wine-photos/');
@@ -118,6 +129,8 @@ describe('magyar adatbevitel', () => {
   });
   it('a határértékek és hiányos boradatok ellenőrzöttek', () => {
     expect(validateGameInput(input)).toEqual([]);
+    expect(validateGameInput({ ...input, wines: Array.from({ length: 13 }, () => input.wines[0]) })).toEqual([]);
+    expect(validateGameInput({ ...input, wines: Array.from({ length: 41 }, () => input.wines[0]) })).not.toEqual([]);
     expect(validateGameInput({ ...input, wines: [] })).not.toEqual([]);
     expect(validateGameInput({ ...input, roundSeconds: 29 })).not.toEqual([]);
     expect(validateGameInput({ ...input, wines: [{ name: '', priceHuf: NaN, alcoholTenths: 251 }] })).toHaveLength(3);

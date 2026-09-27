@@ -1,6 +1,8 @@
 import type { HostQuestion } from '../questions/model';
 import type { HostGame } from './model';
 
+export type SourceWinePhoto = { gameId: string; roundId: string };
+
 export type CreateWineDraft = {
   kind: 'wine';
   id: string;
@@ -8,6 +10,7 @@ export type CreateWineDraft = {
   price: string;
   alcohol: string;
   questions: HostQuestion[];
+  sourcePhoto: SourceWinePhoto | null;
 };
 
 export type CreateCardDraft = {
@@ -49,7 +52,11 @@ function cloneQuestions(questions: HostQuestion[] | undefined): HostQuestion[] {
   }));
 }
 
-/** Maps a saved host game into create-form state (new IDs; photos are not copied). */
+function sourcePhoto(game: HostGame, roundId: string, updatedAt: string | null): SourceWinePhoto | null {
+  return updatedAt ? { gameId: game.id, roundId } : null;
+}
+
+/** Maps a saved host game into create-form state. Wine photos keep a source reference until save copies them. */
 export function buildCreateDraftFromGame(game: HostGame): CreateGameDraft {
   const wineByPosition = new Map(game.wines.map((wine) => [wine.position, wine]));
   const roundIdToLocalId = new Map<string, string>();
@@ -76,6 +83,7 @@ export function buildCreateDraftFromGame(game: HostGame): CreateGameDraft {
           price: String(step.price_huf ?? stored.priceHuf),
           alcohol: formatAlcohol(step.alcohol_tenths ?? stored.alcoholTenths),
           questions: cloneQuestions(step.questions),
+          sourcePhoto: sourcePhoto(game, stored.roundId, stored.photoUpdatedAt),
         });
       } else if (step.kind === 'break') {
         entries.push({
@@ -110,6 +118,7 @@ export function buildCreateDraftFromGame(game: HostGame): CreateGameDraft {
         price: String(wine.priceHuf),
         alcohol: formatAlcohol(wine.alcoholTenths),
         questions: cloneQuestions(wine.questions),
+        sourcePhoto: sourcePhoto(game, wine.roundId, wine.photoUpdatedAt),
       });
     }
   }
@@ -125,6 +134,7 @@ export function buildCreateDraftFromGame(game: HostGame): CreateGameDraft {
       price: '',
       alcohol: '',
       questions: [],
+      sourcePhoto: null,
     }],
   };
 }

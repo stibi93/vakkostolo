@@ -43,15 +43,22 @@ function HostGameList({ api }: { api: GamesApi }) {
   return <section className="game-section" aria-labelledby="my-games-title">
     <div className="host-page-head">
       <h2 id="my-games-title">Saját kóstolóim</h2>
-      <Link className="button-primary" to="/host/new">Új kóstoló</Link>
+      <div className="host-page-actions">
+        <button className="button-secondary" disabled={state.status === 'loading'} onClick={retry}>Lista frissítése</button>
+        <Link className="button-primary" to="/host/new">Új kóstoló</Link>
+      </div>
     </div>
     {notice && <p role="status">{notice}</p>}
     {state.status === 'loading' && <p role="status">Kóstolók betöltése…</p>}
     {state.status === 'error' && <p role="alert" className="auth-message">{state.message}</p>}
     {state.status === 'ready' && (state.data.length ? <>
-      <ul className="host-game-list">{state.data.map((game) => <li key={game.id}>
+      <ul className="host-game-list">{state.data.map((game) => <li key={game.id} className="host-game-card">
+        <p className="eyebrow">Létrehozott kóstoló</p>
         <Link to={`/host/${game.id}`}>{game.title}</Link>
-        <span>{gameStatusLabels[game.status]} · {new Date(game.createdAt).toLocaleDateString('hu-HU')}</span>
+        <p className="host-game-status">
+          <span className="status-pill">{gameStatusLabels[game.status]}</span>
+          <time dateTime={game.createdAt}>{new Date(game.createdAt).toLocaleDateString('hu-HU')}</time>
+        </p>
         <div className="host-game-actions">
           <Link className="button-secondary" to={`/host/new?from=${game.id}`}>Másolat alapján</Link>
           <DeleteGameButton api={api} id={game.id} title={game.title} onDeleted={() => { setNotice('A kóstoló törölve.'); refresh(); }} />
@@ -59,7 +66,6 @@ function HostGameList({ api }: { api: GamesApi }) {
       </li>)}</ul>
       {state.data.length === 100 && <p>A legutóbbi 100 kóstolót mutatjuk.</p>}
     </> : <p>Még nincs mentett kóstolód. Az elsőt az „Új kóstoló” gombbal hozhatod létre.</p>)}
-    <button className="button-secondary" disabled={state.status === 'loading'} onClick={retry}>Lista frissítése</button>
   </section>;
 }
 

@@ -1,3 +1,6 @@
+/** A tasting stays within the 60-step schedule, with room past the old 12-wine assumption. */
+export const maxWines = 40;
+
 export type GameStatus = 'draft' | 'lobby' | 'tasting' | 'intermission' | 'reveal' | 'finished';
 export type RoundStatus = 'pending' | 'open' | 'closed' | 'revealed';
 

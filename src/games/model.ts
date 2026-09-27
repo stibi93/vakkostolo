@@ -1,3 +1,4 @@
+import { maxWines } from '../domain/game';
 import { parseQuestions, type HostQuestion } from '../questions/model';
 import type { TastingSchedule } from '../schedule/model';
 import type { GameStatus } from '../domain/game';
@@ -18,6 +19,7 @@ export interface GamesApi {
   remove?(id: string): Promise<void>;
   get(id: string): Promise<HostGame>;
   uploadPhoto(gameId: string, roundId: string, photo: Blob): Promise<void>;
+  copyPhoto(fromGameId: string, fromRoundId: string, gameId: string, roundId: string): Promise<void>;
   removePhoto(gameId: string, roundId: string): Promise<void>;
   photoUrl(gameId: string, roundId: string): Promise<string>;
 }
@@ -33,7 +35,7 @@ export function validateGameInput(input: CreateGameInput): string[] {
   if (length(input.title) < 1 || length(input.title) > 100) errors.push('A kóstoló címe 1–100 karakter legyen.');
   if (input.roundSeconds !== 0 && !integerBetween(input.roundSeconds, 30, 1800)) errors.push('Válassz időkorlát nélküli kóstolást vagy 30–1800 egész másodpercet.');
   if (!integerBetween(input.revealEvery, 1, 12)) errors.push('A felfedési gyakoriság 1–12 egész tétel lehet.');
-  if (input.wines.length < 1 || input.wines.length > 12) errors.push('Adj meg 1–12 bort.');
+  if (input.wines.length < 1 || input.wines.length > maxWines) errors.push(`Adj meg 1–${maxWines} bort.`);
   input.wines.forEach((wine, i) => {
     try { parseQuestions(wine.questions,true); } catch (error) { errors.push(`${i+1}. tétel: ${(error as Error).message}`); }
     if (length(wine.name) < 1 || length(wine.name) > 200) errors.push(`${i+1}. tétel: a név 1–200 karakter legyen.`);

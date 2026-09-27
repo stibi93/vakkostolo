@@ -1,0 +1,11 @@
+{
+  "started": true,
+  "frames": 50,
+  "xMax": 8.3,
+  "yMax": 0,
+  "scaleSpan": 0.1,
+  "early": 0.707,
+  "middle": 0.309,
+  "fastest": 1.571,
+  "slowest": 0
+}

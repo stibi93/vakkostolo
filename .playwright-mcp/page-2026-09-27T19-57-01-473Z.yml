@@ -1,0 +1,77 @@
+- generic [ref=f2e4]:
+  - link "Ugrás a tartalomhoz" [ref=f2e5] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=f2e6]:
+    - link "Vakkóstoló, kezdőlap" [ref=f2e7] [cursor=pointer]:
+      - /url: /
+      - text: Vakkóstoló
+    - generic [ref=f2e8]: FEJLESZTÉS ALATT
+    - generic [ref=f2e10]:
+      - link "Játékmestereknek" [ref=f2e11] [cursor=pointer]:
+        - /url: /jatekmester
+      - button "Háttérmozgás szüneteltetése" [ref=f2e12] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e13]: Ⅱ
+        - text: Háttérmozgás szüneteltetése
+  - main [ref=f2e14]:
+    - region [ref=f2e15]:
+      - generic [ref=f2e16]:
+        - paragraph [ref=f2e17]: KÖZÖS BORKÓSTOLÓ · SAJÁT TIPPEK
+        - heading [level=1] [ref=f2e18]:
+          - text: Vakborkóstoló,
+          - emphasis [ref=f2e19]: telefonon.
+        - paragraph [ref=f2e20]: Kóstolj a többiekkel, és rögzítsd a saját értékelésedet a telefonodon.
+        - link "Csatlakozás a játékhoz" [ref=f2e21] [cursor=pointer]:
+          - /url: /join
+          - text: Csatlakozás a játékhoz
+          - generic [aria-hidden] [ref=f2e22]: ↗
+        - paragraph [ref=f2e23]: A játékmester meghívólinkjével és egy becenévvel beléphetsz a közös váróba.
+      - generic [ref=f2e24]:
+        - generic [aria-hidden]:
+          - img:
+            - generic: "01"
+    - region [ref=f2e25]:
+      - generic [ref=f2e27]:
+        - paragraph [ref=f2e28]: ÉRZÉKEK, EMLÉKEK, MEGLEPETÉSEK
+        - heading "Mit adhat a vakkóstolás?" [level=2] [ref=f2e29]
+      - paragraph [ref=f2e35]: Mit veszel észre, ha nem tudod, mi van a pohárban? A közös kóstoló arra is alkalom, hogy megfigyeld, hogyan születik meg a saját véleményed.
+      - generic [ref=f2e36]:
+        - 'figure "FIGYELEM ÉS EMLÉKEZET Ismerős illat, saját szavakkal Gyümölcsös, virágos, fűszeres? Nem kell rögtön szőlőfajtát találnod. A benyomások megfogalmazása kapaszkodót adhat ahhoz, hogy később felismerj egy bort. Próbáld ki Válassz három saját szót az illatra. Felfedés előtt térj vissza ugyanahhoz a pohárhoz: most is ezek jutnak eszedbe? Mit vizsgáltak a kutatók?" [ref=f2e37]':
+          - generic [ref=f2e38]:
+            - img "Szőlőfürtök és levelek a tőkén." [ref=f2e39]
+            - generic [aria-hidden] [ref=f2e40]: "01"
+          - generic [ref=f2e42]:
+            - paragraph [ref=f2e43]: FIGYELEM ÉS EMLÉKEZET
+            - heading "Ismerős illat, saját szavakkal" [level=3] [ref=f2e44]
+            - paragraph [ref=f2e45]: Gyümölcsös, virágos, fűszeres? Nem kell rögtön szőlőfajtát találnod. A benyomások megfogalmazása kapaszkodót adhat ahhoz, hogy később felismerj egy bort.
+            - generic [ref=f2e46]:
+              - heading "Próbáld ki" [level=4] [ref=f2e47]
+              - paragraph [ref=f2e48]: "Válassz három saját szót az illatra. Felfedés előtt térj vissza ugyanahhoz a pohárhoz: most is ezek jutnak eszedbe?"
+            - group [ref=f2e49]:
+              - generic "Mit vizsgáltak a kutatók?" [ref=f2e50] [cursor=pointer]
+        - figure "ELVÁRÁS ÉS ÉRZÉKELÉS A történet is beleszólhat az ízbe Amit előre hallasz egy borról, alakíthatja a kóstolás élményét. A letakart címke és a későbbre hagyott bemutatás teret ad az első, saját benyomásodnak. Próbáld ki A bor történetét csak a saját értékelésed után hallgasd meg. Figyeld meg, mi lep meg a felfedéskor. Mit vizsgáltak a kutatók?" [ref=f2e51]:
+          - generic [ref=f2e52]:
+            - img "Szőlősorok egy domboldalon, távoli hegyekkel." [ref=f2e53]
+            - generic [aria-hidden] [ref=f2e54]: "02"
+          - generic [ref=f2e56]:
+            - paragraph [ref=f2e57]: ELVÁRÁS ÉS ÉRZÉKELÉS
+            - heading "A történet is beleszólhat az ízbe" [level=3] [ref=f2e58]
+            - paragraph [ref=f2e59]: Amit előre hallasz egy borról, alakíthatja a kóstolás élményét. A letakart címke és a későbbre hagyott bemutatás teret ad az első, saját benyomásodnak.
+            - generic [ref=f2e60]:
+              - heading "Próbáld ki" [level=4] [ref=f2e61]
+              - paragraph [ref=f2e62]: A bor történetét csak a saját értékelésed után hallgasd meg. Figyeld meg, mi lep meg a felfedéskor.
+            - group [ref=f2e63]:
+              - generic "Mit vizsgáltak a kutatók?" [ref=f2e64] [cursor=pointer]
+        - figure "SAJÁT VÉLEMÉNY, KÖZÖS ÉLMÉNY Előbb te, aztán a társaság Érdekesebb összevetni a benyomásokat, ha előbb mindenki önállóan fogalmazza meg őket. Így a beszélgetésben az is kiderülhet, mennyire mást vettetek észre ugyanabban a borban. Próbáld ki Az első benyomás idejére tartsatok egy kis csendet. Csak a saját értékelések rögzítése után osszátok meg, ki mit érzett. Mit vizsgáltak a kutatók?" [ref=f2e65]:
+          - generic [ref=f2e66]:
+            - img "Poharak és letakart palackok egy közös kóstolóhoz megterített asztalon." [ref=f2e67]
+            - generic [aria-hidden] [ref=f2e68]: "03"
+          - generic [ref=f2e70]:
+            - paragraph [ref=f2e71]: SAJÁT VÉLEMÉNY, KÖZÖS ÉLMÉNY
+            - heading "Előbb te, aztán a társaság" [level=3] [ref=f2e72]
+            - paragraph [ref=f2e73]: Érdekesebb összevetni a benyomásokat, ha előbb mindenki önállóan fogalmazza meg őket. Így a beszélgetésben az is kiderülhet, mennyire mást vettetek észre ugyanabban a borban.
+            - generic [ref=f2e74]:
+              - heading "Próbáld ki" [level=4] [ref=f2e75]
+              - paragraph [ref=f2e76]: Az első benyomás idejére tartsatok egy kis csendet. Csak a saját értékelések rögzítése után osszátok meg, ki mit érzett.
+            - group [ref=f2e77]:
+              - generic "Mit vizsgáltak a kutatók?" [ref=f2e78] [cursor=pointer]
+      - paragraph [ref=f2e79]: A kipróbálható ötletek a kóstolóhoz szólnak; a hivatkozott kutatások nem a Vakkóstoló alkalmazást vizsgálták.

@@ -78,7 +78,7 @@ describe('create_game: szerveroldali létrehozás', () => {
   it.each([
     { id: null }, { title: null }, { title: ' ' }, { title: 'a'.repeat(101) },
     { seconds: null }, { seconds: 29 }, { seconds: 1801 }, { reveal: 0 }, { reveal: 13 },
-    { wines: null }, { wines: {} }, { wines: [] }, { wines: Array.from({ length: 13 }, () => wines[0]) },
+    { wines: null }, { wines: {} }, { wines: [] }, { wines: Array.from({ length: 41 }, () => wines[0]) },
     { wines: [null] }, { wines: [{ ...wines[0], name: 123 }] },
     { wines: [{ ...wines[0], name: '  ' }] }, { wines: [{ ...wines[0], name: 'a'.repeat(201) }] },
     { wines: [{ ...wines[0], price_huf: '5000' }] }, { wines: [{ ...wines[0], price_huf: 0 }] },
@@ -91,6 +91,14 @@ describe('create_game: szerveroldali létrehozás', () => {
     expect((await db.query('select * from public.rounds')).rows).toHaveLength(0);
     expect((await db.query('select * from public.wine_secrets')).rows).toHaveLength(0);
     expect((await db.query('select * from public.game_events')).rows).toHaveLength(0);
+  });
+  it('13 bor is menthető, 41 nem', async () => {
+    const many = Array.from({ length: 13 }, (_, index) => ({ name: `Bor ${index + 1}`, price_huf: 4500, alcohol_tenths: 125 }));
+    await create({ id: '10000000-0000-0000-0000-000000000013', wines: many });
+    expect((await db.query<{ position: number }>('select position from public.rounds order by position')).rows.map(row => row.position))
+      .toEqual(many.map((_, index) => index + 1));
+    await expect(create({ id: '10000000-0000-0000-0000-000000000041', wines: Array.from({ length: 41 }, () => wines[0]) }))
+      .rejects.toThrow('INVALID_WINES');
   });
   it('hibás későbbi bor esetén nem marad fél játék, javítva ugyanazzal a request ID-val menthető', async () => {
     await expect(create({ wines: [wines[0], { ...wines[1], alcohol_tenths: -1 }] })).rejects.toThrow('INVALID_WINE');

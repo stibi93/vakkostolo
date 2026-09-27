@@ -17,10 +17,10 @@ export function HostArea() {
   return (
     <PageFrame>
       <section className="auth-panel" aria-labelledby="host-title">
-        <p className="eyebrow">ONLINE BELÉPÉS</p>
-        <h1 id="host-title">Játékmester</h1>
         {authRuntime.status === 'ready' ? <HostSession store={authRuntime.store} mfa={authRuntime.mfa}
           games={authRuntime.games} invites={authRuntime.invites} lobby={authRuntime.lobby} /> : <>
+          <p className="eyebrow">ONLINE BELÉPÉS</p>
+          <h1 id="host-title">Játékmester</h1>
           <h2>A belépés még nem elérhető.</h2>
           <p>{authRuntime.status === 'missing'
             ? 'Az online kapcsolat még nincs beállítva. A belépéshez az üzemeltető állítja be a Supabase-kapcsolatot.'
@@ -53,7 +53,10 @@ function HostSession({ store, mfa, games, invites, lobby }: {
     };
   }, [store]);
 
-  if (state.status === 'loading') return <p role="status">Belépés ellenőrzése…</p>;
+  if (state.status === 'loading') return <>
+    <h1 id="host-title" className="host-title-quiet">Játékmester</h1>
+    <p role="status">Belépés ellenőrzése…</p>
+  </>;
   if (location.pathname.replace(/\/+$/, '') === '/auth/callback') {
     // Google sign-in belongs to players: send them back to their invite, even after a failed callback.
     const playerReturn = readReturnPath(window.sessionStorage);
@@ -62,8 +65,11 @@ function HostSession({ store, mfa, games, invites, lobby }: {
   }
   const signOut = <div className="actions"><button className="button-secondary" disabled={!!state.pending}
     onClick={() => void store.signOut()}>{state.pending === 'sign-out' ? 'Kijelentkezés…' : 'Kijelentkezés'}</button></div>;
+  const host = state.status === 'ready' && !!state.user && state.user.is_anonymous === false && isSuperadmin(state.user);
 
   return <>
+    {!host && <p className="eyebrow">ONLINE BELÉPÉS</p>}
+    <h1 id="host-title" className={host ? 'host-title-quiet' : undefined}>Játékmester</h1>
     {state.message && <p className="auth-message" role="alert">{state.message}</p>}
     {state.status === 'error' ? <>
       <h2>Nem sikerült ellenőrizni a belépést.</h2>
@@ -83,12 +89,13 @@ function HostSession({ store, mfa, games, invites, lobby }: {
           felhasználó vezethet. Jelentkezz ki, majd lépj be a superadmin felhasználónévvel és jelszóval.</p>
         {signOut}
       </> : <>
-        <h2>Játékmesteri fiók</h2>
-        <p>Bejelentkezve: {usernameFromEmail(state.user.email) ?? state.user.email}</p>
+        <div className="host-account">
+          <p>Bejelentkezve: {usernameFromEmail(state.user.email) ?? state.user.email}</p>
+          {signOut}
+        </div>
         <MfaGate key={state.user.id} mfa={mfa} aal={state.aal ?? null} onVerified={() => store.reload()}>
           <HostWorkspace key={state.user.id} api={games} invites={invites} lobby={lobby} />
         </MfaGate>
-        {signOut}
       </>}
   </>;
 }

@@ -23,6 +23,10 @@
 .auth-panel h1 { font-size: clamp(36px, 5vw, 52px); margin-top: 16px; }
 .auth-panel p { line-height: 1.7; overflow-wrap: anywhere; color: var(--muted); }
 .auth-panel h2 { margin-top: 28px; font-size: 28px; }
+.auth-panel h1.host-title-quiet { margin-top: 0; font-size: 28px; }
+.host-account { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 8px; }
+.auth-panel .host-account p { margin: 0; color: var(--ink); font-size: 14px; }
+.auth-panel .host-account .actions { margin-top: 0; }
 .auth-message { border-left: 3px solid var(--error); padding: 12px 16px; background: var(--paper); }
 .auth-panel .actions { margin-top: 24px; }
 .auth-panel button { max-width: 100%; min-width: 0; }

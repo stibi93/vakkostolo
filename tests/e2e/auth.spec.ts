@@ -60,7 +60,8 @@ async function mockAuth(page: Page, options: { user?: User; withFactor?: boolean
       calls.logoutScope = url.searchParams.get('scope') ?? '';
       await route.fulfill({ status: 204 });
     } else if (path === '/rest/v1/rpc/list_host_games') {
-      await route.fulfill({ json: [] });
+      await route.fulfill({ json: [{ id: '10000000-0000-0000-0000-000000000001', title: 'teszt kóstoló', status: 'finished',
+        round_seconds: 120, reveal_every: 2, created_at: '2026-09-27T10:00:00.000Z' }] });
     } else if (path === '/rest/v1/rpc/join_game') {
       await route.fulfill({ status: 400, json: { code: 'P0001', message: 'NICKNAME_REQUIRED' } });
     } else if (path === '/rest/v1/rpc/preview_invite') {
@@ -98,6 +99,11 @@ test('superadmin: jelszó + hitelesítő kód → host → újratöltés → kij
   await enterCode(page);
   await expect(page.getByRole('heading', { name: 'Saját kóstolóim' })).toBeVisible();
   await expect(page.getByText('Bejelentkezve: admin')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Játékmesteri fiók' })).toHaveCount(0);
+  await expect(page.getByText('ONLINE BELÉPÉS')).toHaveCount(0);
+  await expect(page.getByText('Létrehozott kóstoló')).toBeVisible();
+  await expect(page.getByText('Befejezve')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'teszt kóstoló', exact: true })).toBeVisible();
   expect(calls.passwordLogins).toBe(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('host-authenticated.png'), fullPage: true });

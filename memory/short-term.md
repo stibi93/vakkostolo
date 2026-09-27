@@ -1,5 +1,34 @@
 # Aktuális állapot — 2026-09-27
 
+## Több bor, egyszerűbb játékmesteri lista
+
+- Egy kóstoló 1–40 bort fogadhat; a menet továbbra is legfeljebb 60 lépés. Új migráció: `202609270005_more_wines.sql`.
+- A bejelentkezett `/host` lista kártyán mutatja a létrehozott kóstolót: nagy cím, állapotjelvény. A fiókcím és a belépés felirata bejelentkezés után nem ismétlődik.
+- A helyi adatbázison a `202609270005` migráció alkalmazva.
+
+# Aktuális állapot — 2026-09-27
+
+## Kóstolómásolat fotóval, rögzített hozzáadógombok
+
+- A másolat a borfotókat is átviszi a privát tárolóban, új körútvonalra. Mentés előtt cserélhetők vagy elhagyhatók.
+- A Bor, Szünet és Felfedés hozzáadása a szerkesztőben és az új kóstoló űrlapon görgetés közben felül marad.
+- Ellenőrzés: create-game-draft és games-api egységteszt; a felület böngészős ellenőrzése a másolás és a rögzített sáv.
+
+# Aktuális állapot — 2026-09-27
+
+## Kezdőlap: köröző pohár
+
+- A szüreti rajz pohara véletlen szünet után kisebb, szabálytalan köröket ír le a vízszintes síkban: oldalaz és közeledik-távolodik, fel-le nem jár. A perem megdől, a tempó egy lögybölésen belül változik. A bor a kehely vonalán belül marad.
+- Csak látható rajz és bekapcsolt háttérmozgás mellett, `prefers-reduced-motion` nélkül. Ellenőrzés: asztali nézet, egy lögybölés oldalirányban 9 px alatt, függőleges elmozdulás nincs, a bor nem lép ki a falon.
+
+# Aktuális állapot — 2026-09-27
+
+## Kezdőlapi pohár
+
+- A pohár a szár körül, egy csuklókör vetületeként mozog: oldalra dől, a kör másik felén méretet vált, a bor felszíne vízszintes marad.
+
+# Aktuális állapot — 2026-09-27
+
 ## Demó mód kivéve
 
 - A `/demo` útvonal, a `src/demo` felület és a próbakóstoló gombok kikerültek. A `/demo` 404. A dokumentáció sem ír le helyi demót.

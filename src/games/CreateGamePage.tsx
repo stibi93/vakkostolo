@@ -50,8 +50,8 @@ function CopyCreateGamePage({ api, sourceId }: { api: GamesApi; sourceId: string
   }
   return <>
     <HostCreateNav />
-    <p className="game-hint">A(z) „{state.data.sourceTitle}” kóstoló adatai betöltve. A címet és a borokat módosíthatod mentés előtt.
-      A borfotók nem másolódnak; szükség esetén újra feltöltheted.</p>
+    <p className="game-hint">A(z) „{state.data.sourceTitle}” kóstoló adatai betöltve. A címet, a borokat és a fotókat módosíthatod mentés előtt.
+      A meglévő borfotók az új kóstolóval együtt mentődnek.</p>
     <CreateGameForm key={sourceId} api={api} draft={state.data.draft} />
   </>;
 }

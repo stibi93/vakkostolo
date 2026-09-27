@@ -1,6 +1,8 @@
 # Borfotók és kóstolómenet
 
 A játékmester a létrehozáskor vagy a mentett borlistában választhat képet.
+Meglévő kóstoló másolásakor a borfotók is átkerülnek: a privát tárolóban
+új körútvonalra másolódnak, és mentés előtt lecserélhetők vagy elhagyhatók.
 A böngésző JPEG-re alakítja, legfeljebb 1600 px hosszabb élre méretezi és
 2 MB alá tömöríti; az újrakódolás elhagyja az EXIF-metaadatokat.
 Hibás vagy sikertelen csere esetén a korábbi fotó megmarad.
