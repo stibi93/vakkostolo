@@ -89,6 +89,15 @@ Legfeljebb 50 résztvevő (`GAME_FULL`): visszaélés elleni korlát, nem termé
 Ismételt belépés nem hoz létre új résztvevőt és nem írja át a becenevet. A játék sorát
 zárolja, így a létszámkorlát párhuzamos belépésnél is tart.
 
+`join_game` harmadik, opcionális argumentuma `p_reclaim` (`202609270004_reclaim_seat.sql`):
+a böngésző 43 karakteres helykulcsa. A szerver csak a SHA-256 hashét tárolja a
+`private.participant_reclaims` táblában, nem a publikus résztvevősoron, mert azt a
+többi játékos és a Realtime is olvashatja. Új anonim belépés ugyanezzel a kulccsal
+a régi résztvevőhöz kötődik: a `joined_at` és a tippek megmaradnak, üres duplikátum
+törlődik. Google-fiókos helyet a kulcs nem vehet át (`RECLAIM_DENIED`).
+`resume_membership(p_game_id, p_reclaim)` ugyanezt meghívó nélkül is megteszi, tehát
+lejárt meghívó után a `/play/:gameId` oldal a telefonon mentett kulccsal visszatér.
+
 `preview_invite(p_token text) → { title, joinable }` (`202609240004_invite_preview.sql`):
 bejelentkezés nélkül (`anon`) is hívható, hogy a vendég a becenév megadása és az anonim
 felhasználó létrehozása előtt lássa, melyik kóstolóba hívták. Ugyanúgy `INVITE_INVALID`

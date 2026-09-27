@@ -56,6 +56,8 @@ function fixture() {
           if (state.loseSubmit) return route.abort('failed');
           return route.fulfill({ json: saved.get(index) });
         }
+        if (path === '/rest/v1/rpc/resume_membership') return route.fulfill({ json: {
+          game_id: gameId, participant_id: index ? member(index) : member(1), nickname: 'Vendég', title: 'Élő kóstoló', status: 'lobby', reclaim_saved: true } });
         await route.abort(); throw new Error(`Unexpected endpoint: ${path}`);
       });
     },

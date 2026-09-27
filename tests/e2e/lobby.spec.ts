@@ -50,6 +50,8 @@ function mockGame() {
           if (state.fail) return route.fulfill({ status: 503, json: { message: 'fixture failure' } });
           return route.fulfill({ json: state.malformed ? {} : lobbyResponse(gameId, participants, host ? 'host' : 'player', host ? null : membershipId(index), status) });
         }
+        if (path === '/rest/v1/rpc/resume_membership') return route.fulfill({ json: {
+          game_id: gameId, participant_id: membershipId(index), nickname: 'Anna', title: 'Péntesti kóstoló', status, reclaim_saved: true } });
         await route.abort(); throw new Error(`Unexpected endpoint ${path}`);
       });
       return state;

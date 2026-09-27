@@ -3,7 +3,8 @@
 A host saját játékoldalán, a `/present/:gameId` kivetítőn és a vendég
 `/play/:gameId` oldalán ugyanaz a friss résztvevőlista látszik. A `/join/:token` sikeres belépés után erre a játékútvonalra
 irányít. Az újratöltéshez így már nem kell érvényes meghívó: a meglévő Auth és
-tagság elég. Elveszett anonim munkamenet továbbra is új résztvevőt jelent.
+tagság elég. Ha az anonim belépés elvész, de a telefonon megvan a helykulcs
+(`202609270004_reclaim_seat.sql`), ugyanaz a résztvevő tér vissza, a tippjeivel.
 
 ## Adathatár
 

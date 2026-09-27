@@ -57,6 +57,11 @@ async function setup(page: Page) {
       if (!state.game || body.p_game_id !== state.game.id) return route.fulfill({ status: 400, json: { message: 'GAME_NOT_FOUND', code: 'P0001' } });
       return route.fulfill({ json: state.malformed ? { ...state.game, wines: null } : state.game });
     }
+    if (url.pathname === '/rest/v1/rpc/resume_membership') {
+      await route.fulfill({ json: { game_id: '10000000-0000-0000-0000-000000000001', participant_id: '30000000-0000-0000-0000-000000000001',
+        nickname: 'Anna', title: 'Kóstoló', status: 'lobby', reclaim_saved: true } });
+      return;
+    }
     await route.abort();
     throw new Error(`Unexpected mocked endpoint: ${url.pathname}`);
   });

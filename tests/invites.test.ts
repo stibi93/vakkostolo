@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Database } from '../src/lib/database.types';
 import { createInvitesApi, inviteErrorMessage, parseInvitePreview, parseMembership } from '../src/invites/api';
 import { inviteUrl, isInviteToken, nicknameError, readStoredInvite, storeInvite } from '../src/invites/model';
+import { readSeatByToken, rememberSeat } from '../src/invites/seat';
 import { authSession } from './fixtures/auth';
 
 const token = 'A'.repeat(21) + '_' + 'b'.repeat(20) + '-';
@@ -22,9 +23,10 @@ function setup(session: boolean) {
     getSession: vi.fn().mockResolvedValue({ data: { session: session ? authSession() : null }, error: null }),
     signInAnonymously: vi.fn().mockResolvedValue({ data: {}, error: null }),
   };
-  const rpc = vi.fn().mockResolvedValue({ data: membership, error: null });
-  const api = createInvitesApi({ auth, rpc } as unknown as SupabaseClient<Database>);
-  return { api, auth, rpc };
+  const rpc = vi.fn().mockResolvedValue({ data: { ...membership, reclaim_saved: true }, error: null });
+  const storage = memoryStorage();
+  const api = createInvitesApi({ auth, rpc } as unknown as SupabaseClient<Database>, storage);
+  return { api, auth, rpc, storage };
 }
 
 describe('meghívó-modell', () => {
@@ -63,6 +65,21 @@ describe('vendégbelépés adapter', () => {
     expect(auth.signInAnonymously).not.toHaveBeenCalled();
     expect(rpc).not.toHaveBeenCalled();
   });
+  it('Google-hely kulcsánál nem nyit új játékost, hanem becenevet kér', async () => {
+    const { api, rpc, storage } = setup(false);
+    rememberSeat(storage, { gameId, token, secret: 'S'.repeat(43) });
+    rpc.mockResolvedValueOnce({ data: null, error: { message: 'RECLAIM_DENIED' } });
+    expect(await api.resume(token)).toBeNull();
+    expect(rpc).toHaveBeenCalledOnce();
+  });
+  it('mentett helykulccsal munkamenet nélkül a régi játékoshoz tér vissza, új becenév nélkül', async () => {
+    const { api, auth, rpc, storage } = setup(false);
+    const secret = 'S'.repeat(43);
+    rememberSeat(storage, { gameId, token, secret });
+    expect(await api.resume(token)).toMatchObject({ participantId: membership.participant_id });
+    expect(auth.signInAnonymously).toHaveBeenCalledOnce();
+    expect(rpc).toHaveBeenCalledExactlyOnceWith('resume_membership', { p_game_id: gameId, p_reclaim: secret });
+  });
   it('meglévő munkamenettel becenév nélkül visszatér a tagsághoz', async () => {
     const { api, rpc } = setup(true);
     expect(await api.resume(token)).toMatchObject({ gameId, nickname: 'Anna' });
@@ -74,10 +91,11 @@ describe('vendégbelépés adapter', () => {
     expect(await api.resume(token)).toBeNull();
   });
   it('belépéskor előbb anonim munkamenetet kér, majd levágott becenévvel csatlakozik', async () => {
-    const { api, auth, rpc } = setup(false);
+    const { api, auth, rpc, storage } = setup(false);
     expect(await api.join(token, '  Anna ')).toMatchObject({ participantId: membership.participant_id });
     expect(auth.signInAnonymously).toHaveBeenCalledOnce();
-    expect(rpc).toHaveBeenCalledExactlyOnceWith('join_game', { p_token: token, p_nickname: 'Anna' });
+    expect(rpc).toHaveBeenCalledExactlyOnceWith('join_game', { p_token: token, p_nickname: 'Anna', p_reclaim: expect.stringMatching(/^[A-Za-z0-9_-]{43}$/) });
+    expect(readSeatByToken(storage, token)?.gameId).toBe(gameId);
     expect(auth.signInAnonymously.mock.invocationCallOrder[0]).toBeLessThan(rpc.mock.invocationCallOrder[0]);
   });
   it('meglévő (akár Google-) munkamenet mellett nem jelentkeztet be újra', async () => {

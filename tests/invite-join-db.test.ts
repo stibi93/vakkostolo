@@ -85,7 +85,8 @@ describe('join_game: vendégbelépés meghívóval', () => {
     await asUser(guest);
     const membership = await join(token, '  Anna  ');
     expect(membership).toMatchObject({ game_id: game, nickname: 'Anna', title: 'Péntesti kóstoló', status: 'lobby' });
-    expect(Object.keys(membership).sort()).toEqual(['game_id', 'nickname', 'participant_id', 'status', 'title']);
+    expect(Object.keys(membership).sort()).toEqual(['game_id', 'nickname', 'participant_id', 'reclaim_saved', 'status', 'title']);
+    expect(membership.reclaim_saved).toBe(false);
     expect((await db.query('select id from public.games')).rows).toEqual([{ id: game }]);
     expect((await db.query('select * from public.wine_secrets')).rows).toHaveLength(0);
     expect((await db.query('select * from public.game_invites')).rows).toHaveLength(0);
@@ -202,5 +203,70 @@ describe('preview_invite: kóstoló azonosítása belépés előtt', () => {
     await asAdmin("update public.games set status = 'finished'");
     await asUser(guest);
     expect(await preview(token)).toEqual({ title: 'Péntesti kóstoló', joinable: false });
+  });
+});
+
+describe('helykulcs: elveszett anonim belépés ugyanahhoz a játékoshoz tér vissza', () => {
+  const secret = 'S'.repeat(43);
+  const otherSecret = 'T'.repeat(43);
+  async function joinWith(token: string, nickname: string | null, reclaim: string | null = null) {
+    return (await db.query<{ data: Record<string, unknown> }>('select public.join_game($1,$2,$3) as data',
+      [token, nickname, reclaim])).rows[0].data;
+  }
+  async function resume(reclaim = secret) {
+    return (await db.query<{ data: Record<string, unknown> }>('select public.resume_membership($1,$2) as data',
+      [game, reclaim])).rows[0].data;
+  }
+  it('lejárt meghívó után az új anonim belépés a régi helyet, tippet és időt kapja vissza', async () => {
+    const { token } = await issue();
+    await asUser(guest);
+    const first = await joinWith(token, 'Anna', secret);
+    expect(first.reclaim_saved).toBe(true);
+    const [round] = await asAdmin<{ id: string }>('select id from public.rounds');
+    await asAdmin(`update public.participants set joined_at = now() - interval '2 hours' where id = $1`, [first.participant_id]);
+    await asAdmin(`insert into public.ratings(game_id, round_id, participant_id, price_bucket, alcohol_tenths, liking)
+      values ($1,$2,$3,4,120,8)`, [game, round.id, first.participant_id]);
+    await asAdmin("update public.game_invites set expires_at = now() - interval '1 second', created_at = now() - interval '1 day'");
+    await asUser(secondGuest);
+    await expect(joinWith(token, 'Anna', secret)).rejects.toThrow(/INVITE_INVALID/);
+    const back = await resume();
+    expect(back).toMatchObject({ participant_id: first.participant_id, nickname: 'Anna', reclaim_saved: true });
+    const seats = await asAdmin<{ user_id: string; nickname: string; ratings: number; age: string }>(
+      `select p.user_id::text, p.nickname, (select count(*)::int from public.ratings r where r.participant_id = p.id) as ratings,
+        extract(epoch from (now() - p.joined_at))::int::text as age from public.participants p`);
+    expect(seats).toEqual([{ user_id: secondGuest, nickname: 'Anna', ratings: 1, age: expect.any(String) }]);
+    expect(Number(seats[0].age)).toBeGreaterThan(60 * 60);
+    await asUser(secondGuest);
+    await expect(db.query('select * from private.participant_reclaims')).rejects.toThrow(/permission denied/);
+  });
+  it('kulcs nélkül új játékos lesz, Google-helyet a kulcs nem vesz át, üres duplikátumot igen', async () => {
+    const { token } = await issue();
+    await asUser(guest);
+    const first = await joinWith(token, 'Anna', secret);
+    await asUser(secondGuest);
+    const created = await joinWith(token, 'Béla');
+    expect(created.participant_id).not.toBe(first.participant_id);
+    expect(await asAdmin('select count(*)::int as n from public.participants')).toEqual([{ n: 2 }]);
+    await asAdmin('delete from public.participants where id = $1', [created.participant_id]);
+    await asAdmin('update auth.users set is_anonymous = false where id = $1', [guest]);
+    await asUser(secondGuest);
+    await expect(resume()).rejects.toThrow(/RECLAIM_DENIED/);
+    await asAdmin('update auth.users set is_anonymous = true where id = $1', [guest]);
+    await asUser(secondGuest);
+    const duplicate = await joinWith(token, 'Anna', otherSecret);
+    const back = await resume();
+    expect(back.participant_id).toBe(first.participant_id);
+    expect(await asAdmin('select id, user_id from public.participants')).toEqual([{ id: first.participant_id, user_id: secondGuest }]);
+    expect(duplicate.participant_id).not.toBe(first.participant_id);
+  });
+  it('hibás kulcs és a host nem veszi át a helyet', async () => {
+    const { token } = await issue();
+    await asUser(guest);
+    await joinWith(token, 'Anna', secret);
+    await asUser(secondGuest);
+    await expect(resume('Z'.repeat(43))).rejects.toThrow(/RECLAIM_INVALID/);
+    await asUser(host);
+    await expect(resume()).rejects.toThrow(/HOST_CANNOT_JOIN/);
+    expect(await asAdmin('select user_id from public.participants')).toEqual([{ user_id: guest }]);
   });
 });

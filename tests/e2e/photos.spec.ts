@@ -81,6 +81,8 @@ test('játékos csak a szerver által felfedett borhoz kér és lát fotót', as
       expect(revealed).toBe(true); signedRequests++;
       return route.fulfill({json:{signedURL:`/object/sign/wine-photos/${game}/${round(1)}.jpg?token=fixture`}});
     }
+    if(path==='/rest/v1/rpc/resume_membership') return route.fulfill({json:{
+      game_id:game,participant_id:member,nickname:'Vendég',title:'Fotós menet',status:'lobby',reclaim_saved:true}});
     await route.abort();throw new Error(`Unexpected player endpoint: ${path}`);
   });
   await page.route('https://auth.vakkostolo.test/storage/v1/object/sign/wine-photos/**?token=fixture',route=>route.fulfill({body:photo,contentType:'image/png'}));

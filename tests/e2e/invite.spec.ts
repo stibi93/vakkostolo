@@ -175,14 +175,16 @@ test('kezdőlapról meghívólink, becenév, valódi váró és megmaradó tags�
   await expect(page.getByText('Bent vagy a váróban', { exact: false })).toContainText('Bent vagy a váróban Anna néven.');
   expect(calls.signups).toBe(1);
   await page.screenshot({ path: testInfo.outputPath('player-waiting.png'), fullPage: true });
-  expect(calls.joins).toEqual([{ p_token: token, p_nickname: 'Anna' }]);
+  expect(calls.joins).toHaveLength(1);
+  expect(calls.joins[0]).toMatchObject({ p_token: token, p_nickname: 'Anna' });
+  expect(calls.joins[0].p_reclaim).toMatch(/^[A-Za-z0-9_-]{43}$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
   await page.reload();
   await expect(page.getByText('Bent vagy a váróban', { exact: false })).toContainText('Bent vagy a váróban Anna néven.');
   await expect(nickname).toHaveCount(0);
   expect(calls.signups).toBe(1);
-  expect(calls.joins).toEqual([{ p_token: token, p_nickname: 'Anna' }]);
+  expect(calls.joins).toHaveLength(1);
   await expect(page).toHaveURL(new RegExp(`/play/${gameId}$`));
   expect(unexpected).toEqual([]);
 });

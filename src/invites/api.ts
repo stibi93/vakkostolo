@@ -5,6 +5,7 @@ import type { Database } from '../lib/database.types';
 import { gameStatusLabels, isUuid } from '../games/model';
 import { isInviteToken, nicknameError } from './model';
 import type { InvitePreview, InvitesApi, IssuedInvite, Membership, Participant } from './model';
+import { forgetSeat, isSeatSecret, newSeatSecret, readSeatByToken, readSeatSecret, rememberSeat } from './seat';
 
 export class InviteServiceError extends Error {}
 const invalidResponse = () => new InviteServiceError('A szerver válasza nem értelmezhető. Próbáld újra.');
@@ -49,6 +50,8 @@ const serverMessages: Record<string, string> = {
   GAME_FINISHED: 'Befejezett kóstolóhoz nem készíthető meghívó.',
   WINES_INCOMPLETE: 'A váró csak akkor nyitható meg, ha minden bor adata megvan.',
   INVITE_INVALID: 'Ez a meghívó nem érvényes. Lehet, hogy lejárt, vagy a játékmester újat készített. Kérj új linket vagy QR-kódot.',
+  RECLAIM_DENIED: 'Ehhez a helyhez Google-fiókkal léptél be. Ugyanazzal a fiókkal tudsz visszatérni.',
+  RECLAIM_INVALID: 'Ezen a telefonon nem találjuk a korábbi helyed. Nyisd meg a meghívót, és lépj be újra.',
   HOST_CANNOT_JOIN: 'Ez a saját kóstolód. Játékmesterként nem léphetsz be játékosnak, mert ismered a borokat.',
   GAME_CLOSED: 'Ebbe a kóstolóba már nem lehet belépni.',
   GAME_FULL: 'A kóstoló megtelt.',
@@ -72,11 +75,36 @@ export function inviteErrorMessage(error: unknown): string {
   return error instanceof InviteServiceError ? error.message : 'Nem sikerült kapcsolódni a szerverhez. Próbáld újra.';
 }
 
-export function createInvitesApi(client: SupabaseClient<Database>): InvitesApi {
+function browserStorage(): Storage {
+  try {
+    if (typeof localStorage !== 'undefined') return localStorage;
+  } catch { /* storage blocked */ }
+  return { length: 0, clear() {}, key: () => null, getItem: () => null, setItem() {}, removeItem() {} };
+}
+
+export function createInvitesApi(client: SupabaseClient<Database>, storage: Storage = browserStorage()): InvitesApi {
   async function hasSession() {
     const { data, error } = await client.auth.getSession();
     if (error) throw new InviteServiceError('Nem sikerült ellenőrizni a belépést. Próbáld újra.');
     return data.session !== null;
+  }
+  async function ensureGuestSession() {
+    if (await hasSession()) return;
+    const { error } = await client.auth.signInAnonymously();
+    if (error) throw fromGuestSignIn(error);
+  }
+  function keepSeat(membership: Membership, secret: string, token?: string) {
+    rememberSeat(storage, { gameId: membership.gameId, secret, ...(token ? { token } : {}) });
+  }
+  async function reclaimSeat(gameId: string, secret: string) {
+    if (!isUuid(gameId) || !isSeatSecret(secret)) throw new InviteServiceError(serverMessages.RECLAIM_INVALID);
+    await ensureGuestSession();
+    const { data, error } = await client.rpc('resume_membership', { p_game_id: gameId, p_reclaim: secret });
+    if (error?.message === 'RECLAIM_INVALID') forgetSeat(storage, gameId);
+    if (error) throw fromServer(error);
+    const membership = parseMembership(data);
+    if (record(data).reclaim_saved === true) keepSeat(membership, secret);
+    return membership;
   }
   return {
     async issue(gameId) {
@@ -103,24 +131,41 @@ export function createInvitesApi(client: SupabaseClient<Database>): InvitesApi {
     },
     async resume(token) {
       if (!isInviteToken(token)) throw new InviteServiceError(serverMessages.INVITE_INVALID);
-      // No session yet: do not create an anonymous user before the guest actually joins.
-      if (!await hasSession()) return null;
-      const { data, error } = await client.rpc('join_game', { p_token: token });
+      const seat = readSeatByToken(storage, token);
+      // No saved seat and no session yet: do not create an anonymous user before the guest joins.
+      if (!seat && !await hasSession()) return null;
+      if (seat && !await hasSession()) {
+        try {
+          return await reclaimSeat(seat.gameId, seat.secret);
+        } catch (error) {
+          // The seat belongs to a Google account. Show the nickname form, which offers that sign-in.
+          if (error instanceof InviteServiceError && error.message === serverMessages.RECLAIM_DENIED) return null;
+          throw error;
+        }
+      }
+      const secret = seat?.secret ?? readSeatSecret(storage, seat?.gameId ?? '');
+      const { data, error } = await client.rpc('join_game', { p_token: token, ...(secret ? { p_reclaim: secret } : {}) });
+      if (error?.message === 'INVITE_INVALID' && seat) return reclaimSeat(seat.gameId, seat.secret);
       if (error?.message === 'NICKNAME_REQUIRED') return null;
       if (error) throw fromServer(error);
-      return parseMembership(data);
+      const membership = parseMembership(data);
+      if (secret && record(data).reclaim_saved === true) keepSeat(membership, secret, token);
+      return membership;
     },
     async join(token, nickname) {
       if (!isInviteToken(token)) throw new InviteServiceError(serverMessages.INVITE_INVALID);
       const problem = nicknameError(nickname);
       if (problem) throw new InviteServiceError(problem);
-      if (!await hasSession()) {
-        const { error } = await client.auth.signInAnonymously();
-        if (error) throw fromGuestSignIn(error);
-      }
-      const { data, error } = await client.rpc('join_game', { p_token: token, p_nickname: nickname.trim() });
+      const seat = readSeatByToken(storage, token);
+      const secret = seat?.secret ?? newSeatSecret();
+      await ensureGuestSession();
+      const { data, error } = await client.rpc('join_game', { p_token: token, p_nickname: nickname.trim(), p_reclaim: secret });
+      if (error?.message === 'INVITE_INVALID' && seat) return reclaimSeat(seat.gameId, seat.secret);
       if (error) throw fromServer(error);
-      return parseMembership(data);
+      const membership = parseMembership(data);
+      if (record(data).reclaim_saved !== false) keepSeat(membership, secret, token);
+      return membership;
     },
+    reclaim(gameId, secret) { return reclaimSeat(gameId, secret); },
   };
 }

@@ -45,7 +45,10 @@ host böngészője tárolja, ezért más böngészőben a kivetítő nem tudja m
    borokat. A meghívó 12 óráig érvényes; új meghívó a régit érvényteleníti.
    Elkészült a `/play/:gameId` közös váró is: számozott résztvevőlista, Realtime,
    15 másodperces pótló lekérés és visszacsatlakozás. Újratöltéshez a már belépett
-   vendégnek nem kell újra a meghívó. A lista nem online jelenlétjelzés.
+   vendégnek nem kell újra a meghívó. Ha a telefonon az anonim belépés közben elvész,
+   ugyanez a készülék a mentett helykulccsal a régi játékoshoz tér vissza, a tippekkel
+   és a kóstoló aktuális állásával; a lejárt meghívó ezt nem akadályozza. Másik
+   telefonról Google-fiók nélkül új játékos keletkezik. A lista nem online jelenlétjelzés.
 4. A játékmester elindítja az első tételt. Mindenki az aktív értékelőt látja:
    becsült palackár (árkategória-kártyák), becsült alkoholfok (fél fokos léptető
    vagy beírás, 12,0 helyőrzővel), tetszési index (1–10 kártyák). Mindhárom kötelező.

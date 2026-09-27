@@ -11,9 +11,11 @@ export interface InvitesApi {
   /** Title of the invited tasting without signing in; rejects unknown, rotated or expired links. */
   preview(token: string): Promise<InvitePreview>;
   participants(gameId: string): Promise<Participant[]>;
-  /** Existing membership for this browser's session, or null when a nickname is still needed. */
+  /** Existing membership for this browser's session or saved seat, or null when a nickname is still needed. */
   resume(token: string): Promise<Membership | null>;
   join(token: string, nickname: string): Promise<Membership>;
+  /** Attach this login to the seat saved on this device. Does not require a live invite. */
+  reclaim(gameId: string, secret: string): Promise<Membership>;
 }
 
 export const isInviteToken = (value: unknown): value is string =>

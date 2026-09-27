@@ -239,9 +239,10 @@ export type Database = {
       get_lobby_snapshot: { Args: { p_game_id: string }; Returns: Json };
       get_tasting_schedule: { Args: { p_game_id: string }; Returns: Json };
       issue_invite: { Args: { p_game_id: string }; Returns: Json };
-      join_game: { Args: { p_token: string; p_nickname?: string }; Returns: Json };
+      join_game: { Args: { p_token: string; p_nickname?: string; p_reclaim?: string }; Returns: Json };
       list_host_games: { Args: Record<never, never>; Returns: Json };
       preview_invite: { Args: { p_token: string }; Returns: Json };
+      resume_membership: { Args: { p_game_id: string; p_reclaim: string }; Returns: Json };
       save_tasting_schedule: { Args: { p_game_id: string; p_expected_version: number; p_request_id: string; p_steps: Json }; Returns: string };
       start_round: { Args: { p_game_id: string; p_expected_version: number; p_request_id: string }; Returns: string };
       submit_rating: { Args: { p_round_id: string; p_price_bucket: number; p_alcohol_tenths: number; p_liking: number }; Returns: Database['public']['Tables']['ratings']['Row'] };

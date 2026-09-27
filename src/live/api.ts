@@ -87,7 +87,7 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
 function fromServer(error: { message: string; code?: string }, status?: number): LiveError {
   const accessLost = ['AUTH_REQUIRED', 'GAME_NOT_FOUND', 'NOT_A_PARTICIPANT'].includes(error.message) || status === 401 || status === 403;
   const messages: Record<string, string> = {
-    AUTH_REQUIRED: 'A belépésed lejárt. Nyisd meg újra a meghívót.',
+    AUTH_REQUIRED: 'A belépésed lejárt. Nyisd meg újra a meghívót ugyanezen a telefonon: a saját helyedre kerülsz vissza.',
     GAME_NOT_FOUND: 'Ez a kóstoló nem érhető el a jelenlegi belépéseddel.',
     NOT_A_PARTICIPANT: 'Ezzel a belépéssel nem vagy a kóstoló résztvevője.',
     PERMANENT_AUTH_REQUIRED: 'A kört csak a bejelentkezett játékmester indíthatja.',
@@ -102,7 +102,7 @@ function fromServer(error: { message: string; code?: string }, status?: number):
     WINES_INCOMPLETE: 'A boradatok hiányosak, ezért a kóstoló nem indítható.',
   };
   return new LiveError(accessLost && !Object.hasOwn(messages, error.message)
-    ? 'A belépésed lejárt. Nyisd meg újra a meghívót.'
+    ? 'A belépésed lejárt. Nyisd meg újra a meghívót ugyanezen a telefonon: a saját helyedre kerülsz vissza.'
     : (Object.hasOwn(messages, error.message) ? messages[error.message] : undefined) ??
       'A szerver nem igazolta vissza a műveletet. Frissíts, és ellenőrizd a mentett állapotot.', accessLost);
 }

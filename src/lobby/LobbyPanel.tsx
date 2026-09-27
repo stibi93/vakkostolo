@@ -71,7 +71,7 @@ export function LobbyView({ state, refresh, showTitle = true, children, activeRo
         : presence?.status === 'unavailable'
           ? 'Az online jelenlét most nem látszik; a lista a belépett résztvevőket mutatja.'
           : 'A lista magától frissül.'} A számok az azonos becenevű játékosokat is megkülönböztetik.</p>
-      {snapshot.role === 'player' && <p className="small-note">Ezt az oldalt újratöltve ugyanide térsz vissza.
+      {snapshot.role === 'player' && <p className="small-note">Ezt az oldalt újratöltve, vagy a telefon bezárása után ugyanezen a készüléken ugyanide térsz vissza.
         A mentett tippedet is visszakapod.</p>}
     </section>}
   </section>;
