@@ -108,7 +108,7 @@ function PasswordSignIn({ store, pending }: { store: Store; pending: boolean }) 
     await store.signInWithPassword(superadminEmail(username), secret);
   }
   return <>
-    <h2>Játékmesteri belépés</h2>
+    {/* <h2>Játékmesteri belépés</h2> */}
     <p>A kóstolót a superadmin felhasználó vezeti. A játékosok a meghívó QR-kódjával lépnek be,
       nekik nem kell ez az oldal.</p>
     <form className="host-sign-in" onSubmit={(event) => void submit(event)} noValidate>

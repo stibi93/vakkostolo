@@ -1,91 +1,199 @@
 # Vakkóstoló
 
-Mobilra tervezett vakborkóstoló: vendégbelépés, közös kóstolás, tippek és
-közösen felfedett eredmények. Munkanév, szabadon változtatható.
+Magyar nyelvű, mobilra tervezett vakborkóstoló. A játékmester előkészíti a
+borokat, a vendégek QR-rel vagy meghívólinkkel belépnek, tippelnek, majd
+közösen felfeditek az eredményeket.
 
-## Mi készült el?
+Az első kiadás kis, személyes kóstolókat céloz: nincs kötelező fizetés, és a
+játékhoz nem kell futásidejű AI.
 
-Alkalmazásváz kezdőlappal (`/`) és külön megnyitható, egy böngészőlapon működő
-UX-demóval (`/demo`). Ismeretlen útvonalon visszalépési lehetőség jelenik meg.
-A demo a játékmester, játékos és prezentáció nézetét mutatja. Nem többeszközös
-játék, a tippeket nem menti szerverre. A külön `/host` oldalra csak a superadmin
-lép be felhasználónévvel, jelszóval és hitelesítő app kódjával (`npm run superadmin -- create <név>`);
-a játékosok meghívóval, anonim vagy opcionálisan Google-fiókkal lépnek be. Az éles backendhez adatmodell,
-SQL-migráció, hozzáférési szabályok, válaszbeküldő függvény és tesztek készültek.
-A bejelentkezett host létrehozhat 1–12 boros kóstolót, megnézheti saját mentett
-játékait és azok boradatait. A szerver ellenőrzi a hostot, az adatokat és az
-ismételt mentést. Meghívó, QR, anonim belépés, élő közös váró és az első online kör is elérhető,
-saját tippek mentésével. A további körvezérlés és felfedés még készül.
-A váró és a valódi helyi Supabase-próba leírása: [közös váró](docs/lobby.md).
-A hiányzó éles funkciókat a [megvalósítási terv](docs/roadmap.md) sorolja fel.
+A demó (`/demo`) egy böngészőlapon, helyi mintadatokkal mutatja a három nézetet.
+Az éles játék (`/host`, `/join`, `/play`) Supabase-t használ.
 
-## Indítás
+## Mit csinál az alkalmazás?
 
-Node.js 22.22 vagy újabb, npm:
+| Szerep | Hol | Feladat |
+| --- | --- | --- |
+| Játékos | `/join`, `/play/:gameId` | Meghívó, becenév, váró, tipp, saját eredmény |
+| Játékmester | `/host`, `/host/:gameId` | Borok, fotó, kérdések, meghívó, időzítés, felfedés |
+| Kivetítő | `/present/:gameId` | QR, váró, felfedett borok, ranglista |
+
+A játékos a kóstolás alatt csak a tételszámot látja. A bor neve, ára, alkoholfoka
+és fotója a felfedésig rejtve marad. A határidőt, a pontozást és az állapotváltást
+a szerver dönti el.
+
+Játékos tippje: árkategória, alkoholfok, tetszés (1–10, nem ad versenypontot),
+és opcionális egyedi kérdések. Új játékok pontozása: pontos árkategória 50 pont,
+szomszédos 25, plusz alkoholpont.
+
+**Még nincs kész:** hosztolt élesítés, telefonos pilot, eredmény e-mailben,
+megosztható kivetítő-link idegen böngészőnek, rövid belépőkód.
+
+Részletes szabályok: [termékterv](docs/product.md). Hiányzó kiadási lépések:
+[ütemezés](docs/roadmap.md).
+
+## Előfeltételek
+
+- Node.js 22.22 vagy újabb, npm
+- A demóhoz ennyi elég
+- Élő kóstolóhoz: [Docker](https://docs.docker.com/engine/install/) és
+  [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started)
+  (`supabase` a `PATH`-on, vagy `npx supabase`)
+
+## Gyors próba (csak demó)
 
 ```sh
 npm ci
 npm run dev
 ```
 
-A terminálban kiírt helyi címet nyisd meg, majd válaszd a „Próbakóstoló megnyitása”
-linket. A `/demo` közvetlenül is megnyitható. A demo nem kér kulcsot.
-Telefonos próbához ugyanazon a hálózaton: `npm run dev:lan` (helyi Supabase-szel).
-A meghívó link és QR-kód ekkor a gép hálózati címére mutat, a Supabase-kérések a
-Vite-on keresztül mennek; WSL alatt egyszeri porttovábbítás kell (részletek: `docs/auth.md`).
-Ez még nem szinkronizálja a kóstolás menetét. A fejlesztői szervert ne tedd ki az internetre.
+A terminálban kiírt címet nyisd meg, majd a **Próbakóstoló** linket, vagy menj
+közvetlenül a `/demo` oldalra. Kulcs nem kell. A demó nem ment szerverre;
+frissítéskor a tippek és a saját képek elvesznek.
+
+A fejlesztői szervert ne tedd ki az internetre.
+
+## Helyi élő kóstoló
+
+### 1. Függőségek
 
 ```sh
-npm run check
-npm run test:db
-npm run db:types
+npm ci
+```
+
+### 2. Helyi Supabase
+
+```sh
+supabase start
+supabase migration up --local
+```
+
+Az első `start` általában felhúzza a migrációkat. Új migráció után mindig
+`migration up --local`. Ne futtass `supabase db reset`-et mentendő adatokon.
+
+A Google OAuth titkai a Gitből kizárt `supabase/.env` fájlba kerülnek. Enélkül
+a játékosok anonim meghívóval is beléphetnek; a Google-gomb csak a provider
+beállítása után működik. Részletek: [belépés](docs/auth.md).
+
+### 3. Publikus böngészőkulcsok
+
+Másold a `.env.example` fájlt `.env.local` névre. A `supabase status` kiírja
+a helyi API címet és a publishable (anon) kulcsot:
+
+```sh
+cp .env.example .env.local
+supabase status
+```
+
+Példa:
+
+```sh
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+```
+
+Csak ezek a `VITE_` változók mennek a böngészőbe. Service-role / titkos kulcsot
+soha ne tegyél `VITE_` változóba.
+
+### 4. Superadmin (játékmester)
+
+Játékmester csak parancssorból létrehozott superadmin lehet. Nyilvános
+jelszavas regisztráció nincs. A CLI a titkos kulcsot a futó helyi stackből olvassa.
+
+```sh
+npm run superadmin -- create admin
+```
+
+Jelszó: legalább 14 karakter, kis- és nagybetű és szám. A `--generate` erős
+jelszót ad, és egyszer kiírja. Első belépéskor a `/host` végigvezet a
+hitelesítő app (TOTP) beállításán.
+
+További parancsok: `reset-password`, `reset-mfa`, `revoke`, `list`.
+Érdemes egy tartalék superadmint is létrehozni.
+
+### 5. Alkalmazás indítása
+
+```sh
+npm run dev
+```
+
+1. Nyisd meg a `/host` oldalt, lépj be a superadminnal és a hitelesítő kóddal.
+2. Hozz létre kóstolót (borok, opcionális fotó és egyedi kérdések).
+3. Nyisd meg a várót: a QR és a meghívólink a vendégeké.
+4. A kivetítő: ugyanannak a bejelentkezett böngészőnek egy másik lapja,
+   `/present/:gameId` (húzd a projektorra).
+5. Vendég: `/join` + teljes meghívólink, vagy a QR. Becenév után a váróba kerül.
+
+## Telefon ugyanazon a Wi-Fi-n
+
+```sh
+npm run dev:lan
+```
+
+A szkript a gép hálózati címére állítja a meghívót, és a Supabase-kéréseket a
+Vite-on keresztül továbbítja. A játékmester jelszóval bármelyik címről beléphet.
+A játékos Google-belépése helyi stacken csak `127.0.0.1`-ről működik; telefonon
+az anonim meghívó a járható út.
+
+WSL 2 alatt a Windows nem adja tovább a portot NAT módban. A szkript kiír egy
+PowerShell-parancsot (`scripts/wsl-lan-forward.ps1`); ezt rendszergazdaként,
+WSL vagy Windows újraindítás után egyszer futtasd. Nyilvános profilú Wi-Fi-n
+a telefon nem éri el a gépet.
+
+## Ellenőrzés
+
+```sh
+npm run check          # típusok, lint, tesztek, build
+npm run test:e2e       # böngészős próba (egyszer: npx playwright install chromium)
 npm run build
 npm run preview
 ```
 
-Böngészős próba: egyszer `npx playwright install chromium`, utána
-`npm run test:e2e`. A teszt két helyi szervert indít (4173 és 4174), asztali és
-360 px széles Chromiumban ellenőrzi a demót és az Auth-folyamatot. Az Auth-próbák
-szintetikus HTTP-válaszokat használnak, nem a fejlesztő valódi projektjét.
-Ugyanez vonatkozik az új játék létrehozási/lista/részlet RPC-próbákra is.
-Párhuzamos munkánál saját worktree és függőségtelepítés mellett például
-`PLAYWRIGHT_BASE_PORT=4195 npm run test:e2e -- --workers=2` használható;
-ilyenkor a tesztszerverek a 4195 és 4196 portot foglalják.
-A képernyőképek a Gitből kizárt
-`test-results/` mappába kerülnek. Ez emulált mobilméret, nem valódi iOS/Android-eszközteszt.
+A `check` a PGlite-ban futtatott SQL-teszteket is tartalmazza. Ez nem helyettesíti
+a valódi helyi Auth/Realtime próbát.
 
-`dist/` a publikálható statikus build. A `.env.example` alapján létrehozott
-`.env.local` publikus Supabase-beállításait a `/host` és a `/join` használja. A superadmin
-kezelése, a hook, az MFA és a játékosi Google provider: [belépési útmutató](docs/auth.md).
-A demo ettől független, helyi próba marad. Valódi Google/Supabase-integrációs
-teszt és többeszközös játékpróba még nem történt.
+Helyi Supabase mellett, opcionálisan:
 
-## Fejlesztési egységek és Git
+```sh
+npm run test:lobby:local
+npm run test:presence:local
+npm run test:live:local
+npm run test:schedule:local
+npm run test:photos:local
+npm run test:results:local
+```
 
-A helyi repository `main` ágon indul. Az első commit a korábbi projektalapot
-őrzi, a következő az alkalmazásvázat adja hozzá. Minden új egység egy konkrét,
-ellenőrizhető viselkedést szállítson, a hozzá tartozó tesztekkel és dokumentációval.
-Commitnév: például `feat(auth): add host sign-in` vagy `fix(lobby): restore membership`.
-Commit előtt `npm run check`, felületi változásnál `npm run test:e2e` is szükséges.
-A függőségi lockfile verziózott; környezeti titkok és generált fájlok kizárva.
+Ezek ideiglenes fiókokat hoznak létre, majd törlik őket. Párhuzamos munkánál
+saját port: `PLAYWRIGHT_BASE_PORT=4195 npm run test:e2e -- --workers=2`.
 
-A következő egységek sorrendjét és készültségi feltételeit a
-[fejlesztési terv](docs/roadmap.md#önálló-fejlesztési-egységek) tartalmazza.
+## Hosztolt projekt
 
-## Terv és projektmemória
+Még nincs éles deploy a repositoryból. A recept:
 
-- [Termék, adminfelület, pontozás](docs/product.md)
-- [Architektúra](docs/architecture.md) és [adatbázis](docs/database.md)
-- [Ütemezés és becsült ráfordítás](docs/roadmap.md)
-- [Telepítés, költség és üzemeltetés](docs/operations.md)
-- [AI és memóriakezelés](docs/ai.md)
-- [Arculat és mobilfelület](docs/design.md)
-- [Agentutasítások](AGENTS.md), [skillek](skills.md)
-- [Aktuális állapot](memory/short-term.md), [tartós döntések](memory/long-term.md)
+1. Supabase-projekt (EU), migrációk: `supabase db push`.
+2. Auth: e-mail (superadminnak), anonim vendég, TOTP MFA, opcionális Google a
+   játékosoknak. „Before User Created” hook: `private.before_user_created`.
+3. `.env.local` / buildkörnyezet: HTTPS URL + publishable kulcs.
+4. Superadmin: `SUPABASE_URL=… SUPABASE_SECRET_KEY=… npm run superadmin -- create <név>`.
+5. Statikus frontend: `npm run build`, kimenet `dist`, Node 22.22+.
+   A `public/_redirects` az SPA-útvonalakat és az Auth callbacket kezeli.
 
-Helyi Git-repository létrejött; távoli repository nincs beállítva.
-Külső fiók, felhőprojekt, domain vagy telepítés nem jött létre.
-A meglévő GitHub Actions ellenőrzések GitHubra feltöltés után futnak távol is.
+Pontos callbackcímek és MFA: [belépés](docs/auth.md). Költség és esemény előtti
+teendők: [üzemeltetés](docs/operations.md).
 
-Az első online kör indítása és a játékos tippek mentése elkészült;
-[API, működés és helyi integrációs próba](docs/live-round.md).
+## Fejlesztés
+
+- Új adatbázis-változás új migráció; alkalmazott migrációt ne írj át.
+- A felület magyar, a kódbeli azonosítók angolok.
+- A böngészőbe csak publikus kulcs kerülhet.
+- Commit előtt `npm run check`; felületi változásnál `npm run test:e2e` is.
+
+## Dokumentáció
+
+- [Termék és pontozás](docs/product.md)
+- [Architektúra](docs/architecture.md) · [adatbázis](docs/database.md)
+- [Belépés](docs/auth.md) · [váró](docs/lobby.md) · [élő kör](docs/live-round.md)
+- [Kóstolómenet](docs/tasting-schedule.md) · [borfotók](docs/wine-photos.md) · [eredmények](docs/results.md)
+- [Üzemeltetés](docs/operations.md) · [ütemezés](docs/roadmap.md)
+- [Arculat](docs/design.md) · [AI és memória](docs/ai.md)
+- [Agentutasítások](AGENTS.md)

@@ -14,8 +14,8 @@ választómezővel lehet lapozni; a **Ranglista** gomb a közös állást mutatj
   0 pont; hiányzó értékelés nem kerül nulla tetszésként az átlagba.
 - Ugyanaz az összesített tippeloszlás, mint a kivetítőn, plusz „a te tipped”
   a saját sávon. A név nélküli eloszlás nem sorolja fel, ki mit mondott.
-- A **Ranglista** összpontos dobogója mellett Ár, Alkohol és Kérdések nézet
-  mutatja minden résztvevő felfedett tippjét és az arra kapott pontot.
+- A **Ranglista** háromfokú dobogó. Holtversenynél a nevek egy fokon, egymás mellett állnak; üres 2. vagy 3. hely is kint marad.
+  Alatta minden játékos egy sor. Az oszlopok összesített pontok: árkategória, alkoholfok és az egyedi kérdések együtt, Egyéb címmel. A konkrét tippek és kérdésszövegek nem ismétlődnek.
   A még fel nem fedett bor válasza itt sem látszik.
 - Összpont és helyezés a már felfedett borok alapján. Játék közben részállás,
   befejezett kóstolónál végeredmény. Holtverseny: 1, 1, 3 sorrend.
@@ -33,9 +33,7 @@ a név és a valódi értékek mellette. A **Tippeloszlás** nézet ugyanahhoz a
 az árkategóriák, az alkoholskála, az egyedi kérdések és a tetszés darabszámait
 mutatja. A helyes árkategória, alkoholfok és kérdésopció kiemelt; a tetszésnél
 csak az átlag. A borlapon nincs saját válasz. A **Ranglista** a telefonnal
-azonos kategóriabontást mutat: összpont, ár, alkohol és egyedi kérdés, játékosonként
-a tippel és a ponttal. Öt résztvevőnként lapozható, hogy normál 720p kivetítőn is
-olvasható legyen.
+azonos összesítőt mutat a dobogó alatt: árkategória, alkoholfok és az egyedi kérdések egy Egyéb oszlopban, pontösszeggel.
 Mobilon a fotó és az adatok egymás alá kerülnek. Hosszú bornevek tördelhetők;
 a tartalmat nem vágjuk le. További kérdésekhez a borlap statisztikai része bővíthető;
 most a ténylegesen feltett ár-, alkohol- és tetszéskérdéseket jeleníti meg.

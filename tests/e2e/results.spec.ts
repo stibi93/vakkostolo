@@ -67,13 +67,19 @@ test('játékos: csak felfedés után fotó, saját összevetés, részpont, hi�
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('button',{name:'Ranglista',exact:true}).click();
   const ranking=page.getByRole('region',{name:'Ranglista'});
+  await expect(ranking.getByRole('list',{name:'Dobogó'}).getByRole('listitem')).toHaveCount(3);
   await expect(ranking.getByRole('list',{name:'Dobogó'})).toContainText('Anna · Te');
+  await expect(ranking.getByRole('list',{name:'Dobogó'})).toContainText('Vendég 2');
+  const summary=ranking.getByRole('table',{name:'Kategóriánkénti pontösszesítő'});
+  await expect(summary).toContainText('Árkategória');
+  await expect(summary).toContainText('Alkoholfok');
+  await expect(summary).toContainText('Egyéb');
+  await expect(summary).toContainText('Összesen');
+  await expect(summary).toContainText('25');
+  await expect(summary).not.toContainText('6 001–8 000 Ft');
   await expect(ranking).toContainText('67');
   await expect(ranking).toContainText('200');
   await expect(ranking).not.toContainText('#01');
-  await page.getByRole('button',{name:'Ár',exact:true}).click();
-  await expect(ranking).toContainText('6 001–8 000 Ft');
-  await expect(ranking).toContainText('Vendég 2');
   await page.reload();await expect(page.getByRole('heading',{name:'Eddigi eredmények'})).toBeVisible();
 });
 test('kivetítő: fotós borlap és lapozható ranglista, saját válaszok és meghívó nélkül is',async({page},info)=>{
@@ -95,13 +101,13 @@ test('kivetítő: fotós borlap és lapozható ranglista, saját válaszok és m
   await page.screenshot({path:info.outputPath('projector-guesses.png'),fullPage:true});
   await page.getByRole('button',{name:'Ranglista',exact:true}).click();
   const ranking=page.getByRole('region',{name:'Ranglista'});
+  await expect(ranking.getByRole('list',{name:'Dobogó'}).getByRole('listitem')).toHaveCount(3);
   await expect(ranking.getByRole('list',{name:'Dobogó'})).toContainText('Anna');
+  await expect(ranking.getByRole('list',{name:'Dobogó'})).toContainText('Vendég 2');
   await expect(ranking).toContainText('pont volt elérhető');
   await expect(ranking).not.toContainText('#01');
-  if(info.project.name.includes('desktop')) await expect(page.getByRole('button',{name:'Következő oldal'})).toBeInViewport({ratio:1});
+  await expect(ranking.getByRole('row').filter({hasText:'Vendég 10'})).toBeVisible();
   await page.screenshot({path:info.outputPath('projector-ranking.png'),fullPage:true});
-  await page.getByRole('button',{name:'Következő oldal'}).click();
-  await expect(ranking.getByText('Vendég 10',{exact:true})).toBeVisible();
 });
 test('képhiba után az adatok megmaradnak, a fotó újrapróbálható',async({page})=>{
   const f=fixture();f.state.failPhoto=true;await f.attach(page);await page.goto(`/play/${game}`);

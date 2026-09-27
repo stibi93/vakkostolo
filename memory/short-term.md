@@ -1,12 +1,30 @@
 # Aktuális állapot — 2026-09-27
 
+## Játékos visszatérése ugyanarra a helyre
+
+- Az anonim belépés elvesztése (bezárt telefon, lejárt munkamenet) eddig új
+  résztvevőt hozott létre. A telefon most helykulcsot őriz; a szerver csak a
+  hashét. Új belépés vagy lejárt meghívó után is a régi játékos tér vissza,
+  a tippekkel és a kóstoló aktuális állásával. Google-helyet a kulcs nem vesz át.
+- Migráció: `202609270004_reclaim_seat.sql`. Ellenőrzés: invite-join DB-tesztek.
+
+# Aktuális állapot — 2026-09-27
+
+## Kivetítő: nagyobb borfotó, szürke háttér, lebegő üveg
+
+- A prezentációs borlapon a fotó fehér mezőben, nagyobb keretben áll.
+  Az üveg lassan fel-le mozog, az alatta lévő árnyék ezzel együtt keskenyedik és halványul.
+  Csak a kivetítőn (`lift`); a játékos nézete változatlan. `prefers-reduced-motion` mellett nincs animáció.
+- Ellenőrzés: results E2E „fotós borlap” asztalon átment; a palack a szürke padló fölött marad, az árnyék látszik.
+  Következő: a lebegést valódi kivetítőn megnézni.
+
+# Aktuális állapot — 2026-09-27
+
 ## Ranglista és kategóriatippek
 
-- A ranglista dobogót mutat, ülésjel és válaszszám nélkül. A most elérhető
-  maximum a pont mellett látszik.
-- Felfedett borokra a játékos és a játékmester is látja, ki mit tippelt árra,
-  alkoholra és egyedi kérdésre, és arra mennyi pontot kapott. A fel nem fedett
-  kör válasza továbbra sem kerül ki.
+- A ranglista három dobogófokot mutat akkor is, ha kevesebb a játékos.
+  Holtversenynél a nevek egy fokon állnak. Alatta táblázat: soronként egy játékos,
+  oszloponként az összesített ár-, alkohol- és egyedi kérdés pont.
 - 0019 `202609270003_revealed_scorecards.sql` helyi adatbázison alkalmazva.
 - Ellenőrzés: results/questions tesztek sikeresek. A kivetítő ranglista E2E
   asztalon és mobilon átment, a lapozó a képernyőn marad.

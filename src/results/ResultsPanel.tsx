@@ -1,7 +1,6 @@
 import { CategoryIcon } from '../rating/CategoryIcon';
 import { useState } from 'react';
-import { CategoryChips, ScoreLenses } from './ScoreLenses';
-import { categoryMax, type ScoreLens } from './scorecard';
+import { ScoreTable } from './ScoreTable';
 import { priceBucketLabel } from '../domain/game';
 import type { GameResults, ResultPhotoApi, WineResult } from './model';
 import { GuessCharts } from './GuessCharts';
@@ -17,10 +16,8 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
   const wines = roundIds ? roundIds.flatMap(id => results.wines.filter(w => w.id === id)) : results.wines;
   const [selected,setSelected]=useState(roundIds ? 0 : wines.length-1);
   const [view,setView]=useState<'wine'|'guesses'|'ranking'>('wine');
-  const [page,setPage]=useState(0);
   const wine=wines[Math.min(selected,wines.length-1)];
   const self=results.leaderboard.find(e=>e.id===selfId);
-  const pageSize=presentation?5:50;
   if(!wine) return <p>Még nincs felfedett eredmény. A borok a játékmester felfedése után jelennek meg.</p>;
   return <section className={`results-panel${presentation?' results-presentation':''}`} aria-label="Kóstoló eredményei">
     <header className="results-heading"><div><p className="eyebrow">{intro ? 'FELFEDÉS / BEMUTATÓ' : results.final?'VÉGEREDMÉNY':'FELFEDETT EREDMÉNYEK'}</p>
@@ -45,7 +42,7 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
         <button className="button-secondary" disabled={selected>=wines.length-1} onClick={()=>setSelected(i=>i+1)}>Következő bor</button>
       </nav>
       <article className="result-wine" aria-label={`${wine.position}. bor eredménye`}>
-        <ResultPhoto key={`${wine.id}:${wine.photoUpdatedAt}`} api={photos} gameId={gameId} wine={wine} />
+        <ResultPhoto key={`${wine.id}:${wine.photoUpdatedAt}`} api={photos} gameId={gameId} wine={wine} lift={presentation} />
         <div className="result-wine-content"><p className="eyebrow">{String(wine.position).padStart(2,'0')}. TÉTEL · FELFEDVE</p>
           <h3>{wine.name}</h3>
           <dl className="result-facts"><div><dt><CategoryIcon category="price" />Valódi palackár</dt><dd>{money(wine.priceHuf)}</dd><dd className="result-fact-note">{priceBucketLabel(wine.priceBucket)}</dd></div>
@@ -82,73 +79,38 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
           {presentation && <p className="result-public-note">A játékosonkénti tippek és a kategóriapontok a Ranglistán vannak. Az összesített tippek a Tippeloszlás nézetben.</p>}
         </div>
       </article>
-    </> : <Ranking results={results} selfId={presentation ? null : selfId} page={page} setPage={setPage} pageSize={pageSize} compact={presentation} />}
+    </> : <Ranking results={results} selfId={presentation ? null : selfId} compact={presentation} />}
   </section>;
 }
-function Ranking({ results, selfId, page, setPage, pageSize, compact = false }: {
-  results: GameResults; selfId: string | null; page: number; setPage: (value: number | ((page: number) => number)) => void; pageSize: number; compact?: boolean;
-}) {
-  const [lens, setLens] = useState<'total' | ScoreLens>('total');
-  const choose = (next: 'total' | ScoreLens) => { setLens(next); setPage(0); };
+function Ranking({ results, selfId, compact = false }: { results: GameResults; selfId: string | null; compact?: boolean }) {
   const board = results.leaderboard;
-  const podium = board.slice(0, 3);
-  const order = [1, 0, 2].filter(index => podium[index]);
-  const rest = board.slice(3);
-  const listLength = lens === 'total' ? rest.length : board.length;
-  const pages = Math.max(1, Math.ceil(listLength / pageSize));
   const max = Math.max(1, results.maxPoints);
-  const category = lens === 'total' ? null : categoryMax(results, lens);
   return <section aria-label="Ranglista" className="results-ranking">
     <header className="podium-heading">
       <h3>{results.final ? 'Végső ranglista' : 'Állás a felfedett borok alapján'}</h3>
-      {lens === 'questions' && results.scoringVersion !== 3 ? <p className="podium-max"><span>a válaszok látszanak, pont nélkül</span></p>
-        : <p className="podium-max"><strong>{lens === 'total' ? results.maxPoints : category}</strong><span>{lensLabel(lens, results.final)}</span></p>}
+      <p className="podium-max"><strong>{results.maxPoints}</strong><span>{results.final ? 'pont volt elérhető' : 'pont érhető el most'}</span></p>
     </header>
-    <nav className="score-lenses" aria-label="Kategóriák">
-      {([['total', 'Összes'], ['price', 'Ár'], ['alcohol', 'Alkohol'], ['questions', 'Kérdések']] as const).map(([id, label]) =>
-        <button key={id} className={lens === id ? 'button-primary' : 'button-secondary'} aria-pressed={lens === id} onClick={() => choose(id)}>{label}</button>)}
-    </nav>
     {board.length ? <>
-      {lens === 'total' ? <>
-        <ol className="podium" aria-label="Dobogó">
-          {order.map(index => {
-            const entry = podium[index];
-            const card = results.scorecards[board.indexOf(entry)];
-            const rise = compact
-              ? (index === 0 ? 72 : 56) + Math.round(entry.points / max * 36)
-              : (index === 0 ? 108 : 76) + Math.round(entry.points / max * 96);
-            return <li key={entry.id} className={`podium-step podium-slot-${index + 1}${entry.id === selfId ? ' is-self' : ''}`}>
-              <p className="podium-name">{entry.nickname}{entry.id === selfId ? ' · Te' : ''}</p>
-              {!compact && card && <CategoryChips results={results} card={card} onSelect={choose} />}
-              <div className="podium-plinth" style={{ height: rise }}>
-                <span className="podium-place">{entry.rank}.</span>
-                <strong>{entry.points}<small> / {results.maxPoints}</small></strong>
-              </div>
-            </li>;
-          })}
-        </ol>
-        {rest.length > 0 && <ol className="ranking-rest" start={4}>
-          {rest.slice(page * pageSize, (page + 1) * pageSize).map(entry => {
-            const card = results.scorecards[board.indexOf(entry)];
-            return <li key={entry.id} className={entry.id === selfId ? 'is-self' : undefined}>
-              <span>{entry.rank}.</span>
-              <span><span>{entry.nickname}{entry.id === selfId ? ' · Te' : ''}</span>{!compact && card && <CategoryChips results={results} card={card} onSelect={choose} />}</span>
-              <strong>{entry.points}<small> / {results.maxPoints}</small></strong>
-            </li>;
-          })}
-        </ol>}
-      </> : <ScoreLenses results={results} selfId={selfId} lens={lens} page={page} pageSize={pageSize} />}
-      {pages > 1 && <nav className="result-navigation" aria-label="Ranglista lapozása"><button className="button-secondary" disabled={page === 0} onClick={() => setPage(value => value - 1)}>Előző oldal</button>
-        <span>{page + 1} / {pages}</span><button className="button-secondary" disabled={page >= pages - 1} onClick={() => setPage(value => value + 1)}>Következő oldal</button></nav>}
+      <ol className="podium" aria-label="Dobogó">
+        {[2, 1, 3].map(place => {
+          const people = board.filter(entry => entry.rank === place);
+          const points = people[0]?.points;
+          const rise = people.length === 0
+            ? (compact ? 76 : 96)
+            : (compact ? (place === 1 ? 92 : 76) : (place === 1 ? 120 : 96)) + Math.round((points ?? 0) / max * (compact ? 28 : 72));
+          return <li key={place} className={`podium-step podium-slot-${place}${people.some(entry => entry.id === selfId) ? ' is-self' : ''}${people.length === 0 ? ' is-empty' : ''}`}>
+            <p className="podium-name">{people.length ? people.map((entry, index) => <span key={entry.id}>{index > 0 ? ' · ' : ''}{entry.nickname}{entry.id === selfId ? ' · Te' : ''}</span>) : <span>—</span>}</p>
+            <div className="podium-plinth" style={{ height: rise }}>
+              <span className="podium-place">{place}.</span>
+              <strong>{points === undefined ? '—' : <>{points}<small> / {results.maxPoints}</small></>}</strong>
+            </div>
+          </li>;
+        })}
+      </ol>
+      <ScoreTable results={results} selfId={selfId} />
     </> : <p>Még nincs résztvevő ebben a kóstolóban.</p>}
-    <p className="small-note">Azonos pontszámhoz azonos helyezés tartozik. A tetszés nem befolyásolja a sorrendet. A kategóriák a felfedett borok tippjeit mutatják.</p>
+    <p className="small-note">Azonos pontszámhoz azonos helyezés tartozik, a nevek egy dobogófokon állnak. A tetszés nem befolyásolja a sorrendet.</p>
   </section>;
-}
-function lensLabel(lens: 'total' | ScoreLens, final: boolean) {
-  if (lens === 'price') return 'pont érhető el árból';
-  if (lens === 'alcohol') return 'pont érhető el alkoholból';
-  if (lens === 'questions') return 'pont érhető el a kérdésekből';
-  return final ? 'pont volt elérhető' : 'pont érhető el most';
 }
 function pointText(points: number | null, simple: boolean) {
   if (points === null) return '—';
