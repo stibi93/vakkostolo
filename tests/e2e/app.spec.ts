@@ -140,7 +140,7 @@ test('a képes ismeretterjesztő blokk kutatásai billentyűzettel elérhetők',
 test('közös háttér minden útvonalon, navigáláskor megmaradó szüneteltetéssel', async ({ page }, info) => {
   test.setTimeout(60_000);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  const routes = ['/', '/join', '/join/invalid', '/jatekmester', '/host', '/host/invalid', '/auth/callback', '/play/invalid', '/present/invalid', '/demo', '/missing'];
+  const routes = ['/', '/join', '/join/invalid', '/jatekmester', '/host', '/host/new', '/host/invalid', '/auth/callback', '/play/invalid', '/present/invalid', '/demo', '/missing'];
   for (const [index, route] of routes.entries()) {
     await page.goto(route);
     await expect(page.getByText('Az oldal betöltése…', { exact: true })).toHaveCount(0);

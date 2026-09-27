@@ -25,7 +25,7 @@ flowchart LR
 ## Rétegek a kódban
 
 - `src/app/`: alkalmazásbelépési pont, kezdőlap, közös keret és útvonalválasztás.
-  React Router kezeli a `/`, `/demo`, `/host`, `/host/:gameId`, `/auth/callback` útvonalakat.
+  React Router kezeli a `/`, `/demo`, `/host`, `/host/new`, `/host/:gameId`, `/auth/callback` útvonalakat.
   A demo dinamikus importtal külön JS-csomagba kerül; a kezdőlap nem tölti le
   a mintaborokat. Ez betöltési határ, nem biztonsági védelem: a demo csomagja publikus.
 - `src/auth/`: lazy betöltött hostfelület, PKCE-callback és Reacttól független

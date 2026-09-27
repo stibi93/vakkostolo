@@ -1,25 +1,33 @@
 import { QuestionEditor } from '../questions/QuestionEditor';
-import type { HostQuestion } from '../questions/model';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { WinePhoto } from '../ui/WinePhoto';
 import { gameErrorMessage } from './api';
+import type { CreateEntryDraft, CreateGameDraft } from './createGameDraft';
 import { parseAlcohol, validateGameInput } from './model';
 import type { GamesApi, InitialStep } from './model';
 import { prepareWinePhoto, WinePhotoError } from './winePhoto';
 
 type PickedPhoto = { blob: Blob; url: string };
-type WineFields = { questions: HostQuestion[]; kind: 'wine'; id: string; name: string; price: string; alcohol: string; photo: PickedPhoto | null; photoMessage: string };
-const emptyWine = (): WineFields => ({ questions: [], kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
-type CardFields = { kind: 'break' | 'reveal'; id: string; title: string; message: string; seconds: number; targets: string[] };
+type WineFields = CreateEntryDraft & { kind: 'wine'; photo: PickedPhoto | null; photoMessage: string };
+type CardFields = Extract<CreateEntryDraft, { kind: 'break' | 'reveal' }>;
 type Entry = WineFields | CardFields;
-export function CreateGameForm({ api }: { api: GamesApi }) {
+const emptyWine = (): WineFields => ({ questions: [], kind: 'wine', id: crypto.randomUUID(), name: '', price: '', alcohol: '', photo: null, photoMessage: '' });
+
+function entriesFromDraft(draft: CreateGameDraft | undefined): Entry[] {
+  if (!draft?.entries.length) return [emptyWine()];
+  return draft.entries.map((entry) => entry.kind === 'wine'
+    ? { ...entry, photo: null, photoMessage: '' }
+    : { ...entry });
+}
+
+export function CreateGameForm({ api, draft }: { api: GamesApi; draft?: CreateGameDraft }) {
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [timed, setTimed] = useState(true);
-  const [seconds, setSeconds] = useState('120');
-  const [entries, setEntries] = useState<Entry[]>(() => [emptyWine()]);
+  const [title, setTitle] = useState(draft?.title ?? '');
+  const [timed, setTimed] = useState(draft?.timed ?? true);
+  const [seconds, setSeconds] = useState(draft?.seconds ?? '120');
+  const [entries, setEntries] = useState<Entry[]>(() => entriesFromDraft(draft));
   const wines = entries.filter((e): e is WineFields => e.kind === 'wine');
   const [requestId] = useState(() => crypto.randomUUID());
   const [pending, setPending] = useState<false | 'game' | 'photos'>(false);

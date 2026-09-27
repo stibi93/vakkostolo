@@ -12,7 +12,7 @@ a sorszámokat. A játékos csak „01. tétel” jelölést lát felfedésig.
 | Szerep | Tervezett felület | Feladat |
 | --- | --- | --- |
 | Játékos | `/join`, `/join/:token`, `/play/:gameId` | Meghívólink, becenév (anonim vagy opcionálisan Google-fiókkal), váró, saját tippek, engedélyezett eredmény |
-| Játékmester | `/host`, `/host/:gameId` | Csak superadmin (felhasználónév + jelszó + hitelesítő kód): borok, meghívás, időzítő, körváltás, felfedés |
+| Játékmester | `/host`, `/host/new`, `/host/:gameId` | Csak superadmin (felhasználónév + jelszó + hitelesítő kód): kóstolólista, új kóstoló (üres vagy meglévő másolata), borok, meghívás, időzítő, körváltás, felfedés |
 | Kivetítő | `/present/:gameId` | QR/váró, tételszám, felfedett eredmény, ranglista |
 
 A hostbelépés, játéklétrehozás, meghívás, közös váró és az első élő kör

@@ -24,8 +24,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/jatekmester" element={<OrganizerPage />} />
         <Route path="/demo" element={<DemoApp />} />
-        <Route path="/host" element={<HostArea />} />
-        <Route path="/host/:gameId" element={<HostArea />} />
+        <Route path="/host/*" element={<HostArea />} />
         <Route path="/present/:gameId" element={<ProjectorPage />} />
         <Route path="/auth/callback" element={<HostArea />} />
         <Route path="/play/:gameId" element={<LobbyPage />} />

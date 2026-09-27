@@ -69,8 +69,7 @@ async function fillWine(page: Page, position: number, name: string, price: strin
   await row.getByLabel('Valódi alkoholfok').fill(alcohol);
 }
 async function fillGame(page: Page) {
-  await page.goto('/host');
-  await expect(page.getByText('Még nincs mentett kóstolód.')).toBeVisible();
+  await page.goto('/host/new');
   await page.getByLabel('Kóstoló címe').fill('Őszi kóstoló');
   await fillWine(page, 1, 'Első mintabor 2024', '4500', '13,5');
 }
@@ -230,4 +229,19 @@ test('egyedi kérdések új bornál: sablon, hibajavítás és mentett payload',
  await page.getByRole('button',{name:'Kóstoló létrehozása',exact:true}).click();await expect(page).toHaveURL(new RegExp(`/host/${gameId}$`));
  const questions=state.calls[0].p_wines[0].questions!;expect(questions).toHaveLength(3);
  expect(questions[0].correctOptionId).toBe(questions[0].options[0].id);expect(state.calls[0].p_steps).toEqual([{kind:'wine',wine_index:0}]);
+});
+
+test('meglévő kóstoló másolata kitölti az új űrlapot', async ({ page }) => {
+  const state = await setup(page);
+  await fillGame(page);
+  await page.getByRole('button', { name: 'Kóstoló létrehozása', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/host/${gameId}$`));
+  await page.getByRole('link', { name: 'Másolat alapján', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/host/new\\?from=${gameId}$`));
+  await expect(page.getByLabel('Kóstoló címe')).toHaveValue('Őszi kóstoló – másolat');
+  await expect(page.getByRole('group', { name: '1. tétel', exact: true }).getByLabel('Bor neve és évjárata')).toHaveValue('Első mintabor 2024');
+  await page.getByRole('button', { name: 'Kóstoló létrehozása', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/host/${gameId}$`));
+  expect(state.calls).toHaveLength(2);
+  expect(state.calls[1].p_title).toBe('Őszi kóstoló – másolat');
 });
