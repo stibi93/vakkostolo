@@ -1,5 +1,18 @@
 # Aktuális állapot — 2026-09-27
 
+## Ranglista és kategóriatippek
+
+- A ranglista dobogót mutat, ülésjel és válaszszám nélkül. A most elérhető
+  maximum a pont mellett látszik.
+- Felfedett borokra a játékos és a játékmester is látja, ki mit tippelt árra,
+  alkoholra és egyedi kérdésre, és arra mennyi pontot kapott. A fel nem fedett
+  kör válasza továbbra sem kerül ki.
+- 0019 `202609270003_revealed_scorecards.sql` helyi adatbázison alkalmazva.
+- Ellenőrzés: results/questions tesztek sikeresek. A kivetítő ranglista E2E
+  asztalon és mobilon átment, a lapozó a képernyőn marad.
+
+# Aktuális állapot — 2026-09-27
+
 ## Host: külön lista, új kóstoló, másolat
 
 - `/host`: csak saját kóstolók listája és „Új kóstoló” gomb.

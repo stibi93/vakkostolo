@@ -14,14 +14,14 @@ describe('árkategóriák', () => {
   });
 });
 
-describe('pontozás (2. verzió) és validáció', () => {
-  it('pontos kategória 50, szomszédos 25 árpont; a tetszés nem változtat pontot', () => {
-    expect(scoreRating({ ...rating, priceBucket: 5, alcoholTenths: 135 }, wine)).toBe(100);
-    expect(scoreRating(rating, wine)).toBe(67);
-    expect(scoreRating({ ...rating, liking: 1 }, wine)).toBe(67);
-    expect(scoreRating({ ...rating, priceBucket: 7, alcoholTenths: 135 }, wine)).toBe(50);
+describe('pontozás (3. verzió) és validáció', () => {
+  it('helyes árkategória és helyes alkohol 1-1 pont; a tetszés és a szomszédos kategória nem ad pontot', () => {
+    expect(scoreRating({ ...rating, priceBucket: 5, alcoholTenths: 135 }, wine)).toBe(2);
+    expect(scoreRating(rating, wine)).toBe(0);
+    expect(scoreRating({ ...rating, liking: 1 }, wine)).toBe(0);
+    expect(scoreRating({ ...rating, priceBucket: 7, alcoholTenths: 135 }, wine)).toBe(1);
   });
-  it('nagy hibánál is 0–100 közötti marad', () => {
+  it('teljes tévesztés 0 pont', () => {
     expect(scoreRating({ priceBucket: 8, alcoholTenths: 165, liking: 1 }, wine)).toBe(0);
     expect(scoreRating({ priceBucket: 1, alcoholTenths: 0, liking: 1 }, wine)).toBe(0);
   });

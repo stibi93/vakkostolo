@@ -27,8 +27,16 @@ function fixture(revealed=true) {
         round:state.card ? null : {id:second,position:2,status:state.revealed?'revealed':'open',opened_at:new Date(Date.now()-30000).toISOString(),closes_at:new Date(Date.now()+60000).toISOString(),eligible:!host,can_submit:!host&&!state.revealed},own_rating:null,
         ...(state.card ? {reveal_card:state.card} : {}),
         ...(state.revealed?{revealed:publicWines,results:{scoring_version:2,final:state.finished,revealed_count:2,max_points:200,
-          wines:publicWines.map((w,i)=>({...w,...(state.questions?{questions:[{id:'grape',prompt:'Melyik szőlőfajta?',options:[{id:'a',label:'Furmint'},{id:'b',label:'Olaszrizling'}],correctOptionId:'a',ownOptionId:host?null:'b'}]}:{}),own:host||i===1?null:{price_bucket:6,price_huf:null,alcohol_tenths:140,liking:8,price_points:25,alcohol_points:41.6666666666667,total:67}})),
-          leaderboard:participants.map((p,i)=>({id:p.id,nickname:p.nickname,seat:p.seat,rank:i<2?1:3,points:i<2?67:0,answered:i<2?1:0,unscored:0}))}}:{})
+          wines:publicWines.map((w,i)=>({...w,guesses:w.response_count?{price:[0,0,0,0,1,1,0,0],alcohol:[{tenths:135,count:1},{tenths:140,count:1}],liking:[0,0,0,0,0,0,1,1,0,0]}:{price:[0,0,0,0,0,0,0,0],alcohol:[],liking:[0,0,0,0,0,0,0,0,0,0]},
+            ...(state.questions?{questions:[{id:'grape',prompt:'Melyik szőlőfajta?',options:[{id:'a',label:'Furmint',count:w.response_count?1:0},{id:'b',label:'Olaszrizling',count:w.response_count?1:0}],correctOptionId:'a',ownOptionId:host?null:'b'}]}:{}),own:host||i===1?null:{price_bucket:6,price_huf:null,alcohol_tenths:140,liking:8,price_points:25,alcohol_points:41.6666666666667,total:67}})),
+          leaderboard:participants.map((p,i)=>({id:p.id,nickname:p.nickname,seat:p.seat,rank:i<2?1:3,points:i<2?67:0,answered:i<2?1:0,unscored:0})),
+          scorecards:participants.map((p,i)=>({id:p.id,wines:publicWines.map((w,wi)=>{
+            const answered=i<2&&wi===0;
+            const questions=state.questions?[{id:'grape',option_id:answered?(i===0?'b':'a'):null,points:0}]:[];
+            return answered
+              ?{id:w.id,price_bucket:6,price_huf:null,price_points:25,alcohol_tenths:140,alcohol_points:41.6666666666667,liking:8,questions}
+              :{id:w.id,price_bucket:null,price_huf:null,price_points:null,alcohol_tenths:null,alcohol_points:null,liking:null,questions};
+          })}))}}:{})
       }});
       if(path===`/storage/v1/object/wine-photos/${game}/${first}.jpg`) {
         state.photoReads++; if(state.failPhoto)return route.fulfill({status:503,json:{message:'unavailable'}});
@@ -53,10 +61,19 @@ test('játékos: csak felfedés után fotó, saját összevetés, részpont, hi�
   const comparison=page.getByRole('region',{name:'Saját tipp és valódi érték'});
   await expect(comparison).toContainText('6 001–8 000 Ft');await expect(comparison).toContainText('4 001–6 000 Ft');
   await expect(comparison).toContainText('14% vol');await expect(comparison).toContainText('13,5% vol');
+  const distribution=page.getByRole('region',{name:'Tippeloszlás'});
+  await expect(distribution).toContainText('helyes');await expect(distribution).toContainText('a te tipped');
   await page.getByRole('region',{name:'Kóstoló eredményei'}).screenshot({path:info.outputPath('player-results.png')});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('button',{name:'Ranglista',exact:true}).click();
-  await expect(page.getByRole('row').filter({hasText:'Anna · Te'})).toContainText('67');
+  const ranking=page.getByRole('region',{name:'Ranglista'});
+  await expect(ranking.getByRole('list',{name:'Dobogó'})).toContainText('Anna · Te');
+  await expect(ranking).toContainText('67');
+  await expect(ranking).toContainText('200');
+  await expect(ranking).not.toContainText('#01');
+  await page.getByRole('button',{name:'Ár',exact:true}).click();
+  await expect(ranking).toContainText('6 001–8 000 Ft');
+  await expect(ranking).toContainText('Vendég 2');
   await page.reload();await expect(page.getByRole('heading',{name:'Eddigi eredmények'})).toBeVisible();
 });
 test('kivetítő: fotós borlap és lapozható ranglista, saját válaszok és meghívó nélkül is',async({page},info)=>{
@@ -67,16 +84,24 @@ test('kivetítő: fotós borlap és lapozható ranglista, saját válaszok és m
   const photo=page.getByRole('img',{name:/Dűlőválogatás Furmint/});await expect(photo).toBeVisible();
   await expect.poll(()=>photo.evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);
   await expect(page.getByRole('region',{name:'Saját tipp és valódi érték'})).toHaveCount(0);
+  await expect(page.getByText('a te tipped')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Kóstoló befejezése'})).toHaveCount(0);
   if(info.project.name.includes('desktop')) await expect(page.getByRole('article',{name:'1. bor eredménye'})).toBeInViewport({ratio:1});
   await page.screenshot({path:info.outputPath('projector-wine.png'),fullPage:true});
+  await page.getByRole('button',{name:'Tippeloszlás',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Tippeloszlás'})).toContainText('helyes');
+  await expect(page.getByText('a te tipped')).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('projector-guesses.png'),fullPage:true});
   await page.getByRole('button',{name:'Ranglista',exact:true}).click();
-  await expect(page.getByRole('row')).toHaveCount(6);
+  const ranking=page.getByRole('region',{name:'Ranglista'});
+  await expect(ranking.getByRole('list',{name:'Dobogó'})).toContainText('Anna');
+  await expect(ranking).toContainText('pont volt elérhető');
+  await expect(ranking).not.toContainText('#01');
   if(info.project.name.includes('desktop')) await expect(page.getByRole('button',{name:'Következő oldal'})).toBeInViewport({ratio:1});
   await page.screenshot({path:info.outputPath('projector-ranking.png'),fullPage:true});
-  await page.getByRole('button',{name:'Következő oldal'}).click();await expect(page.getByRole('row')).toHaveCount(6);
-  await expect(page.getByRole('row').filter({hasText:'Vendég 10'})).toBeVisible();
+  await page.getByRole('button',{name:'Következő oldal'}).click();
+  await expect(ranking.getByText('Vendég 10',{exact:true})).toBeVisible();
 });
 test('képhiba után az adatok megmaradnak, a fotó újrapróbálható',async({page})=>{
   const f=fixture();f.state.failPhoto=true;await f.attach(page);await page.goto(`/play/${game}`);

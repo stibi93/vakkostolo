@@ -9,6 +9,11 @@
 .live-saved { padding: 18px; border-left: 4px solid var(--accent); background: var(--blue); margin: 20px 0; }
 .live-saved p { margin: 8px 0 0; }
 .live-rating-form fieldset:disabled { opacity: .7; }
+.submission-list { margin: 20px 0; }
+.submission-list ul { list-style: none; margin: 12px 0 0; padding: 0; }
+.submission-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.submission-list strong { font-size: 14px; }
+.host-controls-compact { margin: 12px 0 20px; }
 @media (min-width: 760px) { .live-rating-form { max-width: 620px; } }
 
 .player-session .lobby-panel { margin-top: 0; padding-top: 0; border-top: 0; }

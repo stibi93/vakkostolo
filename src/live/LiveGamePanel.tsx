@@ -79,7 +79,8 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
       <p className="small-note">{snapshot.revealCard.roundIds.length} bemutatott bor · A folytatást a játékmester indítja.</p>
     </section>}
     {snapshot.game.status === 'finished' && !snapshot.results && <h3>A kóstoló befejeződött.</h3>}
-    {snapshot.role === 'host' && !presentation && api.schedule && <HostControls api={api.schedule} snapshot={snapshot} refresh={refresh} available={available} secondsLeft={secondsLeft(snapshot,now)} />}
+    {snapshot.role === 'host' && !presentation && snapshot.submissions && <SubmissionList submissions={snapshot.submissions} />}
+    {snapshot.role === 'host' && api.schedule && <HostControls compact={presentation} api={api.schedule} snapshot={snapshot} refresh={refresh} available={available} secondsLeft={secondsLeft(snapshot,now)} />}
     {snapshot.results && snapshot.role === 'host' && !presentation && <p>
       <a className="button-secondary" href={`/present/${snapshot.game.id}`} target="_blank" rel="noopener">Eredmények kivetítése</a>
     </p>}
@@ -94,6 +95,17 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
           <p>{w.priceHuf.toLocaleString('hu-HU')} Ft · {(w.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p></li>)}
       </ol></details>}
   </>;
+}
+function SubmissionList({ submissions }: { submissions: NonNullable<GameSnapshot['submissions']> }) {
+  const missing = submissions.filter(item => !item.submitted);
+  return <section className="submission-list" aria-label="Leadott tippek">
+    <h3>Tippek ennél a bornál</h3>
+    <p className="small-note">{submissions.length - missing.length} / {submissions.length} játékos adott le tippet. A tipp tartalma rejtve marad.</p>
+    <ul>{submissions.map(item => <li key={item.id}>
+      <span>{item.nickname}</span>
+      <strong>{item.submitted ? 'Leadta' : 'Még nem adott le tippet'}</strong>
+    </li>)}</ul>
+  </section>;
 }
 function StartRound({ api, snapshot, refresh, available }: {
   api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean;

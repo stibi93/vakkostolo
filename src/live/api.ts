@@ -71,8 +71,18 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
       c.round_ids.some(id => !isUuid(id) || !revealed?.some(w => w.id === id)) || new Set(c.round_ids).size !== c.round_ids.length) return invalid();
     revealCard = { id: c.id, title: c.title, message: c.message, roundIds: c.round_ids };
   }
+  let submissions: GameSnapshot['submissions'];
+  if (row.submissions !== undefined) {
+    if (base.role !== 'host' || !round || !Array.isArray(row.submissions) || row.submissions.length !== base.participants.length) return invalid();
+    submissions = row.submissions.map((value, index) => {
+      const item = record(value);
+      const participant = base.participants[index];
+      if (!participant || item.id !== participant.id || item.nickname !== participant.nickname || item.seat !== participant.seat || typeof item.submitted !== 'boolean') return invalid();
+      return { id: participant.id, nickname: participant.nickname, seat: participant.seat, submitted: item.submitted };
+    });
+  }
   const results = row.results === undefined ? undefined : parseResults(row.results, base.role);
-  return { ...base, round, ownRating, ...(revealCard ? { revealCard } : {}), ...(results ? { results } : {}), ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
+  return { ...base, round, ownRating, ...(revealCard ? { revealCard } : {}), ...(results ? { results } : {}), ...(pause ? { pause } : {}), ...(revealed ? { revealed } : {}), ...(submissions ? { submissions } : {}), receivedAt, serverTime: Date.parse(base.serverNow) + Math.max(0, requestMs) };
 }
 function fromServer(error: { message: string; code?: string }, status?: number): LiveError {
   const accessLost = ['AUTH_REQUIRED', 'GAME_NOT_FOUND', 'NOT_A_PARTICIPANT'].includes(error.message) || status === 401 || status === 403;

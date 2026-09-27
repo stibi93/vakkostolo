@@ -50,7 +50,7 @@ export function LobbyView({ state, refresh, showTitle = true, children, activeRo
     {canRetry && <button className="button-secondary lobby-retry" disabled={state.loading} onClick={() => void refresh()}>
       {state.loading ? 'Újrapróbálás…' : 'Újrapróbálás'}</button>}
     {children}
-    {snapshot && <section className="lobby-roster" aria-labelledby="lobby-roster-title">
+    {snapshot && (snapshot.role === 'host' || snapshot.game.status === 'draft' || snapshot.game.status === 'lobby') && <section className="lobby-roster" aria-labelledby="lobby-roster-title">
       <div className="lobby-roster-head">
         <h3 id="lobby-roster-title">Résztvevők ({snapshot.participants.length})</h3>
         {live && snapshot.participants.length > 0 && <p className={`lobby-online-count${onlineCount ? '' : ' is-empty'}`}>

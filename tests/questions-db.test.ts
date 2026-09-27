@@ -65,7 +65,7 @@ it('csak a felfedésnél értékel, ranglista változatlan; host saját válasz 
  await command('close');await user(guest);expect(JSON.stringify(await snapshot())).not.toContain('correctOptionId');
  await command('next');await user(guest);
  const result=parseGameSnapshot(await snapshot(),game).results!;
- expect(result.wines[0].questions).toEqual([{...question,ownOptionId:'b'}]);expect(result.leaderboard[0].points).toBe(100);
+ expect(result.wines[0].questions).toEqual([{...question,options:[{id:'a',label:'Furmint',count:0},{id:'b',label:'Rizling',count:1}],ownOptionId:'b'}]);expect(result.leaderboard[0].points).toBe(2);
  await user(host);
  const raw=(await db.query<{r:unknown}>('select public.get_game_results($1) r',[game])).rows[0].r;
  expect(parseResults(raw,'host').wines[0].questions?.[0].ownOptionId).toBeNull();
@@ -96,5 +96,8 @@ it('két játékos válaszai elkülönülnek; későbbi bor kérdése és megfej
  await command('close');await command('next');await user(guest);
  const dto=await snapshot();expect(JSON.stringify(dto)).not.toMatch(/Későbbi titkos kérdés|Második titkos bor/);
  const result=parseGameSnapshot(dto,game).results!;expect(result.wines).toHaveLength(1);expect(result.wines[0].questions?.[0].ownOptionId).toBe('a');
+ expect(result.wines[0].own?.total).toBe(3);
+ expect(result.scorecards.every(card => card.wines.length === 1)).toBe(true);
+ expect(result.scorecards.map(card => card.wines[0].questions[0]?.optionId).sort()).toEqual(['a', 'b']);
  await user(other);expect(parseGameSnapshot(await snapshot(),game).results?.wines[0].questions?.[0].ownOptionId).toBe('b');
 });

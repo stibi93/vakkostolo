@@ -12,6 +12,11 @@ választómezővel lehet lapozni; a **Ranglista** gomb a közös állást mutatj
 - A saját ár- és alkoholtipp a valódi érték mellett; részpontok és összpont.
 - Saját tetszés külön, versenypont nélkül. Hiányzó tippnél kifejezett jelzés,
   0 pont; hiányzó értékelés nem kerül nulla tetszésként az átlagba.
+- Ugyanaz az összesített tippeloszlás, mint a kivetítőn, plusz „a te tipped”
+  a saját sávon. A név nélküli eloszlás nem sorolja fel, ki mit mondott.
+- A **Ranglista** összpontos dobogója mellett Ár, Alkohol és Kérdések nézet
+  mutatja minden résztvevő felfedett tippjét és az arra kapott pontot.
+  A még fel nem fedett bor válasza itt sem látszik.
 - Összpont és helyezés a már felfedett borok alapján. Játék közben részállás,
   befejezett kóstolónál végeredmény. Holtverseny: 1, 1, 3 sorrend.
 
@@ -24,8 +29,13 @@ a játék indulásakor eltűnik a nagy belépési blokk. Az eredményhez már ne
 **Eredmények kivetítése** gombbal is megnyithatja, befejezett kóstolónál is.
 
 A prezentáció nagy, lapozható borlap: teljes palackot megőrző fotó baloldalt,
-a név és a valódi értékek mellette. Nincs saját válasz és hostvezérlő. A ranglista
-öt résztvevőnként lapozható, hogy normál 720p kivetítőn is olvasható legyen.
+a név és a valódi értékek mellette. A **Tippeloszlás** nézet ugyanahhoz a borhoz
+az árkategóriák, az alkoholskála, az egyedi kérdések és a tetszés darabszámait
+mutatja. A helyes árkategória, alkoholfok és kérdésopció kiemelt; a tetszésnél
+csak az átlag. A borlapon nincs saját válasz. A **Ranglista** a telefonnal
+azonos kategóriabontást mutat: összpont, ár, alkohol és egyedi kérdés, játékosonként
+a tippel és a ponttal. Öt résztvevőnként lapozható, hogy normál 720p kivetítőn is
+olvasható legyen.
 Mobilon a fotó és az adatok egymás alá kerülnek. Hosszú bornevek tördelhetők;
 a tartalmat nem vágjuk le. További kérdésekhez a borlap statisztikai része bővíthető;
 most a ténylegesen feltett ár-, alkohol- és tetszéskérdéseket jeleníti meg.
@@ -38,9 +48,12 @@ A `get_game_snapshot` a felfedéstől ugyanebbe az adatfolyamba ágyazza az ered
 így a meglévő Realtime, ritka poll és újracsatlakozás frissíti a kijelzést.
 
 - A számítás kizárólag `revealed_wines` + `revealed` kör adataiból történik.
-  Nincs fel nem fedett körből pont, tetszésátlag, válaszszám vagy fotómetaadat.
-- Csak a hívó játékos kapja saját tippjét. A host/kivetítő `own: null` értéket kap;
-  a közös ranglista nem tartalmaz egyéni ár-, alkohol- vagy tetszésválaszt.
+  Nincs fel nem fedett körből pont, tetszésátlag, válaszszám, fotómetaadat vagy egyéni tipp.
+- A `scorecards` mező a ranglista minden résztvevőjére, csak a már kiadott borokra
+  tartalmazza az ár-, alkohol- és kérdéstippet, valamint a kategóriapontot.
+  A borlap `own` mezője továbbra is csak a hívó játékosé; a hostnál null.
+- v3: pontos árkategória, pontos alkoholfok és helyes egyedi válasz egyenként 1 pont.
+  Nincs részpont. A tetszés nem ad pontot.
 - v2: pontos árkategória 50 pont, szomszédos 25; alkohol legfeljebb 50 pont,
   3 százalékpont eltéréstől 0. A szerver a teljes összeget egyszer kerekíti.
 - v1: a meglévő forintos tipp az eredeti relatív árhibás képletet követi.

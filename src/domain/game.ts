@@ -68,11 +68,9 @@ export function scoreRating(rating: Rating, wine: WineTruth): number {
       wine.alcoholTenths < 0 || wine.alcoholTenths > 250) {
     throw new Error('Érvénytelen pontozási bemenet.');
   }
-  // Scoring version 2: full price points for the right bucket, half for a neighbouring one.
-  const distance = Math.abs(rating.priceBucket - priceBucketOf(wine.priceHuf));
-  const price = distance === 0 ? 50 : distance === 1 ? 25 : 0;
-  const alcohol = 50 * Math.max(0, 1 - Math.abs(rating.alcoholTenths - wine.alcoholTenths) / 30);
-  return Math.round(price + alcohol);
+  const price = rating.priceBucket === priceBucketOf(wine.priceHuf) ? 1 : 0;
+  const alcohol = rating.alcoholTenths === wine.alcoholTenths ? 1 : 0;
+  return price + alcohol;
 }
 
 export function remainingSeconds(closesAt: number, now: number): number {

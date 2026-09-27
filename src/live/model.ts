@@ -18,6 +18,8 @@ export interface GameSnapshot extends LobbySnapshot {
   revealCard?: { id: string; title: string; message: string; roundIds: string[] };
   pause?: { id: string; title: string; message: string; endsAt: string | null };
   revealed?: { id: string; position: number; name: string; priceHuf: number; alcoholTenths: number }[];
+  /** Host only: who has submitted the current round. Never includes the guess. */
+  submissions?: { id: string; nickname: string; seat: number; submitted: boolean }[];
 }
 export interface LiveApi extends SnapshotApi<GameSnapshot> {
   start(gameId: string, version: number, requestId: string): Promise<string>;

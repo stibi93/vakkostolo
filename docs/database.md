@@ -190,7 +190,8 @@ körváltási és felfedési RPC-ket vezet be. Részletek és korlátok:
 ## Felfedett eredmények
 
 A 0012 migráció verziózott szerverpontozást és tagsággal védett eredményprojekciót
-ad. Csak felfedett borok számítanak; saját tippek csak a hívó játékoshoz kerülnek.
+ad. Csak felfedett borok számítanak. A borlap saját tippje a hívó játékosé;
+a `scorecards` a felfedett borok minden résztvevői tippjét és kategóriapontját adja.
 A ranglista és borfotó-hozzáférés részletei: [eredmények](results.md).
 
 A 0014 migráció explicit Felfedés kártyákkal váltja fel a régi blokkhatárt.

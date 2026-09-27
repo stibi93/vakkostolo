@@ -4,8 +4,8 @@ import type { GameSnapshot } from '../live/model';
 import type { ScheduleApi, TastingAction } from './model';
 import { newRequestId } from './model';
 import './schedule.css';
-export function HostControls({ api, snapshot, refresh, available, secondsLeft }: {
-  api: ScheduleApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean; secondsLeft: number;
+export function HostControls({ api, snapshot, refresh, available, secondsLeft, compact = false }: {
+  api: ScheduleApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean; secondsLeft: number; compact?: boolean;
 }) {
   const [seconds, setSeconds] = useState('120');
   const [pending, setPending] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
@@ -22,6 +22,12 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft }:
     finally { await refresh(); busy.current = false; setPending(false); }
   }
   if (['draft','lobby','finished'].includes(snapshot.game.status)) return null;
+  if (compact) return <section className="host-controls host-controls-compact" aria-label="Élő vezérlés">
+    <button className="button-primary" disabled={pending || !available} onClick={() => void act(live ? 'close' : 'next')}>
+      {pending ? 'Mentés…' : live ? 'Kör lezárása most' : 'Következő lépés indítása'}</button>
+    {error && <p className="auth-message" role="alert">{error}</p>}
+    {notice && <p role="status">{notice}</p>}
+  </section>;
   return <section className="host-controls" aria-label="Élő vezérlés">
     <h3>Élő vezérlés</h3>
     <fieldset disabled={pending || !available} className="schedule-fields">

@@ -28,9 +28,14 @@ describe('váró adatadapter', () => {
     expect(parseLobbySnapshot({ ...raw, wines: ['secret'], game: { ...raw.game, host_id: 'hidden' },
       participants: [{ ...raw.participants[0], user_id: 'private' }] }, id)).toEqual(snapshot);
   });
+  it('indulás után a játékos csak a saját sorát kapja, az eredeti székkel', () => {
+    expect(parseLobbySnapshot({ ...raw, game: { ...raw.game, status: 'tasting' },
+      participants: [{ ...raw.participants[0], seat: 2 }] }, id).participants).toEqual([
+      { id: member, nickname: 'Anna', joinedAt: '2026-09-24T09:59:00Z', seat: 2 }]);
+  });
   it.each([null, {}, { ...raw, role: 'admin' }, { ...raw, participants: [] },
     { ...raw, participants: [raw.participants[0], raw.participants[0]] },
-    { ...raw, participants: [{ ...raw.participants[0], seat: 2 }] },
+    { ...raw, participants: [{ ...raw.participants[0], seat: 0 }] },
     { ...raw, game: { ...raw.game, id: member } }, { ...raw, game: { ...raw.game, status: '__proto__' } },
     { ...raw, server_now: 'bad' }, { ...raw, self_participant_id: id }, { ...raw, role: 'host' }])('hibás válasz elutasítva (%#)', (value) => {
     expect(() => parseLobbySnapshot(value, id)).toThrow(LobbyError);

@@ -119,8 +119,8 @@ it('Realtime csak publikus köradatot adhat; ratings és titkos táblák nincsen
 });
 it('árkategória: új játék 2-es pontozási verziót kap, a mentett tipp csak kategóriát tárol', async () => {
   await db.exec('reset role');
-  expect((await db.query('select scoring_version from public.games where id=$1', [game])).rows).toEqual([{ scoring_version: 2 }]);
-  await expect(db.query('update public.games set scoring_version=3 where id=$1', [game])).rejects.toThrow(/check constraint/);
+  expect((await db.query('select scoring_version from public.games where id=$1', [game])).rows).toEqual([{ scoring_version: 3 }]);
+  await expect(db.query('update public.games set scoring_version=4 where id=$1', [game])).rejects.toThrow(/check constraint/);
   const buckets = await db.query<{ b: number }>(`select private.price_bucket(v) as b
     from unnest(array[0,1000,1001,2000,2001,4000,4001,6000,6001,8000,8001,10000,10001]) v`);
   expect(buckets.rows.map((row) => row.b)).toEqual([1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 7, 8]);

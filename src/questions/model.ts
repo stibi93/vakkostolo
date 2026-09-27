@@ -1,6 +1,9 @@
 export interface Question { id: string; prompt: string; options: { id: string; label: string }[] }
 export interface HostQuestion extends Question { correctOptionId: string }
-export interface QuestionResult extends HostQuestion { ownOptionId: string | null }
+export interface QuestionResult extends Omit<HostQuestion, 'options'> {
+  options: { id: string; label: string; count: number }[];
+  ownOptionId: string | null;
+}
 const id = (v: unknown): v is string => typeof v === 'string' && /^[a-zA-Z0-9-]{1,64}$/.test(v);
 const text = (v: unknown, max: number): v is string => typeof v === 'string' && !!v.trim() && Array.from(v).length <= max;
 export function parseQuestions(value: unknown, host: true): HostQuestion[];
@@ -28,9 +31,16 @@ export function parseAnswers(value: unknown): Record<string,string> {
 }
 export function parseQuestionResults(value: unknown, role: 'player'|'host'): QuestionResult[] {
   const qs = parseQuestions(value,true);
+  if (!Array.isArray(value)) throw new Error('Érvénytelen kérdéslista.');
   return qs.map((q,i)=>{
-    const own = (value as Record<string,unknown>[])[i].ownOptionId;
+    const raw = value[i] as { ownOptionId?: unknown; options?: { count?: unknown }[] };
+    const own = raw.ownOptionId ?? null;
     if (own !== null && (role !== 'player' || !q.options.some(o=>o.id===own))) throw new Error('Érvénytelen egyedi eredmény.');
-    return {...q,ownOptionId:own as string|null};
+    const options = q.options.map((option, j) => {
+      const count = raw.options?.[j]?.count;
+      if (typeof count !== 'number' || !Number.isInteger(count) || count < 0 || count > 50) throw new Error('Érvénytelen egyedi eredmény.');
+      return { ...option, count };
+    });
+    return {...q, options, ownOptionId: own as string|null};
   });
 }

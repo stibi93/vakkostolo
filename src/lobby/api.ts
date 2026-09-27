@@ -29,12 +29,13 @@ export function parseLobbySnapshot(value: unknown, gameId: string): LobbySnapsho
     !Object.hasOwn(gameStatusLabels, game.status) || !Number.isSafeInteger(game.version) || Number(game.version) < 0 ||
     !['host', 'player'].includes(String(row.role)) || !Array.isArray(row.participants) || row.participants.length > 50) return invalid();
   const seen = new Set<string>();
-  const participants = row.participants.map((value, index) => {
+  const participants = row.participants.map((value) => {
     const p = record(value);
-    if (!isUuid(p.id) || seen.has(p.id) || p.seat !== index + 1) return invalid();
+    if (!isUuid(p.id) || seen.has(p.id) || typeof p.seat !== 'number' || !Number.isInteger(p.seat) || p.seat < 1 || p.seat > 50) return invalid();
     seen.add(p.id);
-    return { id: p.id, nickname: text(p.nickname, 30), joinedAt: timestamp(p.joined_at), seat: index + 1 };
+    return { id: p.id, nickname: text(p.nickname, 30), joinedAt: timestamp(p.joined_at), seat: p.seat };
   });
+  if (participants.length > 1 && participants.some((participant, index) => participant.seat !== index + 1)) return invalid();
   if (row.role === 'player' ? !isUuid(row.self_participant_id) || !seen.has(row.self_participant_id)
     : row.self_participant_id !== null) return invalid();
   return { game: { id: game.id, title: text(game.title, 100), status: game.status as GameStatus, version: Number(game.version) },

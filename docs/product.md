@@ -82,10 +82,17 @@ Időkeret: kikapcsolható vagy 30–1800 másodperc, alapérték 120. Időkorlá
 futó kör megállítása nem MVP-funkció. Lejárt kör nem nyitható újra. Későn érkező
 játékos a következő tételtől csatlakozhat, a korábbi körök válasza hiányzó marad.
 
-## Pontozás v2 — árkategóriás tipp (új játékok alapértéke)
+## Pontozás v3 — helyes tipp 1 pont (új játékok)
+
+Minden helyes tipp 1 pont. Nincs részpont. Helyesnek számít a pontos árkategória,
+a pontos alkoholfok és az egyedi kérdés helyes válasza. A tetszés nem ad pontot.
+A befejezetlen kóstolók is erre a képletre állnak; a már befejezettek a korábbi
+verziójukat tartják.
+
+## Pontozás v2 — árkategóriás tipp (korábbi játékok)
 
 Legfeljebb 100 pont/bor, fele ár, fele alkohol. A játékos árkategóriát tippel;
-a valódi árat a szerver sorolja kategóriába.
+a valódi árat a szerver sorolja kategóriába. Az egyedi kérdés ezen a verzión nem ad pontot.
 
 ```text
 árpont = 50, ha a kategória egyezik; 25 a szomszédos kategóriánál; különben 0
@@ -94,7 +101,7 @@ alkoholpont = 50 × max(0, 1 − abs(tipp − valódi %) / 3)
 ```
 
 Példa: 5000 Ft / 13,5% bornál (4 001–6 000 Ft) 6 001–8 000 Ft / 14,0% tipp → 67 pont.
-A `games.scoring_version` 2 az új játékoknál; a v1 csak a régebbi, forintos tippű
+A `games.scoring_version` 3 az új játékoknál; a v2 és a v1 csak a régebbi
 játékok újraszámolására marad.
 
 ## Pontozás v1 — forintos tipp (régi játékok)
@@ -120,8 +127,10 @@ Felfedés előtt pontszám sem szivároghat ki: abból a valós érték követke
 ## Eredmények és prezentáció
 
 Boronként: név/évjárat, valódi ár és alkoholfok, saját tipp és pont, átlagos
-tetszés, a beküldések száma. A következő lépésben tippeloszlás és a játékosok
-válaszainak táblája. Összesítő: ranglista, teljesített körök, közönségkedvenc.
+tetszés, a beküldések száma, valamint a többiek tippeloszlása. A ranglista
+összpontot és dobogót mutat, és külön nézetben ár, alkohol és egyedi kérdés
+szerint is: ki mit tippelt, és arra mennyi pontot kapott. Ez csak a már
+felfedett borokra vonatkozik.
 A projektben megjelenő mintaszámok demonstrációs adatok, nem valódi esemény adatai.
 
 ## Mobil és hozzáférhetőség
@@ -147,7 +156,7 @@ játékmester későbbi helyreállító folyamata külön feladat.
 - Újratöltés után saját tagság és mentett válasz visszatér.
 - Határidőn túli és idegen játékhoz tartozó beküldést a DB elutasít.
 - Következő tétel és blokkos felfedés két hostlap párhuzamos kattintásánál is helyes.
-- Egy játékos közvetlen API-val sem olvas rejtett bort vagy idegen rejtett választ.
+- Egy játékos közvetlen API-val sem olvas fel nem fedett bort vagy fel nem fedett idegen választ. A már felfedett boroknál a tippek és a kategóriapontok közösek.
 - Hálózatszakadás után nem vész el visszaigazolt válasz, a UI helyreáll.
 - A végső pontok újraszámolhatók a zárolt boradatokból és válaszokból.
 
@@ -172,6 +181,6 @@ A megkezdett bor kérdései már nem változhatnak.
 A játékos minden hozzáadott kérdésre választ ad a meglévő értékelés mellett.
 A teljes tipp együtt mentődik és a kör lezárásáig/időkorlátjáig felülírható.
 Felfedéskor a borlap mutatja a helyes választ és a játékos saját tippjét,
-illetve hogy eltalálta-e. A kivetítő csak a kérdést és a helyes választ
-mutatja. Ezek tanulást segítő kiegészítések, nem adnak versenypontot;
-a meglévő, boronként 100 pontos rangsor változatlan.
+illetve hogy eltalálta-e. A kivetítő ugyanezt a helyes választ mutatja.
+A ranglistán minden résztvevő és a játékmester látja, ki melyik opciót választotta,
+és a v3 pontozásnál erre is 1 pont jár. A tetszés továbbra sem ad pontot.

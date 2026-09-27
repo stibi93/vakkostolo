@@ -8,7 +8,8 @@ let game:string,rounds:string[];
 interface Own {price_bucket:number|null;price_huf:number|null;alcohol_tenths:number;liking:number;price_points:number|null;alcohol_points:number;total:number|null}
 interface Results {scoring_version:number;final:boolean;revealed_count:number;max_points:number;
   wines:{id:string;name:string;photo_updated_at:string|null;response_count:number;average_liking:number|null;own:Own|null}[];
-  leaderboard:{id:string;nickname:string;points:number;rank:number;answered:number;unscored:number}[]}
+  leaderboard:{id:string;nickname:string;points:number;rank:number;answered:number;unscored:number}[];
+  scorecards:{id:string;wines:{price_bucket:number|null;alcohol_tenths:number|null;price_points:number|null;alcohol_points:number|null;liking:number|null}[]}[]}
 async function user(id:string,role='authenticated') {
   await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claim.aal','aal2',false)",[id]);await db.exec(`set role ${role}`);
 }
@@ -37,22 +38,31 @@ beforeEach(async()=>{
 afterAll(async()=>{await db.close();});
 it('indítás és lezárás sem közöl titkos eredményt, fotómetaadatot vagy pontot',async()=>{
   await act('start');await rate(one,5,135);await user(two);
-  expect(await results()).toMatchObject({revealed_count:0,max_points:0,wines:[],leaderboard:[]});
+  expect(await results()).toMatchObject({revealed_count:0,max_points:0,wines:[],leaderboard:[],scorecards:[]});
   expect((await db.query('select name from storage.objects')).rows).toEqual([]);
   await act('close');await user(one);expect((await results()).wines).toEqual([]);
   const raw=(await db.query('select public.get_game_snapshot($1) s',[game])).rows;
   expect(JSON.stringify(raw)).not.toMatch(/Első titkos|photo_updated_at|results|price_points/);
 });
-it('felfedéskor saját tipp, pontos és részpont, közös átlag és ranglista; idegen válasz nincs',async()=>{
+it('felfedéskor saját tipp, pontos és részpont, közös átlag és ranglista; a többiek tippje csak ennél a bornál',async()=>{
   await act('start');await rate(one,5,135,10);await rate(two,6,140,6);await act('close');await act('reveal');
   await user(one);const a=await results();
-  expect(a.wines[0]).toMatchObject({name:'Első titkos bor',response_count:2,average_liking:8,own:{price_bucket:5,price_points:50,alcohol_points:50,total:100}});
+  expect(a.wines[0]).toMatchObject({name:'Első titkos bor',response_count:2,average_liking:8,own:{price_bucket:5,price_points:1,alcohol_points:1,total:2},
+    guesses:{price:[0,0,0,0,1,1,0,0],alcohol:[{tenths:135,count:1},{tenths:140,count:1}],liking:[0,0,0,0,0,1,0,0,0,1]}});
   expect(a.wines[0].photo_updated_at).not.toBeNull();expect(a.wines).toHaveLength(1);
-  expect(a.leaderboard.map(e=>[e.nickname,e.points,e.rank])).toEqual([['Anna',100,1],['Béla',67,2]]);
+  expect(a.leaderboard.map(e=>[e.nickname,e.points,e.rank])).toEqual([['Anna',2,1],['Béla',0,2]]);
+  const bela=a.scorecards.find(card=>card.id===a.leaderboard[1].id);
+  expect(bela?.wines[0]).toMatchObject({price_bucket:6,alcohol_tenths:140,price_points:0,alcohol_points:0,liking:6});
   expect(JSON.stringify(a)).not.toContain('Második titkos');
   expect((await db.query('select name from storage.objects')).rows).toHaveLength(1);
-  await user(two);expect((await results()).wines[0].own).toMatchObject({price_bucket:6,total:67});
+  await user(two);expect((await results()).wines[0].own).toMatchObject({price_bucket:6,total:0});
   await user(host);expect((await results()).wines[0].own).toBeNull();
+  expect((await results()).scorecards.some(card=>card.wines[0].price_bucket===6)).toBe(true);
+  await act('next');await rate(two,8,90,3,1);await user(one);
+  const hidden=await results();
+  expect(hidden.wines).toHaveLength(1);
+  expect(JSON.stringify(hidden)).not.toMatch(/"alcohol_tenths":\s*90|"price_bucket":\s*8/);
+  await user(host);
   const snapshot=(await db.query<{s:{results:Results}}>('select public.get_game_snapshot($1) s',[game])).rows[0].s;
   expect(snapshot.results.wines[0].own).toBeNull();
 });
@@ -60,15 +70,16 @@ it('hiányzó válasz 0 pont, nem nulla tetszés; holtverseny közös helyezés,
   await act('start');await rate(one,5,135,10);await act('close');await act('reveal');
   await act('next');await rate(two,8,120,4,1);await act('close');await act('reveal');await act('finish');
   await user(one);const a=await results();
-  expect(a).toMatchObject({final:true,max_points:200,revealed_count:2});
+  expect(a).toMatchObject({final:true,max_points:4,revealed_count:2});
   expect(a.wines.map(w=>w.average_liking)).toEqual([10,4]);
   expect(a.wines[1].own).toBeNull();expect(a.wines[1].photo_updated_at).toBeNull();
-  expect(a.leaderboard.map(e=>[e.points,e.rank,e.answered])).toEqual([[100,1,1],[100,1,1]]);
+  expect(a.leaderboard.map(e=>[e.points,e.rank,e.answered])).toEqual([[2,1,1],[2,1,1]]);
   expect(await results()).toEqual(a);
 });
 it('nulla válasznál nincs mesterséges tetszésátlag; mindenki 0 ponttal holtversenyben',async()=>{
   await act('start');await act('close');await act('reveal');await user(one);
-  const r=await results();expect(r.wines[0]).toMatchObject({response_count:0,average_liking:null,own:null});
+  const r=await results();expect(r.wines[0]).toMatchObject({response_count:0,average_liking:null,own:null,
+    guesses:{price:[0,0,0,0,0,0,0,0],alcohol:[],liking:[0,0,0,0,0,0,0,0,0,0]}});
   expect(r.leaderboard.map(e=>[e.points,e.rank])).toEqual([[0,1],[0,1]]);
 });
 it('árkategória-határok és alkohol részpontok szerveroldali kerekítése',async()=>{
@@ -97,5 +108,5 @@ it('1, 1, 3 helyezés holtverseny után, változó tetszés sem bontja fel',asyn
   await user(host);const token=(await db.query<{t:{token:string}}>('select public.issue_invite($1) t',[game])).rows[0].t.token;
   await user(outsider);await db.query('select public.join_game($1,\'Csaba\')',[token]);
   await act('start');await rate(one,5,135,1);await rate(two,5,135,10);await act('close');await act('reveal');await user(one);
-  expect((await results()).leaderboard.map(e=>[e.rank,e.points])).toEqual([[1,100],[1,100],[3,0]]);
+  expect((await results()).leaderboard.map(e=>[e.rank,e.points])).toEqual([[1,2],[1,2],[3,0]]);
 });
