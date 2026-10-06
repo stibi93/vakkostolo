@@ -5,7 +5,7 @@
 
 /* Radio cards: the native input stays focusable and announced; the card is its visual. */
 .rating-choice { position: relative; display: block; margin: 0; cursor: pointer; }
-.rating-choice input[type='radio'] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.rating-choice input[type='radio'] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
 .rating-choice span { display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: 100%; min-height: 48px;
   padding: 10px 8px; text-align: center; color: var(--ink); background: var(--sheet); border: 1px solid var(--control-border); border-radius: 2px;
   transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease; }
