@@ -211,7 +211,6 @@
 .projector-results .projector-invite > .eyebrow { display: none; }
 .projector-results .projector-invite h1 { margin: 0; }
 @media(min-width:850px) {
-  .projector-shell:has(.projector-results) .projector-toolbar { position: static; display: flex; justify-content: flex-end; padding: 8px 24px 0; }
   .projector-main:has(.projector-results) { min-height: 0; padding: 12px 24px 24px; align-items: start; }
   .projector-results .projector-invite { margin-bottom: 12px; }
   .projector-results .projector-invite h1 { font-size: 28px; }
@@ -258,4 +257,43 @@
   .projector-results .results-panel { margin: 0; }
   .projector-results .lobby-panel { padding: 10px 24px; }
   .projector-main:has(.projector-results) { padding: 8px 24px 16px; }
+}
+
+/* TV stage: the projector is always the cellar theme, with type sized for the back of the room.
+   A revealed wine, its name and facts fit one 1280×720 screen without scrolling. */
+@media(min-width:850px) {
+  .projector-main:has(.projector-results) { padding: 20px clamp(24px, 3.4vw, 56px) 16px; }
+  .projector-results .projector-invite { margin-bottom: 6px; }
+  .projector-results .projector-invite h1 { font: 600 20px/1.2 var(--display); letter-spacing: .01em; color: var(--muted); }
+  .projector-results .lobby-panel { padding: 0; border: 0; background: transparent; }
+  .projector-results .lobby-head:not(:has(*)) { display: none; }
+  .projector-results .host-controls-compact { position: fixed; top: 10px; right: 68px; z-index: 6; display: grid; justify-items: end; gap: 6px; margin: 0; padding: 0; border: 0; }
+  .projector-results .host-controls-compact .button-primary { min-height: 44px; padding: 8px 16px; font-size: 14px; }
+  .projector-results .host-controls-compact p { margin: 0; max-width: 320px; font-size: 13px; }
+  .projector-results .results-panel { padding-top: 0; }
+  .results-presentation .results-heading h2 { font-size: clamp(30px, 3vw, 44px); letter-spacing: -.03em; }
+  .results-presentation .results-heading .live-break-message { margin: 2px 0 0; font-size: 18px; color: var(--muted); line-height: 1.4; }
+  .results-presentation > .results-switch { gap: 0; border: 1px solid var(--line); padding: 4px; background: var(--sheet); }
+  .results-presentation > .results-switch > button { min-height: 44px; border: 0; padding: 0 20px; font-size: 16px; }
+  .results-presentation > .results-switch > .button-secondary { background: transparent; color: var(--muted); }
+  .results-presentation .result-navigation { margin: 10px 0 12px; }
+  .results-presentation .result-wine { padding: 0; border: 0; background: transparent; grid-template-columns: minmax(300px, 1fr) minmax(0, 1.35fr); align-items: center; gap: clamp(28px, 4vw, 64px); }
+  .results-presentation .result-photo { height: clamp(280px, calc(100svh - 270px), 680px); box-shadow: 0 30px 60px -30px rgb(0 0 0 / 70%); }
+  .results-presentation .result-wine-content > .eyebrow { display: block; margin-bottom: 6px; font-size: 14px; }
+  .results-presentation .result-wine-content > h3 { font-size: clamp(40px, 4.6vw, 76px); margin: 0 0 clamp(16px, 3vh, 32px); }
+  .results-presentation .result-facts { gap: 20px 28px; margin: 0; }
+  .results-presentation .result-facts dt { font-size: 18px; }
+  .results-presentation .result-facts dd { font-size: clamp(32px, 3.6vw, 60px); line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .results-presentation .result-facts .result-fact-note { white-space: normal; }
+  .results-presentation .result-facts .result-fact-note { font-size: 17px; }
+  .results-presentation .reveal-strip > span { font-size: clamp(48px, 6vw, 96px); }
+  .results-presentation .podium-heading h3 { font-size: clamp(26px, 2.6vw, 38px); }
+  .results-presentation .podium-max strong { font-size: clamp(28px, 2.6vw, 40px); }
+  .results-presentation .podium { margin: 20px 0 12px; gap: 14px; }
+  .results-presentation .podium-name { font-size: clamp(20px, 2vw, 30px); }
+  .results-presentation .podium-plinth strong { font-size: clamp(28px, 3vw, 48px); }
+  .results-presentation .results-ranking.is-compact .podium-slot-1 .podium-plinth { height: clamp(140px, 22vh, 220px); }
+  .results-presentation .results-ranking.is-compact .podium-slot-2 .podium-plinth { height: clamp(104px, 16vh, 164px); }
+  .results-presentation .results-ranking.is-compact .podium-slot-3 .podium-plinth { height: clamp(80px, 12vh, 124px); }
+  .results-presentation .score-table td, .results-presentation .score-table th { font-size: 18px; }
 }

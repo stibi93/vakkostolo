@@ -100,7 +100,7 @@ function Ranking({ results, selfId, compact = false }: { results: GameResults; s
           const shown = people.slice(0, podiumNames);
           const points = people[0]?.points;
           return <li key={slot} className={`podium-step podium-slot-${slot}${people.some(entry => entry.id === selfId) ? ' is-self' : ''}${people.length === 0 ? ' is-empty' : ''}`}>
-            <p className="podium-name">{shown.map((entry, index) => <span key={entry.id}>{index > 0 ? ' · ' : ''}{entry.nickname}{entry.id === selfId ? ' · Te' : ''}</span>)}
+            <p className="podium-name">{shown.map((entry, index) => <span key={entry.id}>{index > 0 ? '\u00a0· ' : ''}{entry.nickname}{entry.id === selfId ? ' · Te' : ''}</span>)}
               {people.length > shown.length && <span className="podium-more"> +{people.length - shown.length} további</span>}</p>
             <div className="podium-plinth">
               {rank !== undefined && <span className="podium-place">{rank}.</span>}

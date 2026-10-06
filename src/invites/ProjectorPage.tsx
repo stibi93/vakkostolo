@@ -18,7 +18,7 @@ import './invites.css';
 export function ProjectorPage() {
   const { gameId = '' } = useParams();
   const motion = useAppMotion();
-  return <div className="projector-shell">
+  return <div className="projector-shell theme-cellar">
     <div className="projector-toolbar"><HomeMotionToggle motion={motion} /></div>
     <main className="projector-main">
       {authRuntime.status === 'ready'
