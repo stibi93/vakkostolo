@@ -18,12 +18,31 @@ Sorrend: alapok → telefonos játék → felfedés → kivetítő → host irá
   felemelkedik, ár/alkohol/tetszés/pont felpörög (`CountUp`), telefonon
   lapozható borlapok. Dobogó a tényleges helyezési szinteken (holtversenynél nincs
   üres „2.”), legfeljebb 3 név + „további”.
-- Hátra: kivetítő tévés elrendezés (sötét, nagy betű, 1280×720-ba férő borlap —
-  ez javítaná a régóta bukó viewport-tesztet), host élő irányítópult, a
-  „Kóstoló menete” alatti üres sáv, dokumentáció (`docs/design.md`).
-- Ellenőrzés eddig: typecheck és lint zöld. Az e2e futás a frissítés közben
-  indult; eredményét még rögzíteni kell. Korábban is bukott: `games.spec.ts`
-  törlés (desktop+mobil), kivetítős felfedési kártya viewport (desktop).
+- Kész, commitolva (`276d7b3`): kivetítő tévés színpad — mindig sötét, a
+  vezérlés vékony felső sávban (halvány ikonos mozgáskapcsoló, kapcsolat,
+  host „Következő lépés”), a borlap 1280×720-ba fér. A régóta bukó kivetítős
+  viewport-teszt (`results.spec.ts:131`) most zöld.
+- Kész, commitolva (`8e71a42`): a tetszés/ár csempe animált `transform`-ja a
+  rádió fölé rajzolta a feliratot; a rádió `z-index: 1`-et kapott.
+- Kész: host irányítópult. ≥1100 px-en két oszlop: bal az élő kör, vezérlés,
+  résztvevők, majd a menet; jobb a meghívó/QR, a borok és fotók, a törlés.
+  Keskenyebben egy oszlop, a meghívó a borlista előtt. Futó körben a
+  „Kör lezárása most” az elsődleges gomb, az időállítás külön dobozban,
+  „Időkorlát kikapcsolása” halk szöveges gomb (`.button-quiet`).
+- A „Kóstoló menete” alatti üres sáv nem valódi hiba: a ragadós hozzáadósáv
+  a teljes oldalas képernyőképen máshová rajzolódik.
+- Hátra: `docs/design.md` (fontok, pincetéma, mozgás, felfedés, kivetítő,
+  host), 360/1280 px sötét módú böngészős átnézés (kezdőlapi szüreti panel
+  `#d5e1dc` kemény színe még nincs ellenőrizve).
+- Ellenőrzés: typecheck, lint, db-típus, build zöld. E2E (results, live, lobby,
+  schedule, invite, games, photos; asztali és mobil auth projektek) zöld, kivéve
+  a régóta bukó `games.spec.ts:169` törléstesztet. Unit: a régi
+  `tests/live.test.ts` 13. boros hiba megvan; a PGlite DB-tesztek teljes
+  futásban 30 mp-es hook-időtúllépéssel buknak a gép terhelése miatt, egyenként
+  zöldek (`lobby-db` 24 mp). Négy e2e worker terhelés alatt álhibákat ad;
+  kettővel stabil.
+- Ideiglenes e2e konfiguráció: `/tmp/design-review/pw.review.config.ts`
+  (képernyőképek) és `pw.still.config.ts` (reduced-motion, végállapot-képek).
 - A `memory/short-term.md` ma üresen volt a munkakönyvtárban; a commitolt
   változat visszaállítva, erre az új bejegyzés került.
 

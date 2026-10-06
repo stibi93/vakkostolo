@@ -22,9 +22,27 @@
 .host-subnav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .host-game-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
 .host-game-actions .button-secondary { padding: 10px 14px; font-size: 13px; }
+.host-subnav .button-secondary { min-height: 40px; padding: 8px 12px; border-color: transparent; font-size: 14px; }
+.host-subnav .button-secondary:first-child { padding-left: 0; }
+.host-subnav .button-secondary:first-child::before { content: '‹' / ''; margin-right: -8px; font-size: 18px; line-height: 1; }
+.host-game-head { padding-bottom: 4px; }
+.host-game-head .saved-game-title { margin: 0; }
+.host-game-head p { margin: 8px 0 0; }
+.host-dashboard { display: grid; gap: 8px; }
+.host-dashboard-main, .host-dashboard-side { min-width: 0; }
+.host-wines { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+.host-wines > h3 { margin: 0; }
 .saved-wine-list { list-style: none; padding: 0; }
 .saved-wine-list li { padding: 20px 0; border-bottom: 1px solid var(--line); }
-.saved-wine-list h3 { font-size: 22px; letter-spacing: -.5px; }
+.saved-wine-list h4 { margin: 0; font: 600 22px/1.2 var(--display); letter-spacing: -.5px; overflow-wrap: anywhere; }
+.saved-wine-list h4 + p { margin: 6px 0 0; }
+@media (min-width: 1100px) {
+  .auth-panel:has(.host-dashboard) { max-width: 1320px; }
+  .host-dashboard { grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); gap: 48px; align-items: start; }
+  .host-dashboard-side { align-self: stretch; padding-left: 32px; border-left: 1px solid var(--line); }
+  .host-dashboard-side > .invite-panel { margin-top: 24px; }
+  .host-wine-photo { grid-template-columns: 88px minmax(0, 1fr); gap: 12px; }
+}
 .host-wine-photo, .wine-photo-pick { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px 20px; align-items: start; margin-top: 16px; }
 .host-wine-photo .upload-control, .wine-photo-pick .upload-control { max-width: 260px; }
 .host-wine-photo .small-note, .wine-photo-pick .small-note { margin: 10px 0 0; }

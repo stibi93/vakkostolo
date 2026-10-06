@@ -85,9 +85,9 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
   useEffect(() => { if (statusOverride !== null) refresh(); }, [statusOverride, refresh]);
   return <section className="game-section" aria-labelledby="saved-game-title">
     <nav className="host-subnav" aria-label="Játékmesteri navigáció">
-      <Link className="button-secondary" to="/host">Saját kóstolóim</Link>
-      <Link className="button-secondary" to="/host/new">Új kóstoló</Link>
-      <Link className="button-secondary" to={`/host/new?from=${gameId}`}>Kóstoló másolása</Link>
+      <Link className="button-secondary" viewTransition to="/host">Saját kóstolóim</Link>
+      <Link className="button-secondary" viewTransition to="/host/new">Új kóstoló</Link>
+      <Link className="button-secondary" viewTransition to={`/host/new?from=${gameId}`}>Kóstoló másolása</Link>
     </nav>
     {location.state?.created === true && <p role="status">A kóstoló létrejött.</p>}
     {typeof location.state?.photoFailures === 'number' && location.state.photoFailures > 0 &&
@@ -96,20 +96,30 @@ function HostGameDetails({ api, invites, lobby, gameId }: { api: GamesApi; invit
     {state.status === 'error' && <><h2 id="saved-game-title">A kóstoló nem tölthető be.</h2>
       <p role="alert" className="auth-message">{state.message}</p><button className="button-primary" onClick={retry}>Újrapróbálás</button></>}
     {state.status === 'ready' && <>
-      <h2 id="saved-game-title" className="saved-game-title">{state.data.title}</h2>
-      <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds === 0 ? 'Időkorlát nélkül' : `${state.data.roundSeconds} másodperc/bor`}</p>
-      {lobby.schedule && <ScheduleEditor initialPlan={state.data.schedule} api={lobby.schedule} gameId={gameId} onSaved={refresh} />}
-      <LiveGamePanel showTitle={false} api={lobby} gameId={gameId} onStatusChange={setStatusOverride} onVersionChange={setVersion} />
-      <p className="game-hint">Játékmesteri nézet: az alábbi valós boradatok és fotók nem láthatók a játékosoknak felfedés előtt.</p>
-      <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.roundId}>
-        <h3>{wine.position}. {wine.name}</h3>
-        <p>{wine.priceHuf.toLocaleString('hu-HU')} Ft · {(wine.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p>
-        <WinePhotoField key={wine.photoUpdatedAt ?? 'no-photo'} api={api} gameId={gameId} wine={wine} />
-      </li>)}</ol>
-      <DeleteGameButton api={api} id={gameId} title={state.data.title} onDeleted={() => navigate('/host', { replace: true })} />
-      <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
-        onStatusChange={setStatusOverride} />
-
+      <header className="host-game-head">
+        <h2 id="saved-game-title" className="saved-game-title">{state.data.title}</h2>
+        <p>{gameStatusLabels[statusOverride ?? state.data.status]} · {state.data.roundSeconds === 0 ? 'Időkorlát nélkül' : `${state.data.roundSeconds} másodperc/bor`}</p>
+      </header>
+      <div className="host-dashboard">
+        <div className="host-dashboard-main">
+          <LiveGamePanel showTitle={false} api={lobby} gameId={gameId} onStatusChange={setStatusOverride} onVersionChange={setVersion} />
+          {lobby.schedule && <ScheduleEditor initialPlan={state.data.schedule} api={lobby.schedule} gameId={gameId} onSaved={refresh} />}
+        </div>
+        <aside className="host-dashboard-side" aria-label="Meghívó és borok">
+          <InvitePanel api={invites} gameId={gameId} status={statusOverride ?? state.data.status}
+            onStatusChange={setStatusOverride} />
+          <section className="host-wines" aria-labelledby="host-wines-title">
+            <h3 id="host-wines-title">Borok és fotók</h3>
+            <p className="game-hint">Játékmesteri nézet: ezek a valós boradatok és fotók nem láthatók a játékosoknak felfedés előtt.</p>
+            <ol className="saved-wine-list">{state.data.wines.map((wine) => <li key={wine.roundId}>
+              <h4>{wine.position}. {wine.name}</h4>
+              <p>{wine.priceHuf.toLocaleString('hu-HU')} Ft · {(wine.alcoholTenths/10).toLocaleString('hu-HU')}% vol</p>
+              <WinePhotoField key={wine.photoUpdatedAt ?? 'no-photo'} api={api} gameId={gameId} wine={wine} />
+            </li>)}</ol>
+          </section>
+          <DeleteGameButton api={api} id={gameId} title={state.data.title} onDeleted={() => navigate('/host', { replace: true })} />
+        </aside>
+      </div>
     </>}
   </section>;
 }

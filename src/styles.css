@@ -96,6 +96,8 @@ select:hover, input:not([type='range']):hover { border-color: var(--accent); }
 .button-primary > span { font-size: 20px; line-height: 1; font-weight: 400; }
 .button-secondary { color: var(--accent); background: transparent; }
 .button-secondary:not(:disabled):hover { background: var(--accent-soft); }
+.button-quiet { min-height: 44px; padding: 10px 4px; border: 0; background: transparent; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.button-quiet:not(:disabled):hover { text-decoration-thickness: 2px; }
 .small-note { font-size: 13px; line-height: 1.6; color: var(--muted); margin: 16px 0 0; }
 .side-panel { padding: 24px 0; border-top: 2px solid var(--accent); }
 .side-heading .eyebrow { display: block; margin-bottom: 10px; }

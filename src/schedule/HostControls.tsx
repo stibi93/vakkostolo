@@ -33,14 +33,18 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft, c
     <fieldset disabled={pending || !available} className="schedule-fields">
       <legend className="sr-only">A kóstoló vezérlése</legend>
       {live ? <>
-        <form className="schedule-time" onSubmit={event => { event.preventDefault(); void act('time', Number(seconds)); }}>
-          <label>Hátralévő idő mostantól (másodperc)<input type="number" min="30" max="1800" step="1" required value={seconds} onChange={e => setSeconds(e.target.value)} /></label>
-          <button className="button-secondary" type="submit">{snapshot.round?.closesAt === null ? 'Időkorlát bekapcsolása' : 'Idő beállítása'}</button>
-        </form>
-        {snapshot.round?.closesAt !== null && <button className="button-secondary" onClick={() => void act('time',0)}>Időkorlát kikapcsolása</button>}
-        <p className="small-note">Az új idő a mentéstől számít. A játékosok kitöltött mezői megmaradnak.</p>
-        <button className="button-secondary" onClick={() => void act('close')}>Kör lezárása most</button>
-        <p className="small-note">Lezárás után ehhez a borhoz már nem érkezhet tipp.</p>
+        <div className="host-control-main">
+          <button className="button-primary" onClick={() => void act('close')}>Kör lezárása most</button>
+          <p className="small-note">Lezárás után ehhez a borhoz már nem érkezhet tipp.</p>
+        </div>
+        <div className="host-control-time">
+          <form className="schedule-time" onSubmit={event => { event.preventDefault(); void act('time', Number(seconds)); }}>
+            <label>Hátralévő idő mostantól (másodperc)<input type="number" min="30" max="1800" step="1" required value={seconds} onChange={e => setSeconds(e.target.value)} /></label>
+            <button className="button-secondary" type="submit">{snapshot.round?.closesAt === null ? 'Időkorlát bekapcsolása' : 'Idő beállítása'}</button>
+          </form>
+          {snapshot.round?.closesAt !== null && <button className="button-quiet" onClick={() => void act('time',0)}>Időkorlát kikapcsolása</button>}
+          <p className="small-note">Az új idő a mentéstől számít. A játékosok kitöltött mezői megmaradnak.</p>
+        </div>
       </> : <>
         <div className="schedule-actions"><button className="button-primary" onClick={() => void act('next')}>Következő lépés indítása</button>
           <button className="button-secondary" onClick={() => void act('finish')}>Kóstoló befejezése</button></div>

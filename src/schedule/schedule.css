@@ -20,6 +20,11 @@
 .schedule-history { margin: 20px 0; padding: 16px; background: var(--paper); }
 .schedule-history summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
 .host-controls { padding: 24px 0; border-block: 1px solid var(--line); }
+.host-controls h3 { margin: 0; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.host-control-main { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.host-control-main .small-note { margin: 0; flex: 1 1 220px; }
+.host-control-time { margin-top: 20px; padding: 16px; background: var(--paper); border: 1px solid var(--line); }
+.host-control-time .small-note { margin: 8px 0 0; }
 .schedule-time { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
 .schedule-time label { margin: 0; flex: 1 1 220px; }
 .live-break { padding: clamp(24px,5vw,56px); margin: 24px 0; background: var(--paper); border-top: 6px solid var(--accent); }
