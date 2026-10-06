@@ -18,7 +18,7 @@
 .projector-lead { font-size: clamp(18px, 1.8vw, 26px); margin: 0 0 16px; }
 /* Opaque card: the ambient layer never crosses the code or its quiet zone. */
 .projector-qr-card { position: relative; z-index: 1; display: grid; width: max-content; gap: 12px; margin: 8px 0 0; padding: clamp(12px, 1.4vw, 20px); max-width: 100%; box-sizing: border-box;
-  background: #fff; border: 1px solid var(--line); border-top: 6px solid var(--accent); box-shadow: 0 18px 40px -28px #30202e66; }
+  background: #fff; border: 1px solid var(--line); border-top: 6px solid var(--accent); box-shadow: 0 18px 40px -28px var(--shadow-color); }
 .projector-qr-card .qr-code, .projector-link { width: min(58vh, 540px); max-width: 100%; }
 .projector-qr-card .qr-code { margin: 0; border: 0; }
 .projector-link { display: grid; gap: 4px; margin: 0; min-width: 0; }

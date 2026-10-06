@@ -1,45 +1,58 @@
+/* Each colour role has a daylight and a cellar value; `color-scheme` picks one per subtree.
+   In the cellar, rosé carries the accent so it works both as text and as a fill behind dark text. */
 :root {
-  font-family: Arial, Helvetica, sans-serif;
-  color: #30202e;
-  background: #f4f1ed;
+  color-scheme: light dark;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --ink: #30202e;
-  --paper: #f4f1ed;
-  --sheet: #fffdfb;
-  --accent: #61263f;
-  --accent-hover: #30202e;
-  --accent-soft: #eadce3;
-  --muted: #675a62;
-  --line: #c9bfc3;
-  --control-border: #95858e;
-  --error: #9f2727;
-  --blue: #d9e6eb;
-  --reveal: #edd3dc;
+  --ink: light-dark(#30202e, #f3e9ee);
+  --paper: light-dark(#f4f1ed, #170f15);
+  --sheet: light-dark(#fffdfb, #22171f);
+  --accent: light-dark(#61263f, #e3a2bb);
+  --accent-hover: light-dark(#30202e, #f3e9ee);
+  --accent-soft: light-dark(#eadce3, #3c2633);
+  --on-accent: light-dark(#fffdfb, #170f15);
+  --muted: light-dark(#675a62, #bba9b4);
+  --line: light-dark(#c9bfc3, #3e2d39);
+  --control-border: light-dark(#95858e, #76606f);
+  --error: light-dark(#9f2727, #ff9a8f);
+  --success: light-dark(#2f7d4f, #6fcf97);
+  --success-ink: light-dark(#235f3b, #8fe0b0);
+  --blue: light-dark(#d9e6eb, #1d2a30);
+  --reveal: light-dark(#edd3dc, #3a2230);
+  --photo-stage: light-dark(#ffffff, #f1ebee);
+  --shadow-color: light-dark(rgb(48 32 46 / 9%), rgb(0 0 0 / 45%));
   --display: 'Bricolage Grotesque Variable', Arial, sans-serif;
-  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Instrument Sans Variable', Arial, Helvetica, sans-serif;
+  --serif: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --ease-out: cubic-bezier(.2, .75, .2, 1);
+  --ease-spring: linear(0, .35 12%, .78 26%, 1.04 40%, 1.07 48%, 1.02 62%, .99 78%, 1);
 }
+.theme-cellar { color-scheme: dark; color: var(--ink); background: var(--paper); }
 
 * { box-sizing: border-box; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 body { margin: 0; min-width: 320px; }
 ::selection { color: var(--ink); background: var(--accent-soft); }
-button, input, select { font: inherit; }
+button, input, select, textarea { font: inherit; }
 button, select { cursor: pointer; }
 button, select, input:not([type='range']) { min-height: 48px; }
-button { transition: background-color .15s, color .15s; }
+button { transition: background-color .15s, color .15s, border-color .15s, transform .18s var(--ease-out); }
 button:disabled, select:disabled { cursor: not-allowed; opacity: .55; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
   outline: 3px solid var(--accent); outline-offset: 4px;
 }
 a { color: inherit; text-underline-offset: 4px; }
-h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; overflow-wrap: anywhere; }
+p, li, dd { text-wrap: pretty; }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; overflow-wrap: break-word; hyphens: auto; text-wrap: balance; }
 h1 { font-size: clamp(40px, 5vw, 64px); line-height: 1.1; letter-spacing: -1.7px; margin: 16px 0 24px; }
 h2 { font-size: 32px; line-height: 1.2; letter-spacing: -.7px; margin: 0; }
 h3 { font-size: 30px; line-height: 1.2; letter-spacing: -.5px; margin: 0 0 12px; }
 .app-shell { max-width: 1320px; margin: auto; padding: 0 40px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; min-height: 96px; border-bottom: 1px solid var(--ink); }
+.topbar { view-transition-name: topbar; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; min-height: 96px; border-bottom: 1px solid var(--ink); }
 .brand { margin-right: auto; text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 32px; letter-spacing: -1.6px; line-height: 1.2; padding: 10px 0; }
 .dev-badge { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; letter-spacing: .6px; }
 .dev-badge > span { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
@@ -76,8 +89,10 @@ select, input:not([type='range']) { display: block; width: 100%; min-width: 0; b
 select:hover, input:not([type='range']):hover { border-color: var(--accent); }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .button-primary, .button-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 16px; padding: 13px 20px; border: 1px solid var(--accent); border-radius: 2px; font-size: 15px; line-height: 1.4; font-weight: 600; text-decoration: none; min-height: 48px; }
-.button-primary { color: var(--sheet); background: var(--accent); }
-.button-primary:not(:disabled):hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.button-primary, .button-secondary { transition: background-color .15s, color .15s, border-color .15s, transform .18s var(--ease-out), box-shadow .18s var(--ease-out); }
+.button-primary { color: var(--on-accent); background: var(--accent); }
+.button-primary:not(:disabled):hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--paper); box-shadow: 0 10px 22px -14px var(--shadow-color); }
+:is(button, .button-primary, .button-secondary):not(:disabled):active { transform: scale(.97); }
 .button-primary > span { font-size: 20px; line-height: 1; font-weight: 400; }
 .button-secondary { color: var(--accent); background: transparent; }
 .button-secondary:not(:disabled):hover { background: var(--accent-soft); }
@@ -85,7 +100,7 @@ select:hover, input:not([type='range']):hover { border-color: var(--accent); }
 .side-panel { padding: 24px 0; border-top: 2px solid var(--accent); }
 .side-heading .eyebrow { display: block; margin-bottom: 10px; }
 .side-heading h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 26px; margin-bottom: 8px; }
-.side-heading h3 > span { font-family: Arial, sans-serif; color: var(--muted); font-size: 14px; }
+.side-heading h3 > span { font-family: var(--sans); color: var(--muted); font-size: 14px; }
 .side-heading > p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0; }
 .wine-list { padding: 0; margin: 24px 0 0; list-style: none; border-top: 1px solid var(--line); }
 .wine-list li { display: flex; align-items: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--line); }
@@ -151,9 +166,10 @@ input[type='range'] { display: block; width: 100%; min-height: 44px; accent-colo
 }
 @media (max-width: 700px) {
   .app-shell { padding: 0 18px; }
-  .topbar { min-height: 78px; gap: 12px; padding: 10px 0; }
-  .brand { font-size: 28px; }
-  .dev-badge { font-size: 10px; letter-spacing: .2px; }
+  /* Brand and actions share the first row; the development note sits quietly beneath. */
+  .topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand actions" "badge badge"; align-items: center; gap: 0 12px; min-height: 0; padding: 8px 0 10px; }
+  .brand { grid-area: brand; font-size: 26px; padding: 6px 0; }
+  .dev-badge { grid-area: badge; font-size: 10px; letter-spacing: .4px; }
   .hero { grid-template-columns: 1fr; padding: 28px 0 22px; }
   .hero h1 { font-size: 38px; }
   .hero-copy br { display: none; }
@@ -192,8 +208,14 @@ input[type='range'] { display: block; width: 100%; min-height: 44px; accent-colo
   .settings-row, .rating-inputs { grid-template-columns: 1fr; }
   .panel-topline { align-items: start; flex-direction: column; }
 }
+@keyframes stage-in { from { opacity: 0; transform: translateY(14px); } }
+::view-transition-old(root) { animation: .22s var(--ease-out) both page-out; }
+::view-transition-new(root) { animation: .38s var(--ease-out) both page-in; }
+@keyframes page-out { to { opacity: 0; } }
+@keyframes page-in { from { opacity: 0; transform: translateY(10px); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 .timer-toggle { display: flex; gap: 10px; align-items: center; min-height: 44px; }
 .timer-toggle input[type="checkbox"] { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }

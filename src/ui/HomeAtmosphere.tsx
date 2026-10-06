@@ -18,9 +18,13 @@ export function HomeAtmosphere({ children, motion }: { children: ReactNode; moti
 }
 
 export function HomeMotionToggle({ motion }: { motion: AmbientMotion }) {
-  return <button className="home-motion-toggle" aria-pressed={motion.paused || motion.reduced} disabled={motion.reduced} onClick={motion.toggle}>
-      <span aria-hidden="true">{motion.paused || motion.reduced ? '▷' : 'Ⅱ'}</span>
-      {motion.reduced ? 'Mozgás kikapcsolva' : motion.paused ? 'Háttérmozgás indítása' : 'Háttérmozgás szüneteltetése'}
+  const still = motion.paused || motion.reduced;
+  return <button className="home-motion-toggle" aria-pressed={still} disabled={motion.reduced} onClick={motion.toggle}>
+      <svg className="home-motion-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        {still ? <path d="M4.5 2.8v10.4L13 8z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+          : <path d="M5 3v10M11 3v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />}
+      </svg>
+      <span className="home-motion-label">{motion.reduced ? 'Mozgás kikapcsolva' : motion.paused ? 'Háttérmozgás indítása' : 'Háttérmozgás szüneteltetése'}</span>
     </button>;
 }
 

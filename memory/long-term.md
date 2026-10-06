@@ -23,5 +23,16 @@
 - AI a fejlesztéshez fájlalapú emlékezettel; termék-AI opcionális, kikapcsolva.
 - Nincs helyi demó. A kóstoló a Supabase-kapcsolaton fut. A hiányzó kiadási lépések a roadmapben.
 
+## Designdöntések — 2026-10-06
+
+- A számozott címke iránya marad; trendkövetés (üveghatás, színátmenetes hero,
+  nagy lekerekítés) nélkül. A frissítés a játékképernyőkre viszi ugyanazt a karaktert.
+- Betűk: Bricolage (címek, számok), Instrument Sans (szöveg, mezők), Fraunces
+  (bornév, rövid kurzív kiemelés). Mind helyben, OFL-licenccel.
+- Színek csak tokenen (`light-dark()`): sötét módban rosé az akcentus, mert
+  szövegként és sötét szövegű kitöltésként is olvasható. A QR mindig fehér alapú.
+- A felfedés a márkamotívumot animálja: a takarócsík lehámlik. A mozgás állapotot
+  magyaráz, reduced-motion alatt kimarad; a számlálók végértéke azonnal látszik.
+
 Indokok: `docs/decisions/001-foundation.md`. Változáskor ezt a lapot javítsd,
 ne tarts meg egymásnak ellentmondó döntéseket aktív szabályként.

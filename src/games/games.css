@@ -45,7 +45,7 @@
 .game-delete { margin-block: 12px; min-width: 0; }
 .host-game-list .game-delete { grid-column: 1 / -1; }
 .schedule-fields > .schedule-actions { margin-bottom: 20px; }
-.schedule-add-bar { position: sticky; top: 8px; z-index: 4; margin-bottom: 16px; padding: 12px; background: var(--sheet); border: 1px solid var(--line); box-shadow: 0 8px 18px rgb(48 32 46 / 8%); }
+.schedule-add-bar { position: sticky; top: 8px; z-index: 4; margin-bottom: 16px; padding: 12px; background: var(--sheet); border: 1px solid var(--line); box-shadow: 0 8px 18px var(--shadow-color); }
 .wine-fields { scroll-margin-top: 88px; }
 .game-fields textarea { width: 100%; min-width: 0; padding: 12px; resize: vertical; border: 1px solid var(--control-border); background: var(--sheet); color: var(--ink); font: inherit; }
 .game-fields textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }

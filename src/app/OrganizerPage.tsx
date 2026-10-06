@@ -3,7 +3,7 @@ import { PageFrame } from './PageFrame';
 import { EditorialPhoto } from '../ui/EditorialPhoto';
 
 export function OrganizerPage() {
-  return <PageFrame headerAction={<Link className="header-link" to="/">Vissza a kezdőlapra</Link>}>
+  return <PageFrame headerAction={<Link className="header-link" to="/" viewTransition>Vissza a kezdőlapra</Link>}>
     <section className="organizer-intro" aria-labelledby="organizer-title">
       <div>
         <p className="eyebrow">JÁTÉKMESTEREKNEK</p>
@@ -11,7 +11,7 @@ export function OrganizerPage() {
         <p className="organizer-lead">Állítsd össze a borsort, hívd meg a résztvevőket, és indítsd el a kóstolást. A vendégek a saját telefonjukon adják meg a tippjeiket.</p>
         <p className="organizer-status">A közös online kóstoló még készül. Létrehozhatod a kóstolót, meghívhatod a résztvevőket, és elindíthatod az első kört. A további körvezérlés és az eredmények még készülnek.</p>
         <div className="actions">
-          <Link className="button-primary" to="/host">Játékmesteri belépés <span aria-hidden="true">↗</span></Link>
+          <Link className="button-primary" to="/host" viewTransition>Játékmesteri belépés <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
       <EditorialPhoto src="/images/blind-tasting-table.jpg" alt="Borospoharak és textillel letakart palackok egy kóstolóasztalon." number="01" caption="" eager />

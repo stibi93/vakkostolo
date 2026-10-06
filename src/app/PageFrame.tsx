@@ -9,7 +9,7 @@ export function PageFrame({ children, headerAction }: { children: ReactNode; hea
     <div className="app-shell entry-shell">
       <a className="skip-link" href="#main">Ugrás a tartalomhoz</a>
       <header className="topbar">
-        <Link className="brand" to="/" aria-label="Vakkóstoló, kezdőlap">Vakkóstoló</Link>
+        <Link className="brand" to="/" viewTransition aria-label="Vakkóstoló, kezdőlap">Vakkóstoló</Link>
         <span className="dev-badge"><span aria-hidden="true" />FEJLESZTÉS ALATT</span>
         <div className="home-header-actions">{headerAction}<HomeMotionToggle motion={motion} /></div>
       </header>

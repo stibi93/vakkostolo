@@ -24,7 +24,7 @@ export function PlayerEntryPage() {
     navigate(path);
   }
 
-  return <PageFrame headerAction={<Link className="header-link" to="/">Vissza a kezdőlapra</Link>}>
+  return <PageFrame headerAction={<Link className="header-link" to="/" viewTransition>Vissza a kezdőlapra</Link>}>
     <section className="auth-panel join-panel" aria-labelledby="entry-title">
       <p className="eyebrow">JÁTÉKOSBELÉPÉS</p>
       <h1 id="entry-title">Csatlakozás a játékhoz</h1>

@@ -30,8 +30,7 @@
   .home-header-actions { gap: 14px; margin-left: auto; }
 }
 @media (max-width: 700px) {
-  .home-header-actions { width: 100%; justify-content: space-between; gap: 10px; }
-  .home-header-actions .home-motion-toggle { font-size: 10px; padding: 8px; }
+  .home-header-actions { grid-area: actions; gap: 12px; margin-left: 0; }
   .header-link { font-size: 12px; }
   .editorial-heading { gap: 16px; }
   .tasting-seal { width: 64px; height: 64px; }
