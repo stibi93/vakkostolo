@@ -1,6 +1,6 @@
 import { CategoryIcon } from './CategoryIcon';
 import { useId } from 'react';
-import type { FocusEvent } from 'react';
+import type { CSSProperties, FocusEvent } from 'react';
 import { flushSync } from 'react-dom';
 import { priceBuckets } from '../domain/game';
 import { defaultAlcoholTenths, formatAlcohol, stepAlcohol } from './draft';
@@ -54,7 +54,7 @@ export function RatingFields({ value, onChange }: { value: RatingDraft; onChange
     <fieldset className="rating-group">
       <legend><CategoryIcon category="liking" />Tetszés</legend>
       <div className="rating-liking-grid">
-        {likingScale.map((score) => <label key={score} className="rating-choice rating-liking">
+        {likingScale.map((score) => <label key={score} className="rating-choice rating-liking" style={{ '--level': (score - 1) / 9 } as CSSProperties}>
           <input type="radio" name={`${id}-liking`} value={score} checked={value.liking === String(score)}
             onChange={() => set({ liking: String(score) })} aria-label={`Tetszés: ${score} a 10-ből`} required />
           <span aria-hidden="true">{score}</span>

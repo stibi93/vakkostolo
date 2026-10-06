@@ -45,11 +45,14 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
     ? <StartRound key={snapshot.game.version} api={api} snapshot={snapshot} refresh={refresh} available={available} /> : null;
   if (round.status === 'revealed') return null;
   const open = snapshot.game.status === 'tasting' && round.status === 'open' && seconds > 0;
+  const share = open && round.closesAt !== null ? timeShare(snapshot, round.openedAt, round.closesAt, now) : 0;
+  const urgent = open && round.closesAt !== null && seconds <= 10;
   return <section className={`live-round${snapshot.role === 'player' ? ' live-round-player' : ''}`} aria-label="Aktuális kör">
-    <div className="live-round-heading">
+    <div className={`live-round-heading${urgent ? ' is-urgent' : ''}`}>
       <div><p className="eyebrow">AKTUÁLIS TÉTEL</p><h3>{String(round.position).padStart(2, '0')}. tétel</h3></div>
       {round.closesAt === null ? <span className="small-note">Időkorlát nélkül</span> : <span className="live-timer" role="timer" aria-label="Hátralévő idő">
         {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</span>}
+      {round.closesAt !== null && <span className="live-timer-bar" aria-hidden="true"><span style={{ transform: `scaleX(${share})` }} /></span>}
     </div>
     <p>{open ? 'A bor neve és valódi adatai a felfedésig rejtve maradnak.' : 'A kör már nem fogad tippeket. Várd meg a játékmester következő lépését.'}</p>
     {snapshot.role === 'player'
@@ -58,6 +61,12 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
       : <p className="small-note">{open ? 'A játékosok a határidőig módosíthatják a tippjüket.'
         : 'A lenti vezérlőn indíthatod a mentett menet következő kártyáját.'}</p>}
   </section>;
+}
+/** Display-only share of the round still left; the server alone decides when it closes. */
+function timeShare(snapshot: GameSnapshot, openedAt: string, closesAt: string, now: number) {
+  const total = Date.parse(closesAt) - Date.parse(openedAt);
+  const left = Date.parse(closesAt) - snapshot.serverTime - Math.max(0, now - snapshot.receivedAt);
+  return total > 0 ? Math.min(1, Math.max(0, left / total)) : 0;
 }
 function TastingExtras({ api, snapshot, refresh, available, presentation }: {
   api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean; presentation: boolean;
@@ -74,7 +83,7 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
       {remaining !== null && <p role="timer" aria-label="Szünetből hátralévő idő" className="live-timer">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</p>}
       <p className="small-note">A folytatást a játékmester indítja.</p>
     </section>}
-    {snapshot.revealCard && !presentation && <section className="live-break" aria-label="Felfedés">
+    {snapshot.revealCard && !presentation && <section className="live-break live-break-reveal" aria-label="Felfedés">
       <p className="eyebrow">FELFEDÉS / BEMUTATÓ</p><h3>{snapshot.revealCard.title}</h3>
       <p className="live-break-message">{snapshot.revealCard.message}</p>
       <p className="small-note">{snapshot.revealCard.roundIds.length} bemutatott bor · A folytatást a játékmester indítja.</p>
@@ -161,8 +170,10 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   }
   return <>
     {!round.eligible && <p className="auth-message">Ehhez a körhöz későn érkeztél. A következő tételtől adhatsz tippet.</p>}
-    {saved && <div className="live-saved" role="status"><strong>A szerver által mentett tipped</strong>
-      <p>{priceBucketLabel(saved.priceBucket)} · {formatAlcohol(saved.alcoholTenths)}% vol · Tetszés: {saved.liking}/10</p>
+    {saved && <div className="live-saved" role="status" key={saved.submittedAt}>
+      <svg className="live-saved-check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+      <div><strong>A szerver által mentett tipped</strong>
+        <p>{priceBucketLabel(saved.priceBucket)} · {formatAlcohol(saved.alcoholTenths)}% vol · Tetszés: {saved.liking}/10</p></div>
     </div>}
     {round.eligible && <form onSubmit={(event) => void submit(event)} noValidate className="live-rating-form">
       <fieldset disabled={!enabled || pending}>

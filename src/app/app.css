@@ -47,6 +47,10 @@
   .entry-next { display: block; padding-top: 28px; }
   .entry-next .button-secondary { margin-top: 8px; }
   .auth-panel { padding: 24px 20px; }
+  /* The game sheet runs edge to edge on a phone: the current task gets the width. */
+  .player-session { margin-inline: -18px; padding: 20px 18px 28px; border-inline: 0; }
+  .player-playing > .eyebrow { display: none; }
+  .player-playing .lobby-head h2 { font-size: 26px; margin-bottom: 8px; }
   .auth-panel h2 { font-size: 26px; }
 }
 .host-sign-in { display: grid; gap: 10px; max-width: 420px; margin: 20px 0; }

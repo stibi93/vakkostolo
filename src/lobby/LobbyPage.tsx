@@ -13,13 +13,14 @@ export function LobbyPage() {
   const onStatusChange = useCallback((value: GameStatus) => setStatus(value), []);
   const lobby = useMemo(() => authRuntime.status === 'ready'
     ? withSeatReturn(authRuntime.lobby, authRuntime.invites, window.localStorage) : null, []);
+  const playing = status === 'tasting' || status === 'reveal';
   return <PageFrame>
-    <section className={`auth-panel player-session${status === 'lobby' ? ' player-waiting' : ''}`} aria-labelledby="lobby-title">
+    <section className={`auth-panel player-session${status === 'lobby' ? ' player-waiting' : ''}${playing ? ' player-playing' : ''}`} aria-labelledby="lobby-title">
       <p className="eyebrow">KÓSTOLÓ</p><h1 className="sr-only" id="lobby-title">Kóstoló</h1>
       {authRuntime.status !== 'ready' ? <p>Az online kapcsolat nincs beállítva ezen a címen.</p>
         : !isUuid(gameId) ? <p role="alert">A kóstoló címe érvénytelen. Nyisd meg újra a meghívót.</p>
         : lobby && <LiveGamePanel key={gameId} api={lobby} gameId={gameId} onStatusChange={onStatusChange} />}
-      <p><Link to="/">Vissza a kezdőlapra</Link></p>
+      {!playing && <p><Link to="/" viewTransition>Vissza a kezdőlapra</Link></p>}
     </section>
   </PageFrame>;
 }

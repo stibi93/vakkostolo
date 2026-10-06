@@ -1,13 +1,19 @@
 .live-round, .live-start { margin: 24px 0; }
-.live-round-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px; background: var(--accent); color: var(--paper); }
-.live-round-heading .eyebrow { color: inherit; margin: 0 0 8px; }
+.live-round-heading { position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 20px 24px; background: var(--accent); color: var(--on-accent); }
+.live-round-heading .eyebrow { color: inherit; margin: 0 0 8px; opacity: .8; }
 .live-round-heading h3 { margin: 0; font: 600 32px/1.1 var(--display); }
 .live-timer { font: 600 28px/1 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Display-only: the bar drains towards the server deadline that the snapshot carries. */
+.live-timer-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: color-mix(in srgb, currentColor 18%, transparent); }
+.live-timer-bar > span { display: block; height: 100%; background: currentColor; transform-origin: left center; transition: transform .25s linear; }
 .live-rating-form fieldset { padding: 0; border: 0; margin: 0; min-width: 0; }
 .live-rating-form > fieldset > legend { font: 600 24px var(--display); margin-bottom: 16px; }
 .live-rating-form .button-primary { width: 100%; }
-.live-saved { padding: 18px; border-left: 4px solid var(--accent); background: var(--blue); margin: 20px 0; }
-.live-saved p { margin: 8px 0 0; }
+.live-rating-form > fieldset > .button-primary { position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 4; min-height: 56px; font-size: 17px;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--sheet) 92%, transparent), 0 18px 32px -14px var(--shadow-color); }
+.live-saved { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; border-left: 4px solid var(--success); background: color-mix(in srgb, var(--success) 9%, var(--sheet)); margin: 20px 0; }
+.live-saved p { margin: 6px 0 0; }
+.live-saved-check { flex-shrink: 0; width: 28px; height: 28px; fill: none; stroke: var(--success); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 20; }
 .live-rating-form fieldset:disabled { opacity: .7; }
 .submission-list { margin: 20px 0; }
 .submission-list ul { list-style: none; margin: 12px 0 0; padding: 0; }
@@ -20,10 +26,22 @@
 .player-session .lobby-panel > h2 { font-family: var(--display); font-size: 30px; margin-top: 0; }
 
 /* One quiet clock stays in the reading flow while the player scrolls the form. */
-.live-round-player .live-round-heading { position: sticky; top: 8px; z-index: 5; padding: 12px 16px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--accent); }
+.live-round-player .live-round-heading { position: sticky; top: 0; z-index: 5; padding: 12px 16px 14px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+  box-shadow: 0 12px 24px -20px var(--shadow-color); }
 .live-round-player .live-round-heading .eyebrow { display: none; }
 .live-round-player .live-round-heading h3 { font-size: 21px; }
-.live-round-player .live-timer { font: 500 21px/1.2 'IBM Plex Mono', monospace; color: var(--accent); }
-.live-round-player :is(input, button, legend) { scroll-margin-top: 80px; }
+.live-round-player .live-timer { font: 600 24px/1.1 var(--display); color: var(--accent); }
+.live-round-player .live-timer-bar { color: var(--accent); height: 3px; }
+.live-round-player .is-urgent :is(.live-timer, .live-timer-bar) { color: var(--error); }
+.live-round-player :is(input, button, legend) { scroll-margin-top: 80px; scroll-margin-bottom: 96px; }
 .live-revealed-photo { max-width: 220px; margin: 16px 0; }
 .live-round-heading .small-note { color: inherit; margin: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .live-round, .live-start, .live-break { animation: stage-in .5s var(--ease-out) both; }
+  .live-saved { animation: stage-in .4s var(--ease-out) both; }
+  .live-saved-check path { animation: check-draw .5s .12s var(--ease-out) both; }
+  .live-round-heading.is-urgent .live-timer { animation: timer-urgent 1s ease-in-out infinite; }
+}
+@keyframes check-draw { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+@keyframes timer-urgent { 50% { transform: scale(1.08); } }

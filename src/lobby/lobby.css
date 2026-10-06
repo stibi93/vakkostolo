@@ -7,9 +7,12 @@
 .lobby-membership { display: flex; align-items: center; gap: 16px; margin: 0 0 16px; padding: 14px 16px; background: var(--blue); color: var(--ink); }
 .lobby-membership-seat { flex-shrink: 0; font-family: var(--display); font-weight: 700; font-size: 34px; line-height: 1; color: var(--accent);
   font-variant-numeric: tabular-nums; padding-right: 16px; border-right: 1px solid var(--control-border); }
+.lobby-membership.is-compact { gap: 10px; margin: 0 0 12px; padding: 0; background: transparent; color: var(--muted); font-size: 14px; }
+.lobby-membership.is-compact strong { color: var(--ink); }
+.lobby-membership.is-compact .lobby-membership-seat { font-size: 15px; padding: 5px 8px; border: 0; background: var(--accent); color: var(--on-accent); }
 .lobby-connection { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 0; }
 .lobby-connection::before { content: ''; flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--control-border); }
-.lobby-connection-live::before { background: #2f7d4f; }
+.lobby-connection-live::before { background: var(--success); }
 .lobby-connection-offline::before { background: var(--error); }
 .player-session.player-waiting { background: color-mix(in srgb, var(--sheet) 72%, transparent); }
 .lobby-retry { margin-top: 12px; }
@@ -18,7 +21,7 @@
 .lobby-roster-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
 .lobby-roster-head h3 { margin: 0; font-size: 24px; }
 .lobby-online-count { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; color: var(--ink); }
-.lobby-pulse { width: 10px; height: 10px; border-radius: 50%; background: #2f7d4f; box-shadow: 0 0 0 0 #2f7d4f66; }
+.lobby-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 40%, transparent); }
 .lobby-online-count.is-empty { color: var(--muted); }
 .lobby-online-count.is-empty .lobby-pulse { background: var(--control-border); animation: none; }
 
@@ -32,8 +35,8 @@
 .lobby-self { color: var(--accent); white-space: nowrap; }
 .lobby-presence { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
 .lobby-presence::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--control-border); box-sizing: border-box; }
-.lobby-participants li.is-online .lobby-presence { color: #235f3b; font-weight: 600; }
-.lobby-participants li.is-online .lobby-presence::before { background: #2f7d4f; border-color: #2f7d4f; }
+.lobby-participants li.is-online .lobby-presence { color: var(--success-ink); font-weight: 600; }
+.lobby-participants li.is-online .lobby-presence::before { background: var(--success); border-color: var(--success); }
 .lobby-participants li.is-away { border-style: dashed; border-top-style: solid; border-top-color: var(--line); background: transparent; }
 .lobby-participants li.is-away .lobby-seat, .lobby-participants li.is-away .lobby-name { color: var(--muted); }
 .lobby-empty { padding: 18px; border: 1px dashed var(--control-border); text-align: center; }
@@ -43,7 +46,7 @@
   @keyframes connection-heartbeat { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
   .lobby-pulse { animation: lobby-pulse 2.4s ease-out infinite; }
   .lobby-participants li.is-online { animation: lobby-arrive .45s ease-out; }
-  @keyframes lobby-pulse { 70% { box-shadow: 0 0 0 8px #2f7d4f00; } 100% { box-shadow: 0 0 0 0 #2f7d4f00; } }
+  @keyframes lobby-pulse { 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
   @keyframes lobby-arrive { from { transform: translateY(6px); opacity: .4; } }
 }
 @media (max-width: 600px) {

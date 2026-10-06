@@ -37,7 +37,7 @@ export function LobbyView({ state, refresh, showTitle = true, children, activeRo
         {snapshot.game.status === 'lobby' ? 'A játékmester indítja az első bort.'
           : snapshot.game.status === 'finished' ? 'A kóstoló befejeződött.'
           : snapshot.game.status === 'draft' ? 'A játékmester még előkészíti a kóstolót.' : 'A kóstoló már folyamatban van.'}</p>}
-      {self && <p className="lobby-membership">
+      {self && <p className={`lobby-membership${activeRound ? ' is-compact' : ''}`}>
         <span className="lobby-membership-seat" aria-hidden="true">{seatLabel(self.seat)}</span>
         <span>{activeRound ? 'Játékos: ' : 'Bent vagy a váróban '}<strong>{self.nickname}</strong>{activeRound ? ' · ' : ' néven. Saját jelölésed: '}
           <strong>#{seatLabel(self.seat)}</strong>.</span>

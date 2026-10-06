@@ -10,7 +10,7 @@
   padding: 10px 8px; text-align: center; color: var(--ink); background: var(--sheet); border: 1px solid var(--control-border); border-radius: 2px;
   transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease; }
 .rating-choice:hover span { border-color: var(--accent); }
-.rating-choice input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--paper); box-shadow: inset 0 4px 0 var(--ink); }
+.rating-choice input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 10px 20px -12px var(--shadow-color); }
 .rating-choice input:focus-visible + span { outline: 3px solid var(--ink); outline-offset: 2px; }
 fieldset:disabled .rating-choice, fieldset:disabled .rating-choice input { cursor: not-allowed; }
 fieldset:disabled .rating-choice:hover span { border-color: var(--control-border); }
@@ -18,17 +18,18 @@ fieldset:disabled .rating-choice:hover span { border-color: var(--control-border
 .rating-price-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
 .rating-price span { font: 600 15px/1.25 var(--display); font-variant-numeric: tabular-nums; }
 
-/* Liking: numbered label cards 01–10. */
+/* Liking: one continuous 1–10 scale; the tint only deepens along the player's own scale. */
 .rating-liking-grid { display: grid; gap: 8px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.rating-liking span { min-height: 68px; padding: 0; border-top: 4px solid var(--accent);
+.rating-liking span { min-height: 64px; padding: 0; border-color: color-mix(in srgb, var(--accent) calc(18% + var(--level) * 30%), var(--line));
+  background: color-mix(in srgb, var(--accent) calc(var(--level) * 16%), var(--sheet));
   font: 700 clamp(22px, 6vw, 30px)/1 var(--display); font-variant-numeric: tabular-nums; color: var(--accent); }
-.rating-liking input:checked + span { color: var(--paper); box-shadow: none; border-top-color: var(--ink); }
+.rating-liking input:checked + span { color: var(--on-accent); }
 .rating-scale-ends { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 0; font-size: 12px; color: var(--muted); }
 
 .rating-stepper { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; gap: 8px; align-items: stretch; max-width: 360px; }
 .rating-step { display: grid; place-items: center; gap: 0; min-height: 56px; padding: 4px; font: 600 26px/1 var(--display);
   color: var(--accent); background: var(--sheet); border: 1px solid var(--accent); border-radius: 2px; cursor: pointer; }
-.rating-step small { font: 600 11px/1 Arial, sans-serif; color: var(--muted); }
+.rating-step small { font: 600 11px/1 var(--sans); color: var(--muted); }
 .rating-step:hover:not(:disabled) { background: var(--accent-soft); }
 .rating-step:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 .rating-alcohol { position: relative; display: block; margin: 0; }
@@ -37,9 +38,11 @@ fieldset:disabled .rating-choice:hover span { border-color: var(--control-border
 .rating-alcohol input::placeholder { color: var(--muted); opacity: .75; }
 .rating-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
 
+.rating-choice:active span, .rating-step:not(:disabled):active { transform: scale(.95); }
 @media (prefers-reduced-motion: no-preference) {
-  .rating-choice input:checked + span { transform: translateY(-2px); }
+  .rating-choice input:checked + span { transform: translateY(-2px); animation: choice-pop .38s var(--ease-spring); }
 }
+@keyframes choice-pop { from { transform: scale(.9); } to { transform: translateY(-2px); } }
 @media (max-width: 600px) { .rating-liking span { aspect-ratio: 4 / 5; min-height: 56px; } }
 @media (max-width: 360px) {
   .rating-price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
