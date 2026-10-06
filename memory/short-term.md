@@ -1,6 +1,6 @@
 # Aktuális állapot — 2026-10-06
 
-## 2026-os designfrissítés (folyamatban)
+## 2026-os designfrissítés (kész)
 
 A felhasználó designáttekintést kért, majd mind a hét javaslatot jóváhagyta.
 Sorrend: alapok → telefonos játék → felfedés → kivetítő → host irányítópult.
@@ -31,9 +31,12 @@ Sorrend: alapok → telefonos játék → felfedés → kivetítő → host irá
   „Időkorlát kikapcsolása” halk szöveges gomb (`.button-quiet`).
 - A „Kóstoló menete” alatti üres sáv nem valódi hiba: a ragadós hozzáadósáv
   a teljes oldalas képernyőképen máshová rajzolódik.
-- Hátra: `docs/design.md` (fontok, pincetéma, mozgás, felfedés, kivetítő,
-  host), 360/1280 px sötét módú böngészős átnézés (kezdőlapi szüreti panel
-  `#d5e1dc` kemény színe még nincs ellenőrizve).
+- Kész: `docs/design.md` „2026-os frissítés” szakasz. Sötét módú képek
+  (kezdőlap asztalon/mobilon, telefonos játéklap) átnézve, egységesek. A
+  kezdőlapi szüreti panel sötétben is világos zsálya marad; keretezett
+  illusztrációként tudatosan így hagyva.
+- Következő: felhasználói átnézés élő eszközön (telefon + kivetítő). Külön
+  javítandó: elavult `tests/live.test.ts` 13. boros eset, `games.spec.ts:169`.
 - Ellenőrzés: typecheck, lint, db-típus, build zöld. E2E (results, live, lobby,
   schedule, invite, games, photos; asztali és mobil auth projektek) zöld, kivéve
   a régóta bukó `games.spec.ts:169` törléstesztet. Unit: a régi

@@ -15,8 +15,9 @@ Saját címkemotívumot használunk, nem más borászat arculatát másoljuk.
 - Törtfehér papír `#F4F1ED`, világos felület `#FFFDFB`, tintaszöveg `#30202E`.
 - Borvörös főművelet és címke `#61263F`, halványkék ellenpont `#D9E6EB`.
 - Másodlagos szöveg `#675A62`; a mező, hiba és fókusz külön tokeneket kap.
-- Bricolage Grotesque címek, márkanév és számok; Arial a feliratokhoz és mezőkhöz.
-  Georgia kurzív csak néhány hangsúlynál, Georgia a felfedett borok neveinél.
+- Bricolage Grotesque címek, márkanév és számok; Instrument Sans a szöveghez,
+  feliratokhoz és mezőkhöz. Fraunces (kurzív is) a hangsúlyokhoz és a felfedett
+  borok neveihez.
 - Nagy tételszám, világos takarócsík, erős elválasztók, alig lekerekített felületek.
   Az értékelőlapon a bevitel az elsődleges, a dekoratív nyitóblokk rejtett.
 - Felfedésig az absztrakt címke minden bornál azonos színt és motívumot használ.
@@ -47,6 +48,28 @@ könyvtárból töltődnek, OFL licencükkel együtt. Külső fontszolgáltató 
 Az arculat a kezdőlapon, a belépésnél, a kóstoló létrehozásánál és mentett
 adatainál, valamint a meghívó és kivetítő oldalain jelenik meg. A játékszabály,
 Auth és adatbázis működése ettől nem változik.
+
+## 2026-os frissítés
+
+- **Pincetéma.** Minden szín `light-dark()` token a `:root`-on; az oldal a
+  rendszer sötét módját követi. Sötétben a főszín rozé (`#e3a2bb`), rajta sötét
+  szöveg (`--on-accent`). A `.theme-cellar` mindig sötét: ezt kapja a kivetítő.
+- **Mozgás.** Közös görbék (`--ease-out`, `--ease-spring`), `stage-in` belépés,
+  oldalváltás View Transitions API-val (`<Link viewTransition>`), gombnyomásnál
+  enyhe összehúzódás. Csökkentett mozgásnál minden azonnal a végállapotban áll.
+- **Telefonos játék.** Kompakt fejléc ikonos mozgáskapcsolóval, széltől szélig
+  játéklap, ragadós körfejléc fogyó időcsíkkal (csak kijelzés, a határidőt a
+  szerver dönti el), ragadós beküldőgomb, animált mentési visszaigazolás.
+- **Felfedés.** A tételszámos takarócsík lehámlik a fotóról, a bornév felemelkedik,
+  a számok felpörögnek (`CountUp`). A borlapok lapozhatók és húzhatók. A dobogó
+  a tényleges helyezési szinteket mutatja, lépcsőnként legfeljebb három névvel.
+- **Kivetítő.** Tévés színpad: sötét, nagy betű, a vezérlés vékony felső sávban.
+  Egy felfedett bor fotóval, névvel és adatokkal 1280×720-ba fér görgetés nélkül.
+- **Host irányítópult.** 1100 px felett két oszlop: balra az élő kör, vezérlés,
+  résztvevők és menet, jobbra a meghívó, a borok és a fotók. Futó körben a
+  lezárás az elsődleges gomb; ritka műveletek halk szöveges gombot kapnak.
+- Nem használunk üveghatást, színátmenetes hőst vagy erős lekerekítést: a
+  frissítés a számozott címke irányát élesíti, nem cseréli le.
 
 ## Képek és mozgás
 
