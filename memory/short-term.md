@@ -1,3 +1,32 @@
+# Aktuális állapot — 2026-10-06
+
+## 2026-os designfrissítés (folyamatban)
+
+A felhasználó designáttekintést kért, majd mind a hét javaslatot jóváhagyta.
+Sorrend: alapok → telefonos játék → felfedés → kivetítő → host irányítópult.
+
+- Kész, commitolva: Instrument Sans (szöveg) és Fraunces (bornév, kurzív) helyi
+  fontként; minden szín `light-dark()` tokenen, a rendszer sötét módját követi,
+  a `.theme-cellar` mindig sötét. Gombnyomás-visszajelzés, oldalváltás
+  (`viewTransition`), `stage-in` belépő animáció, reduced-motion alatt minden áll.
+- Kész, commitolva: telefonos fejléc (márka + ikonos mozgáskapcsoló egy sorban,
+  fejlesztési jelzés alatta), széltől szélig játéklap, kompakt játékossor,
+  fogyó időcsík (csak kijelzés, a szerver dönt), utolsó 10 mp sürgető,
+  ragadós beküldőgomb, animált mentési visszaigazolás, nyugodtabb 1–10 skála.
+  Játék közben nincs „Vissza a kezdőlapra” link.
+- Kész, commitolva: felfedés — a takarócsík lehámlik a fotóról, a bornév
+  felemelkedik, ár/alkohol/tetszés/pont felpörög (`CountUp`), telefonon
+  lapozható borlapok. Dobogó a tényleges helyezési szinteken (holtversenynél nincs
+  üres „2.”), legfeljebb 3 név + „további”.
+- Hátra: kivetítő tévés elrendezés (sötét, nagy betű, 1280×720-ba férő borlap —
+  ez javítaná a régóta bukó viewport-tesztet), host élő irányítópult, a
+  „Kóstoló menete” alatti üres sáv, dokumentáció (`docs/design.md`).
+- Ellenőrzés eddig: typecheck és lint zöld. Az e2e futás a frissítés közben
+  indult; eredményét még rögzíteni kell. Korábban is bukott: `games.spec.ts`
+  törlés (desktop+mobil), kivetítős felfedési kártya viewport (desktop).
+- A `memory/short-term.md` ma üresen volt a munkakönyvtárban; a commitolt
+  változat visszaállítva, erre az új bejegyzés került.
+
 # Aktuális állapot — 2026-09-27
 
 ## README kezdőlapkép
@@ -5,7 +34,7 @@
 - A `README.md` a bevezető után a kezdőlap felső részét mutatja:
   `docs/images/home.jpg` (fejléc, „Kóstolj vakon.”, szüreti csendélet).
   A kép a helyi fejlesztői szerverről készült, a háttérmozgás szüneteltetve.
-- Nincs commit. A pohármozgás és a README-kép is commitolatlan.
+- Commitolva: `61023c3`.
 
 # Aktuális állapot — 2026-09-27
 
