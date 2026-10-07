@@ -14,9 +14,9 @@ export function LobbyPanel({ api, gameId, showTitle = true }: { api: LobbyApi; g
 
 const seatLabel = (seat: number) => String(seat).padStart(2, '0');
 
-export function LobbyView({ state, refresh, showTitle = true, children, activeRound = false, presence = null }: {
+export function LobbyView({ state, refresh, showTitle = true, children, activeRound = false, presence = null, showRoster = true }: {
   state: LobbyState; refresh: () => Promise<void>; showTitle?: boolean; children?: ReactNode; activeRound?: boolean;
-  presence?: PresenceView | null;
+  presence?: PresenceView | null; showRoster?: boolean;
 }) {
   const snapshot = state.snapshot;
   const motion = useAmbientMotion();
@@ -50,7 +50,7 @@ export function LobbyView({ state, refresh, showTitle = true, children, activeRo
     {canRetry && <button className="button-secondary lobby-retry" disabled={state.loading} onClick={() => void refresh()}>
       {state.loading ? 'Újrapróbálás…' : 'Újrapróbálás'}</button>}
     {children}
-    {snapshot && (snapshot.role === 'host' || snapshot.game.status === 'draft' || snapshot.game.status === 'lobby') && <section className="lobby-roster" aria-labelledby="lobby-roster-title">
+    {snapshot && showRoster && (snapshot.role === 'host' || snapshot.game.status === 'draft' || snapshot.game.status === 'lobby') && <section className="lobby-roster" aria-labelledby="lobby-roster-title">
       <div className="lobby-roster-head">
         <h3 id="lobby-roster-title">Résztvevők ({snapshot.participants.length})</h3>
         {live && snapshot.participants.length > 0 && <p className={`lobby-online-count${onlineCount ? '' : ' is-empty'}`}>

@@ -14,6 +14,7 @@ import { useSnapshot } from '../lobby/useSnapshot';
 import { RatingFields } from '../rating/RatingFields';
 import { draftFromRating, formatAlcohol, ratingFromDraft } from '../rating/draft';
 import type { RatingDraft } from '../rating/draft';
+import type { PresenceView } from '../lobby/presence';
 import type { GameSnapshot, LiveApi, SavedRating } from './model';
 import { secondsLeft } from './model';
 import './live.css';
@@ -26,11 +27,13 @@ export function LiveGamePanel({ api, gameId, showTitle = true, presentation = fa
   const presence = usePresence(api.presence, gameId, snapshot);
   useEffect(() => { if (snapshot) onStatusChange?.(snapshot.game.status); }, [snapshot, onStatusChange]);
   useEffect(() => { if (snapshot) onVersionChange?.(snapshot.game.version); }, [snapshot, onVersionChange]);
-  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!(snapshot?.round || snapshot?.pause || snapshot?.revealCard)} presence={presence}>
+  // During a round the host's submission list also carries presence, so the separate roster would repeat it.
+  const roundRoster = !presentation && snapshot?.role === 'host' && !!snapshot.submissions;
+  return <LobbyView state={state} refresh={refresh} showTitle={showTitle} activeRound={!!(snapshot?.round || snapshot?.pause || snapshot?.revealCard)} presence={presence} showRoster={!roundRoster}>
     {snapshot && <RoundPanel key={`${snapshot.role}:${snapshot.selfParticipantId ?? 'host'}:${snapshot.round?.id ?? 'lobby'}`}
       api={api} snapshot={snapshot} refresh={refresh} presentation={presentation}
       available={!state.stale && state.connection !== 'offline'} />}
-    {snapshot && <TastingExtras api={api} snapshot={snapshot} refresh={refresh} presentation={presentation}
+    {snapshot && <TastingExtras api={api} snapshot={snapshot} refresh={refresh} presentation={presentation} presence={presence}
       available={!state.stale && state.connection !== 'offline'} />}
   </LobbyView>;
 }
@@ -70,8 +73,8 @@ function timeShare(snapshot: GameSnapshot, openedAt: string, closesAt: string, n
   const left = Date.parse(closesAt) - snapshot.serverTime - Math.max(0, now - snapshot.receivedAt);
   return total > 0 ? Math.min(1, Math.max(0, left / total)) : 0;
 }
-function TastingExtras({ api, snapshot, refresh, available, presentation }: {
-  api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean; presentation: boolean;
+function TastingExtras({ api, snapshot, refresh, available, presentation, presence }: {
+  api: LiveApi; snapshot: GameSnapshot; refresh: () => Promise<void>; available: boolean; presentation: boolean; presence: PresenceView | null;
 }) {
   const [now, setNow] = useState(() => performance.now());
   useEffect(() => { const timer = setInterval(() => setNow(performance.now()), 1000); return () => clearInterval(timer); }, []);
@@ -91,7 +94,7 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
       <p className="small-note">{snapshot.revealCard.roundIds.length} bemutatott bor · A folytatást a játékmester indítja.</p>
     </section>}
     {snapshot.game.status === 'finished' && !snapshot.results && <h3>A kóstoló befejeződött.</h3>}
-    {snapshot.role === 'host' && !presentation && snapshot.submissions && <SubmissionList submissions={snapshot.submissions} />}
+    {snapshot.role === 'host' && !presentation && snapshot.submissions && <SubmissionList submissions={snapshot.submissions} presence={presence} />}
     {snapshot.role === 'host' && api.schedule && <HostControls compact={presentation} api={api.schedule} snapshot={snapshot} refresh={refresh} available={available} secondsLeft={secondsLeft(snapshot,now)} />}
     {snapshot.results && snapshot.role === 'host' && !presentation && <p>
       <a className="button-secondary" href={`/present/${snapshot.game.id}`} target="_blank" rel="noopener">Eredmények kivetítése</a>
@@ -108,15 +111,23 @@ function TastingExtras({ api, snapshot, refresh, available, presentation }: {
       </ol></details>}
   </>;
 }
-function SubmissionList({ submissions }: { submissions: NonNullable<GameSnapshot['submissions']> }) {
-  const missing = submissions.filter(item => !item.submitted);
-  return <section className="submission-list" aria-label="Leadott tippek">
-    <h3>Tippek ennél a bornál</h3>
-    <p className="small-note">{submissions.length - missing.length} / {submissions.length} játékos adott le tippet. A tipp tartalma rejtve marad.</p>
-    <ul>{submissions.map(item => <li key={item.id}>
-      <span>{item.nickname}</span>
-      <strong>{item.submitted ? 'Leadta' : 'Még nem adott le tippet'}</strong>
-    </li>)}</ul>
+function SubmissionList({ submissions, presence }: { submissions: NonNullable<GameSnapshot['submissions']>; presence: PresenceView | null }) {
+  const submitted = submissions.filter(item => item.submitted).length;
+  const live = presence?.status === 'live';
+  const online = live ? submissions.filter(item => presence.online.has(item.id)).length : 0;
+  return <section className="submission-list" aria-label="Játékosok ennél a bornál">
+    <h3>Játékosok ennél a bornál</h3>
+    <p className="small-note">{submitted} / {submissions.length} játékos adott le tippet{live ? ` · ${online} bent van most` : ''}. A tipp tartalma rejtve marad.</p>
+    <ul>{submissions.map(item => {
+      const isOnline = live && presence.online.has(item.id);
+      return <li key={item.id} className={[live && (isOnline ? 'is-online' : 'is-away'), item.submitted && 'is-submitted'].filter(Boolean).join(' ') || undefined}>
+        <span className="submission-seat">#{String(item.seat).padStart(2, '0')}</span>
+        <span className="submission-name">{item.nickname}</span>
+        {live && <span className="submission-presence">{isOnline ? 'Online' : 'Offline'}</span>}
+        <strong className="submission-state">{item.submitted ? 'Leadta' : 'Még nincs tipp'}</strong>
+      </li>;
+    })}</ul>
+    {presence?.status === 'unavailable' && <p className="small-note">Az online jelenlét most nem látszik; a tippek állapota friss.</p>}
   </section>;
 }
 function StartRound({ api, snapshot, refresh, available }: {

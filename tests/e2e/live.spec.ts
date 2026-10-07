@@ -39,6 +39,7 @@ function fixture() {
               opened_at: new Date(state.opened).toISOString(), closes_at: new Date(state.deadline).toISOString(),
               eligible: index > 0 && !state.late, can_submit: index > 0 && !state.late && !state.expired && Date.now() < state.deadline } : null,
             own_rating: saved.get(index) ?? null,
+            ...(index === 0 && state.started ? { submissions: participants.map(p => ({ id: p.id, nickname: p.nickname, seat: p.seat, submitted: saved.has(p.seat) })) } : {}),
           } });
         }
         if (path === '/rest/v1/rpc/start_round') {
@@ -103,6 +104,30 @@ test('host indít, két vendég automatikusan értékel; mentés, módosítás, 
     await page.screenshot({ path: info.outputPath('live-host.png'), fullPage: true });
     for (const target of [page, one, two]) expect(await target.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally { await context1.close(); await context2.close(); }
+});
+test('host az aktuális bornál látja, ki van bent és ki adott le tippet', async ({ page, browser }, info) => {
+  test.setTimeout(60_000);
+  const f = fixture(); f.begin(); await f.attach(page, 0);
+  const context1 = await browser.newContext({ ...info.project.use }), context2 = await browser.newContext({ ...info.project.use });
+  try {
+    const one = await context1.newPage(), two = await context2.newPage();
+    await f.attach(one, 1); await f.attach(two, 2);
+    await page.goto(`/host/${gameId}`); await one.goto(`/play/${gameId}`); await two.goto(`/play/${gameId}`);
+    const list = page.getByRole('region', { name: 'Játékosok ennél a bornál' });
+    const row = (name: string) => list.getByRole('listitem').filter({ hasText: name });
+    await expect(row('Vendég 1')).toContainText('Online'); await expect(row('Vendég 2')).toContainText('Online');
+    await expect(list).toContainText('0 / 2 játékos adott le tippet · 2 bent van most');
+    await expect(page.getByRole('heading', { name: /^Résztvevők \(/ })).toHaveCount(0);
+    await fill(one); await one.getByRole('button', { name: 'Tipp beküldése' }).click();
+    await expect(one.getByText('A szerver által mentett tipped')).toBeVisible();
+    f.hub.change(gameId, 'rounds');
+    await expect(row('Vendég 1')).toContainText('Leadta'); await expect(row('Vendég 2')).toContainText('Még nincs tipp');
+    await context2.close();
+    await expect(row('Vendég 2')).toContainText('Offline'); await expect(row('Vendég 1')).toContainText('Online');
+    await expect(list).toContainText('1 / 2 játékos adott le tippet · 1 bent van most');
+    await expect(list).not.toContainText('8 001');
+    await list.screenshot({ path: info.outputPath('host-round-players.png') });
+  } finally { await context1.close(); await context2.close().catch(() => undefined); }
 });
 test('indítási hálózathiba ugyanazzal a kérésazonosítóval ismételhető', async ({ page }) => {
   const f = fixture(); await f.attach(page, 0); f.state.failStart = true;

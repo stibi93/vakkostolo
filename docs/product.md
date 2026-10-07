@@ -79,6 +79,9 @@ Oldalsáv: sorszámozott borlista (várakozik/kóstolás/lezárt/felfedett),
 létszám, meghívó link és valódi QR. Titkos ár és alkohol csak a host szerkesztőben.
 A megkezdett bor adatai és helye zárolódik; a hátralévő borok és egyedi szünetek futás közben is szerkeszthetők. Részletek: [szerkeszthető menet](tasting-schedule.md). A résztvevőlista
 nem mutat mások tippjeit; a host beküldési darabszámot külön végponton kapja.
+Futó körben a host panelje az aktuális bornál egy listában mutatja a résztvevőket:
+online/offline (Realtime-jelenlét) és hogy leadták-e a tippet (a tipp tartalma nélkül).
+Ilyenkor a külön résztvevőlista rejtve van, hogy ne ismétlődjön.
 
 Időkeret: kikapcsolható vagy 30–1800 másodperc, alapérték 120. Időkorlát nélkül csak a játékmester kézi lezárása állítja le a tippek fogadását. Futó, még nyitott körben az időzítés ki-be kapcsolható. A lejárt, de még le nem zárt körnél a játékmester egy gombbal újraengedheti a tippek módosítását; a kör ettől nem indul újra, és a következő lépés lezárja. Szünet két tétel között van;
 futó kör megállítása nem MVP-funkció. Későn érkező

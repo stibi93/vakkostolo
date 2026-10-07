@@ -17,8 +17,20 @@
 .live-rating-form fieldset:disabled { opacity: .7; }
 .submission-list { margin: 20px 0; }
 .submission-list ul { list-style: none; margin: 12px 0 0; padding: 0; }
-.submission-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-.submission-list strong { font-size: 14px; }
+.submission-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.submission-seat { font: 600 13px/1 var(--display); color: var(--muted); font-variant-numeric: tabular-nums; }
+.submission-name { overflow-wrap: anywhere; }
+.submission-presence { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.submission-presence::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--control-border); box-sizing: border-box; }
+.submission-list .is-online .submission-presence { color: var(--success-ink); font-weight: 600; }
+.submission-list .is-online .submission-presence::before { background: var(--success); border-color: var(--success); }
+.submission-state { font-size: 14px; color: var(--muted); font-weight: 500; }
+.submission-list .is-submitted .submission-state { color: var(--success-ink); font-weight: 600; }
+@media (max-width: 420px) {
+  .submission-list li { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 4px; }
+  .submission-presence { grid-column: 2; grid-row: 2; }
+  .submission-state { grid-column: 3; grid-row: 1 / span 2; }
+}
 .host-controls-compact { margin: 12px 0 20px; }
 @media (min-width: 760px) { .live-rating-form { max-width: 620px; } }
 
