@@ -33,7 +33,7 @@ export function parseResults(value: unknown, role: 'host' | 'player'): GameResul
   const r=record(value);
   const revealedCount=number(r.revealed_count,0,maxWines), maxPoints=number(r.max_points,0,maxWines * 250);
   const scoringVersion = Number(r.scoring_version);
-  if (![1,2,3].includes(scoringVersion) || typeof r.scoring_version!=='number' || typeof r.final!=='boolean' ||
+  if (![1,2,3,4].includes(scoringVersion) || typeof r.scoring_version!=='number' || typeof r.final!=='boolean' ||
     !Array.isArray(r.wines) || r.wines.length!==revealedCount || !Array.isArray(r.leaderboard) || r.leaderboard.length>50) return invalid();
   const wines=r.wines.map(value=>{
     const w=record(value); if (!isUuid(w.id)) return invalid();
@@ -67,7 +67,7 @@ export function parseResults(value: unknown, role: 'host' | 'player'): GameResul
     if (card.id !== leaderboard[index].id || !Array.isArray(card.wines) || card.wines.length !== wines.length) return invalid();
     const rows = card.wines.map((item, wineIndex) => parseScoreWine(item, wines[wineIndex].id, wines[wineIndex].questions));
     const earned = rows.reduce((sum, row) => sum + (row.pricePoints ?? 0) + (row.alcoholPoints ?? 0) + row.questions.reduce((points, question) => points + question.points, 0), 0);
-    if (scoringVersion === 3 && earned !== leaderboard[index].points) return invalid();
+    if ((scoringVersion === 3 || scoringVersion === 4) && earned !== leaderboard[index].points) return invalid();
     return { id: leaderboard[index].id, wines: rows };
   });
   wines.forEach((wine, wineIndex) => {
@@ -78,9 +78,9 @@ export function parseResults(value: unknown, role: 'host' | 'player'): GameResul
       if (question.options.some(option => picks.filter(id => id === option.id).length !== option.count)) return invalid();
     }
   });
-  const expectedMax = scoringVersion === 3 ? wines.reduce((sum, wine) => sum + 2 + (wine.questions?.length ?? 0), 0) : revealedCount * 100;
+  const expectedMax = scoringVersion === 3 || scoringVersion === 4 ? wines.reduce((sum, wine) => sum + 2 + (wine.questions?.length ?? 0), 0) : revealedCount * 100;
   if (maxPoints !== expectedMax) return invalid();
-  return {scoringVersion:scoringVersion as 1|2|3,final:r.final,revealedCount,maxPoints,wines,leaderboard,scorecards};
+  return {scoringVersion:scoringVersion as 1|2|3|4,final:r.final,revealedCount,maxPoints,wines,leaderboard,scorecards};
 }
 function parseScoreWine(value: unknown, wineId: string, questions: { id: string; options: { id: string }[] }[] | undefined): ScoreWine {
   const row = record(value);

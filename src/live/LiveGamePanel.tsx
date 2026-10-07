@@ -45,6 +45,7 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
     ? <StartRound key={snapshot.game.version} api={api} snapshot={snapshot} refresh={refresh} available={available} /> : null;
   if (round.status === 'revealed') return null;
   const open = snapshot.game.status === 'tasting' && round.status === 'open' && seconds > 0;
+  const accepting = open || (round.lateEdits && snapshot.game.status === 'tasting' && round.status === 'open' && round.canSubmit);
   const share = open && round.closesAt !== null ? timeShare(snapshot, round.openedAt, round.closesAt, now) : 0;
   const urgent = open && round.closesAt !== null && seconds <= 10;
   return <section className={`live-round${snapshot.role === 'player' ? ' live-round-player' : ''}`} aria-label="Aktuális kör">
@@ -54,11 +55,12 @@ function RoundPanel({ api, snapshot, refresh, available, presentation }: {
         {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</span>}
       {round.closesAt !== null && <span className="live-timer-bar" aria-hidden="true"><span style={{ transform: `scaleX(${share})` }} /></span>}
     </div>
-    <p>{open ? 'A bor neve és valódi adatai a felfedésig rejtve maradnak.' : 'A kör már nem fogad tippeket. Várd meg a játékmester következő lépését.'}</p>
+    <p>{accepting ? 'A bor neve és valódi adatai a felfedésig rejtve maradnak.' : 'A kör már nem fogad tippeket. Várd meg a játékmester következő lépését.'}</p>
     {snapshot.role === 'player'
       ? <LiveRatingForm api={api} snapshot={snapshot} refresh={refresh}
-          enabled={available && open && round.canSubmit} />
+          enabled={available && round.canSubmit} />
       : <p className="small-note">{open ? 'A játékosok a határidőig módosíthatják a tippjüket.'
+        : round.lateEdits ? 'A játékosok a lejárt idő után is módosíthatják a tippjüket, amíg a következő lépést el nem indítod.'
         : 'A lenti vezérlőn indíthatod a mentett menet következő kártyáját.'}</p>}
   </section>;
 }
@@ -156,7 +158,7 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
   const choices = answers ?? saved?.customAnswers ?? {};
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (busy.current || !enabled || secondsLeft(snapshot) <= 0) return;
+    if (busy.current || !enabled || (secondsLeft(snapshot) <= 0 && !round.lateEdits)) return;
     const rating: Rating = {...ratingFromDraft(value), ...(round.questions?.length ? {customAnswers:choices}:{})};
     const invalid = validateRating(rating);
     if (round.questions?.some(q=>!q.options.some(o=>o.id===choices[q.id]))) invalid.push('Válaszolj minden egyedi kérdésre.');

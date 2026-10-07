@@ -80,11 +80,18 @@ létszám, meghívó link és valódi QR. Titkos ár és alkohol csak a host sze
 A megkezdett bor adatai és helye zárolódik; a hátralévő borok és egyedi szünetek futás közben is szerkeszthetők. Részletek: [szerkeszthető menet](tasting-schedule.md). A résztvevőlista
 nem mutat mások tippjeit; a host beküldési darabszámot külön végponton kapja.
 
-Időkeret: kikapcsolható vagy 30–1800 másodperc, alapérték 120. Időkorlát nélkül csak a játékmester kézi lezárása állítja le a tippek fogadását. Futó, még nyitott körben az időzítés ki-be kapcsolható; lejárt kör nem nyitható újra. Szünet két tétel között van;
-futó kör megállítása nem MVP-funkció. Lejárt kör nem nyitható újra. Későn érkező
+Időkeret: kikapcsolható vagy 30–1800 másodperc, alapérték 120. Időkorlát nélkül csak a játékmester kézi lezárása állítja le a tippek fogadását. Futó, még nyitott körben az időzítés ki-be kapcsolható. A lejárt, de még le nem zárt körnél a játékmester egy gombbal újraengedheti a tippek módosítását; a kör ettől nem indul újra, és a következő lépés lezárja. Szünet két tétel között van;
+futó kör megállítása nem MVP-funkció. Későn érkező
 játékos a következő tételtől csatlakozhat, a korábbi körök válasza hiányzó marad.
 
-## Pontozás v3 — helyes tipp 1 pont (új játékok)
+## Pontozás v4 — alkohol ±0,5 százalékpont (új játékok)
+
+Ugyanaz, mint a v3, egy eltéréssel: az alkoholfok akkor is 1 pont, ha a tipp
+legfeljebb 0,5 százalékponttal tér el a valódi értéktől. 13,0% valódi értéknél
+a 12,5–13,5% sáv jár pontért. Ezen kívül 0 pont. A befejezetlen kóstolók erre
+állnak; a már befejezettek a korábbi verziójukat tartják.
+
+## Pontozás v3 — helyes tipp 1 pont (korábbi játékok)
 
 Minden helyes tipp 1 pont. Nincs részpont. Helyesnek számít a pontos árkategória,
 a pontos alkoholfok és az egyedi kérdés helyes válasza. A tetszés nem ad pontot.
@@ -103,7 +110,7 @@ alkoholpont = 50 × max(0, 1 − abs(tipp − valódi %) / 3)
 ```
 
 Példa: 5000 Ft / 13,5% bornál (4 001–6 000 Ft) 6 001–8 000 Ft / 14,0% tipp → 67 pont.
-A `games.scoring_version` 3 az új játékoknál; a v2 és a v1 csak a régebbi
+A `games.scoring_version` 4 az új játékoknál; a v3, a v2 és a v1 csak a régebbi
 játékok újraszámolására marad.
 
 ## Pontozás v1 — forintos tipp (régi játékok)

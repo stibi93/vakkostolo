@@ -51,7 +51,7 @@ it('indítás az első kört nyitja szerveridővel; nincs titkos adat vagy mási
   expect(player.round).toMatchObject({ eligible: true, can_submit: true });
   expect(player.own_rating).toBeNull();
   expect(JSON.stringify(player)).not.toMatch(/Titkos|9876|12345|123456|alcohol_tenths|price_huf|wine|score/);
-  expect(Object.keys(player.round!).sort()).toEqual(['can_submit','closes_at','eligible','id','opened_at','position','questions','status']);
+  expect(Object.keys(player.round!).sort()).toEqual(['can_submit','closes_at','eligible','id','late_edits','opened_at','position','questions','status']);
   await asUser(host); expect((await snapshot()).own_rating).toBeNull();
   expect((await db.query("select status from public.rounds where game_id=$1 order by position", [game])).rows).toEqual([{ status: 'open' }, { status: 'pending' }]);
 });
@@ -110,6 +110,23 @@ it('lejárt határidőnél open állapot és ismételt kérés mellett is tiltot
   await asUser(host); expect(await start()).toBe(round);
   expect((await snapshot()).round?.can_submit).toBe(false);
 });
+it('a játékmester a lejárt kör tippjeit egy gombbal újraengedheti', async () => {
+  await start();
+  await db.exec('reset role');
+  await db.query("update public.participants set joined_at=clock_timestamp()-interval '3 minutes' where game_id=$1", [game]);
+  await db.query("update public.rounds set opened_at=clock_timestamp()-interval '2 minutes',closes_at=clock_timestamp()-interval '1 second' where id=$1", [round]);
+  await asUser(guest);
+  await expect(db.query('select public.submit_rating($1,5,135,8)', [round])).rejects.toThrow('DEADLINE_PASSED');
+  await asUser(host);
+  const version = (await snapshot()).game.version;
+  await db.query('select public.allow_late_edits($1,$2,$3)', [game, version, '20000000-0000-0000-0000-000000000002']);
+  await asUser(guest);
+  expect((await snapshot()).round).toMatchObject({ can_submit: true, late_edits: true });
+  await db.query('select public.submit_rating($1,6,140,9)', [round]);
+  expect((await snapshot()).own_rating).toMatchObject({ price_bucket: 6, alcohol_tenths: 140 });
+  await asUser(other);
+  await expect(db.query('select public.allow_late_edits($1,$2,$3)', [game, version, '20000000-0000-0000-0000-000000000003'])).rejects.toThrow();
+});
 it('Realtime csak publikus köradatot adhat; ratings és titkos táblák nincsenek publikálva', async () => {
   const tables = (await db.query<{ tablename: string }>("select tablename from pg_publication_tables where pubname='supabase_realtime' order by tablename")).rows;
   expect(tables.map(r => r.tablename)).toEqual(['games', 'participants', 'rounds']);
@@ -119,8 +136,8 @@ it('Realtime csak publikus köradatot adhat; ratings és titkos táblák nincsen
 });
 it('árkategória: új játék 2-es pontozási verziót kap, a mentett tipp csak kategóriát tárol', async () => {
   await db.exec('reset role');
-  expect((await db.query('select scoring_version from public.games where id=$1', [game])).rows).toEqual([{ scoring_version: 3 }]);
-  await expect(db.query('update public.games set scoring_version=4 where id=$1', [game])).rejects.toThrow(/check constraint/);
+  expect((await db.query('select scoring_version from public.games where id=$1', [game])).rows).toEqual([{ scoring_version: 4 }]);
+  await expect(db.query('update public.games set scoring_version=5 where id=$1', [game])).rejects.toThrow(/check constraint/);
   const buckets = await db.query<{ b: number }>(`select private.price_bucket(v) as b
     from unnest(array[0,1000,1001,2000,2001,4000,4001,6000,6001,8000,8001,10000,10001]) v`);
   expect(buckets.rows.map((row) => row.b)).toEqual([1, 1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 7, 8]);

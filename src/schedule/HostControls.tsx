@@ -11,6 +11,17 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft, c
   const [pending, setPending] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const busy = useRef(false), receipt = useRef({ signature: '', id: '' });
   const live = snapshot.round?.status === 'open' && secondsLeft > 0 && snapshot.game.status === 'tasting';
+  const expired = snapshot.round?.status === 'open' && snapshot.round.closesAt !== null && secondsLeft <= 0 && snapshot.game.status === 'tasting';
+  async function allowEdits() {
+    if (busy.current || !available) return;
+    const signature = JSON.stringify([snapshot.game.version, 'late']);
+    if (receipt.current.signature !== signature) receipt.current = { signature, id: newRequestId() };
+    busy.current = true; setPending(true); setError(''); setNotice('');
+    try { await api.allowLateEdits(snapshot.game.id, snapshot.game.version, receipt.current.id);
+      setNotice('A játékosok újra módosíthatják a tippjüket.'); }
+    catch (error) { setError(lobbyErrorMessage(error)); }
+    finally { await refresh(); busy.current = false; setPending(false); }
+  }
   async function act(action: TastingAction, duration?: number) {
     if (busy.current || !available) return;
     const signature = JSON.stringify([snapshot.game.version, action, duration]);
@@ -25,6 +36,7 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft, c
   if (compact) return <section className="host-controls host-controls-compact" aria-label="Élő vezérlés">
     <button className="button-primary" disabled={pending || !available} onClick={() => void act(live ? 'close' : 'next')}>
       {pending ? 'Mentés…' : live ? 'Kör lezárása most' : 'Következő lépés indítása'}</button>
+    {expired && !snapshot.round?.lateEdits && <button className="button-secondary" disabled={pending || !available} onClick={() => void allowEdits()}>Tippek módosításának engedélyezése</button>}
     {error && <p className="auth-message" role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
   </section>;
@@ -47,7 +59,8 @@ export function HostControls({ api, snapshot, refresh, available, secondsLeft, c
         </div>
       </> : <>
         <div className="schedule-actions"><button className="button-primary" onClick={() => void act('next')}>Következő lépés indítása</button>
-          <button className="button-secondary" onClick={() => void act('finish')}>Kóstoló befejezése</button></div>
+          <button className="button-secondary" onClick={() => void act('finish')}>Kóstoló befejezése</button>
+          {expired && !snapshot.round?.lateEdits && <button className="button-secondary" onClick={() => void allowEdits()}>Tippek módosításának engedélyezése</button>}</div>
         <p className="small-note">A következő lépés a mentett sorrend szerinti bor, szünet vagy Felfedés kártya. Csak a kártyán kijelölt borok válnak láthatóvá.</p>
       </>}
     </fieldset>

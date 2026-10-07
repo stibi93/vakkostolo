@@ -12,6 +12,7 @@ export interface ScheduleApi {
   get(gameId: string): Promise<TastingSchedule>;
   save(gameId: string, version: number, requestId: string, steps: ScheduleStep[]): Promise<void>;
   control(gameId: string, version: number, requestId: string, action: TastingAction, seconds?: number): Promise<void>;
+  allowLateEdits(gameId: string, version: number, requestId: string): Promise<void>;
 }
 // Also available on phones connected over ordinary LAN HTTP.
 export function newRequestId() {

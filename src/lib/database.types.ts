@@ -183,6 +183,7 @@ export type Database = {
           status: string;
           opened_at: string | null;
           closes_at: string | null;
+          late_edits: boolean;
         };
         Insert: {
           id?: string;
@@ -191,6 +192,7 @@ export type Database = {
           status?: string;
           opened_at?: string | null;
           closes_at?: string | null;
+          late_edits?: boolean;
         };
         Update: {
           id?: string;
@@ -199,6 +201,7 @@ export type Database = {
           status?: string;
           opened_at?: string | null;
           closes_at?: string | null;
+          late_edits?: boolean;
         };
         Relationships: [];
       };
@@ -229,6 +232,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      allow_late_edits: { Args: { p_game_id: string; p_expected_version: number; p_request_id: string }; Returns: string };
       control_tasting: { Args: { p_game_id: string; p_expected_version: number; p_request_id: string; p_action: string; p_seconds?: number }; Returns: string };
       create_game: { Args: { p_request_id: string; p_title: string; p_round_seconds: number; p_reveal_every: number; p_wines: Json }; Returns: string };
       create_game_with_schedule: { Args: { p_request_id: string; p_title: string; p_round_seconds: number; p_reveal_every: number; p_wines: Json; p_steps: Json }; Returns: string };

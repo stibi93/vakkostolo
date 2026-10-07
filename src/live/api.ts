@@ -36,11 +36,13 @@ export function parseGameSnapshot(value: unknown, gameId: string, receivedAt = p
     if (!isUuid(r.id) || !Number.isInteger(r.position) || Number(r.position) < 1 || Number(r.position) > maxWines ||
       !['open', 'closed', 'revealed'].includes(String(r.status)) || typeof r.eligible !== 'boolean' ||
       typeof r.can_submit !== 'boolean') return invalid();
+    const lateEdits = r.late_edits === true;
+    if (r.late_edits !== undefined && typeof r.late_edits !== 'boolean') return invalid();
     round = { ...(r.questions === undefined ? {} : {questions:parseQuestions(r.questions)}), id: r.id, position: Number(r.position), status: r.status as 'open' | 'closed' | 'revealed',
-      openedAt: timestamp(r.opened_at), closesAt: r.closes_at === null ? null : timestamp(r.closes_at), eligible: r.eligible, canSubmit: r.can_submit };
+      openedAt: timestamp(r.opened_at), closesAt: r.closes_at === null ? null : timestamp(r.closes_at), lateEdits, eligible: r.eligible, canSubmit: r.can_submit };
     if ((round.closesAt !== null && Date.parse(round.closesAt) <= Date.parse(round.openedAt)) || (base.role === 'host' && (round.eligible || round.canSubmit)) ||
       (round.canSubmit && (!round.eligible || round.status !== 'open' || base.game.status !== 'tasting' ||
-        (round.closesAt !== null && Date.parse(round.closesAt) <= Date.parse(base.serverNow))))) return invalid();
+        (round.closesAt !== null && Date.parse(round.closesAt) <= Date.parse(base.serverNow) && !lateEdits)))) return invalid();
   }
   const ownRating = row.own_rating === null ? null : round ? parseSavedRating(row.own_rating, round.id) : invalid();
   if (ownRating && base.role !== 'player') return invalid();

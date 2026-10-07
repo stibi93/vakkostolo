@@ -50,12 +50,12 @@ it('felfedéskor saját tipp, pontos és részpont, közös átlag és ranglista
   expect(a.wines[0]).toMatchObject({name:'Első titkos bor',response_count:2,average_liking:8,own:{price_bucket:5,price_points:1,alcohol_points:1,total:2},
     guesses:{price:[0,0,0,0,1,1,0,0],alcohol:[{tenths:135,count:1},{tenths:140,count:1}],liking:[0,0,0,0,0,1,0,0,0,1]}});
   expect(a.wines[0].photo_updated_at).not.toBeNull();expect(a.wines).toHaveLength(1);
-  expect(a.leaderboard.map(e=>[e.nickname,e.points,e.rank])).toEqual([['Anna',2,1],['Béla',0,2]]);
+  expect(a.leaderboard.map(e=>[e.nickname,e.points,e.rank])).toEqual([['Anna',2,1],['Béla',1,2]]);
   const bela=a.scorecards.find(card=>card.id===a.leaderboard[1].id);
-  expect(bela?.wines[0]).toMatchObject({price_bucket:6,alcohol_tenths:140,price_points:0,alcohol_points:0,liking:6});
+  expect(bela?.wines[0]).toMatchObject({price_bucket:6,alcohol_tenths:140,price_points:0,alcohol_points:1,liking:6});
   expect(JSON.stringify(a)).not.toContain('Második titkos');
   expect((await db.query('select name from storage.objects')).rows).toHaveLength(1);
-  await user(two);expect((await results()).wines[0].own).toMatchObject({price_bucket:6,total:0});
+  await user(two);expect((await results()).wines[0].own).toMatchObject({price_bucket:6,total:1});
   await user(host);expect((await results()).wines[0].own).toBeNull();
   expect((await results()).scorecards.some(card=>card.wines[0].price_bucket===6)).toBe(true);
   await act('next');await rate(two,8,90,3,1);await user(one);
@@ -65,6 +65,15 @@ it('felfedéskor saját tipp, pontos és részpont, közös átlag és ranglista
   await user(host);
   const snapshot=(await db.query<{s:{results:Results}}>('select public.get_game_snapshot($1) s',[game])).rows[0].s;
   expect(snapshot.results.wines[0].own).toBeNull();
+});
+it('az alkoholfok ±0,5 százalékponton belül 1 pont, azon kívül 0',async()=>{
+  await db.exec('reset role');
+  const band=await db.query<{alcohol:number;points:number}>(`select v as alcohol, alcohol_points as points
+    from unnest(array[130,135,140,129,141]) v
+    cross join lateral private.rating_points(4,5000,135,5,null,v)`);
+  expect(band.rows).toEqual([{alcohol:130,points:'1'},{alcohol:135,points:'1'},{alcohol:140,points:'1'},{alcohol:129,points:'0'},{alcohol:141,points:'0'}]);
+  const exact=await db.query<{points:number}>('select alcohol_points as points from private.rating_points(3,5000,135,5,null,140)');
+  expect(exact.rows[0].points).toBe('0');
 });
 it('hiányzó válasz 0 pont, nem nulla tetszés; holtverseny közös helyezés, ismétlés stabil',async()=>{
   await act('start');await rate(one,5,135,10);await act('close');await act('reveal');

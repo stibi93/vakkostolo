@@ -8,7 +8,7 @@ import type { PresenceApi } from '../lobby/presence';
 export interface ActiveRound {
   questions?: Question[];
   id: string; position: number; status: 'open' | 'closed' | 'revealed';
-  openedAt: string; closesAt: string | null; eligible: boolean; canSubmit: boolean;
+  openedAt: string; closesAt: string | null; lateEdits: boolean; eligible: boolean; canSubmit: boolean;
 }
 export interface SavedRating extends Rating { roundId: string; submittedAt: string }
 export interface GameSnapshot extends LobbySnapshot {

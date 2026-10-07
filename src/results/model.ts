@@ -21,7 +21,7 @@ export interface ScoreWine {
 }
 export interface Scorecard { id: string; wines: ScoreWine[] }
 export interface GameResults {
-  scoringVersion: 1 | 2 | 3; final: boolean; revealedCount: number; maxPoints: number;
+  scoringVersion: 1 | 2 | 3 | 4; final: boolean; revealedCount: number; maxPoints: number;
   wines: WineResult[]; leaderboard: LeaderboardEntry[]; scorecards: Scorecard[];
 }
 export interface ResultPhotoApi { download(gameId: string, roundId: string): Promise<Blob> }

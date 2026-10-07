@@ -36,8 +36,8 @@ export function ScoreTable({ results, selfId }: { results: GameResults; selfId: 
 }
 
 function summaryColumns(results: GameResults) {
-  const perWine = results.scoringVersion === 3 ? 1 : 50;
-  const questionMax = results.scoringVersion === 3 ? results.wines.reduce((sum, wine) => sum + (wine.questions?.length ?? 0), 0) : 0;
+  const perWine = results.scoringVersion >= 3 ? 1 : 50;
+  const questionMax = results.scoringVersion >= 3 ? results.wines.reduce((sum, wine) => sum + (wine.questions?.length ?? 0), 0) : 0;
   return [
     { id: 'price' as const, label: 'Árkategória', icon: 'price' as const, max: results.revealedCount * perWine },
     { id: 'alcohol' as const, label: 'Alkoholfok', icon: 'alcohol' as const, max: results.revealedCount * perWine },

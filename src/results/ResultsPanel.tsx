@@ -118,9 +118,9 @@ function pointText(points: number | null, simple: boolean) {
   if (points === null) return '—';
   return simple ? `${points} pont` : `${numeric(points)} / 50 pont${points === 50 ? ' · Pontos találat' : ''}`;
 }
-function OwnComparison({wine,version}:{wine:WineResult;version:1|2|3}) {
+function OwnComparison({wine,version}:{wine:WineResult;version:GameResults['scoringVersion']}) {
   const own=wine.own;
-  const simple = version === 3;
+  const simple = version >= 3;
   if(!own) return <div className="result-comparison"><h4>A saját eredményed</h4><p>Ehhez a borhoz nincs leadott tipped. <strong>0 pont.</strong></p></div>;
   const rows=[{label:version===1?'Palackár':'Árkategória',guess:version===1 && own.priceHuf!==null?money(own.priceHuf):own.priceBucket===null?'—':priceBucketLabel(own.priceBucket),
     truth:version===1?money(wine.priceHuf):priceBucketLabel(wine.priceBucket),points:own.pricePoints},
@@ -156,13 +156,13 @@ function QuestionCards({ wine }: { wine: WineResult }) {
     </div>
   </section>;
 }
-function QuestionAnswers({ wine, version, showOwn }: { wine: WineResult; version: 1 | 2 | 3; showOwn: boolean }) {
+function QuestionAnswers({ wine, version, showOwn }: { wine: WineResult; version: GameResults['scoringVersion']; showOwn: boolean }) {
   return <section className="result-questions" aria-label="Egyedi kérdések eredménye">
     <h4>Egyedi kérdések</h4>
     {wine.questions?.map(q => {
       const correct = q.options.find(o => o.id === q.correctOptionId)?.label ?? '—';
       const guess = q.options.find(o => o.id === q.ownOptionId)?.label;
-      const points = version === 3 ? (q.ownOptionId === q.correctOptionId ? 1 : 0) : null;
+      const points = version >= 3 ? (q.ownOptionId === q.correctOptionId ? 1 : 0) : null;
       return <div className="result-answer" key={q.id}>
         <div className="result-answer-title"><h5>{q.prompt}</h5>{points !== null && <span>{points} pont</span>}</div>
         <dl>

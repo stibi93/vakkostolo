@@ -25,7 +25,7 @@ it.each([
   { ...raw, round: { ...raw.round, eligible: false } },
   { ...raw, round: { ...raw.round, status: 'pending' } },
   { ...raw, round: { ...raw.round, closes_at: raw.round.opened_at } },
-  { ...raw, round: { ...raw.round, position: 13 } },
+  { ...raw, round: { ...raw.round, position: 99 } },
   { ...raw, own_rating: { ...rating, round_id: member } },
   { ...raw, own_rating: { ...rating, liking: 0 } },
   { ...raw, own_rating: { ...rating, price_bucket: '5' } },
