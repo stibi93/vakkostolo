@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { ResultPhotoApi, WineResult } from './model';
+import { cutoutBottle } from './bottleCutout';
 export function ResultPhoto({ api, gameId, wine, lift = false }: { api?: ResultPhotoApi; gameId: string; wine: WineResult; lift?: boolean }) {
   // The key on the caller remounts for a different wine/photo, so old blobs cannot flash.
   const [url,setUrl]=useState<string|null>(null), [failed,setFailed]=useState(false), [attempt,setAttempt]=useState(0);
   useEffect(()=>{
     if(!api || !wine.photoUpdatedAt) return;
     let active=true, objectUrl:string|undefined;
-    api.download(gameId,wine.id).then(blob=>{
+    // A plain photo backdrop is cut away so only the bottle shows (and floats on the stage); busy scenes stay as shot.
+    api.download(gameId,wine.id).then(blob=>cutoutBottle(blob).catch(()=>blob)).then(blob=>{
       if(!active) return; objectUrl=URL.createObjectURL(blob); setUrl(objectUrl);
     },()=>{if(active) setFailed(true);});
     return ()=>{active=false;if(objectUrl) URL.revokeObjectURL(objectUrl);};

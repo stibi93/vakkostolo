@@ -135,8 +135,16 @@ Felfedés előtt pontszám sem szivároghat ki: abból a valós érték követke
 
 ## Eredmények és prezentáció
 
-Boronként: név/évjárat, valódi ár és alkoholfok, saját tipp és pont, átlagos
-tetszés, a beküldések száma, valamint a többiek tippeloszlása. A ranglista
+Boronként: név/évjárat, valódi ár és alkoholfok, saját tipp és pont, a beküldések
+száma, valamint a többiek tippeloszlása. A tetszés a bor adataitól külön blokkban
+látszik a játékosnak és a kivetítőn: átlag, szélsők nélküli átlag (a legmagasabb és
+a legalacsonyabb érték nélkül, legalább 3 értékelésnél), medián és szórás (teljes
+sokaság). A játékos itt a saját értékelését is látja. A statisztika a felfedett
+tetszéseloszlásból a kliensen számolódik.
+v3-tól minden helyes tipp 1 pont: árkategória, alkoholfok és minden egyedi kérdés.
+A felület mindenhol így jelzi; a v1/v2 régi játékok 50 pontos kategóriái megmaradnak.
+A borfotó egyszínű, világos hátterét (és vetett árnyékát) a böngésző megjelenítéskor
+átlátszóvá teszi, így csak az üveg látszik. Zsúfolt vagy sötét hátterű fotó változatlan. A ranglista
 összpontot és dobogót mutat, és külön nézetben ár, alkohol és egyedi kérdés
 szerint is: ki mit tippelt, és arra mennyi pontot kapott. Ez csak a már
 felfedett borokra vonatkozik.
@@ -192,4 +200,4 @@ A teljes tipp együtt mentődik és a kör lezárásáig/időkorlátjáig felül
 Felfedéskor a borlap mutatja a helyes választ és a játékos saját tippjét,
 illetve hogy eltalálta-e. A kivetítő ugyanezt a helyes választ mutatja.
 A ranglistán minden résztvevő és a játékmester látja, ki melyik opciót választotta,
-és a v3 pontozásnál erre is 1 pont jár. A tetszés továbbra sem ad pontot.
+és v3-tól erre is 1 pont jár. A tetszés továbbra sem ad pontot.

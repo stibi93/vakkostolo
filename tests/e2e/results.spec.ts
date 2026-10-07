@@ -59,9 +59,11 @@ test('játékos: csak felfedés után fotó, saját összevetés, részpont, hi�
   const photo=page.getByRole('img',{name:'Dűlőválogatás Furmint 2024 – a borhoz feltöltött fotó'});
   await expect(photo).toBeVisible();await expect.poll(()=>photo.evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);
   await expect(page.getByText('67 / 100 pont')).toBeVisible();
-  await expect(page.getByText('Saját tetszés')).toBeVisible();
-  await expect(page.getByText('8 / 10')).toHaveCount(2);
-  await expect(page.getByText('Nem ad versenypontot.')).toBeVisible();
+  const liking=page.getByRole('region',{name:'Tetszés'});
+  await expect(liking).toContainText('nem versenypont');
+  await expect(liking.getByRole('definition').filter({hasText:'8 / 10'})).toHaveCount(1);
+  for(const label of ['Saját értékelésed','Átlag','Szélsők nélküli átlag','Medián','Szórás']) await expect(liking.getByRole('term').filter({hasText:new RegExp(`^${label}$`)})).toBeVisible();
+  await expect(liking).toContainText('Legalább 3 értékelés kell.');
   const comparison=page.getByRole('region',{name:'Saját tipp és valódi érték'});
   await expect(comparison).toContainText('6 001–8 000 Ft');await expect(comparison).toContainText('4 001–6 000 Ft');
   await expect(comparison).toContainText('14% vol');await expect(comparison).toContainText('13,5% vol');
@@ -94,6 +96,8 @@ test('kivetítő: fotós borlap és lapozható ranglista, saját válaszok és m
   await expect.poll(()=>photo.evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);
   await expect(page.getByRole('region',{name:'Saját tipp és valódi érték'})).toHaveCount(0);
   await expect(page.getByText('a te tipped')).toHaveCount(0);
+  await expect(page.getByRole('region',{name:'Tetszés'})).toContainText('Medián');
+  await expect(page.getByText('Saját értékelésed')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Kóstoló befejezése'})).toHaveCount(0);
   if(info.project.name.includes('desktop')) await expect(page.getByRole('article',{name:'1. bor eredménye'})).toBeInViewport({ratio:1});
   await page.screenshot({path:info.outputPath('projector-wine.png'),fullPage:true});

@@ -5,6 +5,7 @@ import { ScoreTable } from './ScoreTable';
 import { priceBucketLabel } from '../domain/game';
 import type { GameResults, ResultPhotoApi, WineResult } from './model';
 import { CountUp } from './CountUp';
+import { likingStats } from './likingStats';
 import { GuessCharts } from './GuessCharts';
 import { ResultPhoto } from './ResultPhoto';
 import './results.css';
@@ -68,11 +69,10 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
         </div>
         <div className="result-wine-content"><p className="eyebrow">{String(wine.position).padStart(2,'0')}. TÉTEL · FELFEDVE</p>
           <h3>{wine.name}</h3>
-          <dl className="result-facts"><div><dt><CategoryIcon category="price" />Valódi palackár</dt><dd><CountUp value={wine.priceHuf} format={money} delay={450} /></dd><dd className="result-fact-note">{priceBucketLabel(wine.priceBucket)}</dd></div>
+          <dl className="result-facts" aria-label="A bor adatai"><div><dt><CategoryIcon category="price" />Valódi palackár</dt><dd><CountUp value={wine.priceHuf} format={money} delay={450} /></dd><dd className="result-fact-note">{priceBucketLabel(wine.priceBucket)}</dd></div>
             <div><dt><CategoryIcon category="alcohol" />Alkoholtartalom</dt><dd><CountUp value={wine.alcoholTenths} format={alcohol} delay={550} /></dd></div>
-            <div><dt><CategoryIcon category="liking" />Átlagos tetszés</dt><dd>{wine.averageLiking===null?'—':<CountUp value={wine.averageLiking} format={outOfTen} step={0.1} delay={650} />}</dd><dd className="result-fact-note">{wine.responseCount} értékelés</dd></div>
-            {!presentation && selfId && <div><dt><CategoryIcon category="liking" />Saját tetszés</dt><dd>{wine.own ? outOfTen(wine.own.liking) : '—'}</dd><dd className="result-fact-note">{wine.own ? 'Nem ad versenypontot.' : 'Nincs leadott tetszés.'}</dd></div>}
           </dl>
+          <LikingSummary wine={wine} showOwn={!presentation && !!selfId} />
           {!presentation && selfId && <OwnComparison wine={wine} version={results.scoringVersion} />}
           {!!wine.questions?.length && (presentation
             ? <QuestionCards wine={wine} />
@@ -114,6 +114,20 @@ function Ranking({ results, selfId, compact = false }: { results: GameResults; s
     <p className="small-note">Azonos pontszámhoz azonos helyezés tartozik, a nevek egy dobogófokon állnak. A tetszés nem befolyásolja a sorrendet.</p>
   </section>;
 }
+function LikingSummary({ wine, showOwn }: { wine: WineResult; showOwn: boolean }) {
+  const stats = likingStats(wine.guesses.liking);
+  const stat = (value: number | null) => value === null ? '—' : outOfTen(value);
+  return <section className="result-liking" aria-label="Tetszés">
+    <h4><CategoryIcon category="liking" />Tetszés <small>{stats.count} értékelés · nem versenypont</small></h4>
+    <dl className="result-facts">
+      {showOwn && <div className="is-own"><dt>Saját értékelésed</dt><dd>{wine.own ? outOfTen(wine.own.liking) : '—'}</dd>{!wine.own && <dd className="result-fact-note">Nincs leadott tetszés.</dd>}</div>}
+      <div><dt>Átlag</dt><dd>{stats.mean === null ? '—' : <CountUp value={stats.mean} format={outOfTen} step={0.1} delay={650} />}</dd></div>
+      <div><dt>Szélsők nélküli átlag</dt><dd>{stat(stats.trimmedMean)}</dd><dd className="result-fact-note">{stats.trimmedMean === null ? 'Legalább 3 értékelés kell.' : 'A legmagasabb és legalacsonyabb nélkül.'}</dd></div>
+      <div><dt>Medián</dt><dd>{stat(stats.median)}</dd></div>
+      <div><dt>Szórás</dt><dd>{stats.spread === null ? '—' : numeric(stats.spread)}</dd><dd className="result-fact-note">Minél kisebb, annál egyezőbb a vélemény.</dd></div>
+    </dl>
+  </section>;
+}
 function pointText(points: number | null, simple: boolean) {
   if (points === null) return '—';
   return simple ? `${points} pont` : `${numeric(points)} / 50 pont${points === 50 ? ' · Pontos találat' : ''}`;
@@ -126,7 +140,7 @@ function OwnComparison({wine,version}:{wine:WineResult;version:GameResults['scor
     truth:version===1?money(wine.priceHuf):priceBucketLabel(wine.priceBucket),points:own.pricePoints},
     {label:'Alkoholtartalom',guess:alcohol(own.alcoholTenths),truth:alcohol(wine.alcoholTenths),points:own.alcoholPoints}];
   return <section className="result-comparison" aria-label="Saját tipp és valódi érték">
-    <div className="result-comparison-heading"><h4>A saját eredményed</h4><strong>{own.total===null?'Nem pontozható':<CountUp value={own.total} format={simple?v=>`${v} pont`:v=>`${v} / 100 pont`} delay={800} />}</strong></div>
+    <div className="result-comparison-heading"><h4>A saját eredményed</h4><strong>{own.total===null?'Nem pontozható':<CountUp value={own.total} format={simple?v=>`${v} / ${2+(wine.questions?.length??0)} pont`:v=>`${v} / 100 pont`} delay={800} />}</strong></div>
     {rows.map(row=><div className="result-answer" key={row.label}><div className="result-answer-title"><h5>{row.label}</h5>
       <span>{pointText(row.points, simple)}</span></div>
       <dl><div><dt>Saját tipped</dt><dd>{row.guess}</dd></div><div><dt>Valódi érték</dt><dd>{row.truth}</dd></div></dl>

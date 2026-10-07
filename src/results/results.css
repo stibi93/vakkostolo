@@ -18,7 +18,7 @@
 .reveal-strip { display: none; }
 .result-wine { display: grid; gap: clamp(20px,3vw,40px); background: var(--sheet); border-block: 1px solid var(--line); padding: 24px 0; }
 .result-photo { margin: 0; position: relative; background: var(--paper); min-width: 0; display: grid; align-items: center; height: 180px; }
-.results-presentation .result-photo { min-height: 0; height: clamp(380px, 52vh, 560px); overflow: hidden; background: var(--photo-stage); }
+.results-presentation .result-photo { min-height: 0; height: clamp(380px, 52vh, 560px); overflow: hidden; background: transparent; }
 .results-presentation .result-photo img { position: absolute; z-index: 1; left: 50%; right: auto; top: auto; bottom: 48px; width: auto; height: calc(100% - 64px); max-width: 92%; max-height: none; margin: 0; object-fit: contain; object-position: center bottom; transform: translateX(-50%); }
 .results-presentation .bottle-shadow { position: absolute; z-index: 2; bottom: 18px; left: 50%; width: 48%; height: 18px; border-radius: 50%; background: rgb(42 34 38 / 0.42); filter: blur(1.5px); transform: translateX(-50%); pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) {
@@ -43,6 +43,12 @@
 .result-facts dt { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 .result-facts dd { margin: 0; font: 600 24px/1.2 var(--display); overflow-wrap: anywhere; }
 .result-facts .result-fact-note { font: 13px/1.5 var(--sans); color: var(--muted); margin-top: 6px; }
+.result-liking { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 24px; }
+.result-liking > h4 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 12px; font-size: 18px; }
+.result-liking > h4 small { font: 13px/1.4 var(--sans); color: var(--muted); }
+.result-liking .result-facts { margin: 0; }
+.result-liking .result-facts dd:not(.result-fact-note) { font-size: 20px; }
+.result-liking .is-own dd:not(.result-fact-note) { color: var(--accent); }
 .result-comparison { border-top: 3px solid var(--accent); padding-top: 12px; margin-bottom: 8px; }
 .result-comparison-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
 .result-comparison h4 { margin: 0; font-size: 18px; }
@@ -278,7 +284,7 @@
   .results-presentation > .results-switch > .button-secondary { background: transparent; color: var(--muted); }
   .results-presentation .result-navigation { margin: 10px 0 12px; }
   .results-presentation .result-wine { padding: 0; border: 0; background: transparent; grid-template-columns: minmax(300px, 1fr) minmax(0, 1.35fr); align-items: center; gap: clamp(28px, 4vw, 64px); }
-  .results-presentation .result-photo { height: clamp(280px, calc(100svh - 270px), 680px); box-shadow: 0 30px 60px -30px rgb(0 0 0 / 70%); }
+  .results-presentation .result-photo { height: clamp(280px, calc(100svh - 270px), 680px); }
   .results-presentation .result-wine-content > .eyebrow { display: block; margin-bottom: 6px; font-size: 14px; }
   .results-presentation .result-wine-content > h3 { font-size: clamp(40px, 4.6vw, 76px); margin: 0 0 clamp(16px, 3vh, 32px); }
   .results-presentation .result-facts { gap: 20px 28px; margin: 0; }
@@ -287,6 +293,14 @@
   .results-presentation .result-facts .result-fact-note { white-space: normal; }
   .results-presentation .result-facts .result-fact-note { font-size: 17px; }
   .results-presentation .reveal-strip > span { font-size: clamp(48px, 6vw, 96px); }
+  .results-presentation .result-liking { margin: clamp(10px, 2vh, 24px) 0 0; padding-top: 10px; }
+  .results-presentation .result-liking > h4 { margin-bottom: 8px; }
+  .results-presentation .result-liking > h4 { font-size: 22px; }
+  .results-presentation .result-liking > h4 small { font-size: 17px; }
+  .results-presentation .result-liking .result-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 20px; }
+  .results-presentation .result-liking .result-facts dt { font-size: 16px; }
+  .results-presentation .result-liking .result-facts dd:not(.result-fact-note) { font-size: clamp(24px, 2.4vw, 40px); }
+  .results-presentation .result-liking .result-facts .result-fact-note { font-size: 14px; }
   .results-presentation .podium-heading h3 { font-size: clamp(26px, 2.6vw, 38px); }
   .results-presentation .podium-max strong { font-size: clamp(28px, 2.6vw, 40px); }
   .results-presentation .podium { margin: 20px 0 12px; gap: 14px; }

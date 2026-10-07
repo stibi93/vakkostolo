@@ -7,7 +7,7 @@ export function QuestionEditor({ questions, onChange }: {questions: HostQuestion
   }
   return <section className="question-editor" aria-label="Egyedi kérdések">
     <h4>Egyedi kérdések <span className="small-note">{questions.length}/5</span></h4>
-    <p className="small-note">Választható kiegészítés. Kérdésenként egy helyes válasz; a találat a felfedésnél látszik, versenypontot nem ad.</p>
+    <p className="small-note">Választható kiegészítés. Kérdésenként egy helyes válasz, ami 1 pontot ér; a találat a felfedésnél látszik.</p>
     {questions.map((q,i)=><fieldset className="custom-question" key={q.id}>
       <legend>{i+1}. kérdés</legend>
       <div className="question-fields">

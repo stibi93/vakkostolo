@@ -180,10 +180,11 @@ function LiveRatingForm({ api, snapshot, refresh, enabled }: {
     {round.eligible && <form onSubmit={(event) => void submit(event)} noValidate className="live-rating-form">
       <fieldset disabled={!enabled || pending}>
         <legend>A te tipped</legend>
+        <p className="small-note">Minden helyes tipp 1 pont: árkategória, alkoholfok és minden kérdés. A tetszés nem pontoz.</p>
         <RatingFields value={value} onChange={setDraft} />
         {round.questions?.map(q=><fieldset className="custom-question" key={q.id}>
           <legend><CategoryIcon category="question" />{q.prompt}</legend>
-          <p className="small-note">Egy választ jelölj meg. A találat a felfedésnél látszik; versenypontot nem ad.</p>
+          <p className="small-note">Egy választ jelölj meg. Találat esetén 1 pont; a felfedésnél látszik.</p>
           {q.options.map(o=><label className="timer-toggle" key={o.id}><input type="radio" name={`question-${q.id}`} value={o.id} checked={choices[q.id]===o.id} onChange={()=>setAnswers({...choices,[q.id]:o.id})} />{o.label}</label>)}
         </fieldset>)}
         <button className="button-primary" type="submit">{pending ? 'Beküldés…' : saved ? 'Tipp módosítása' : 'Tipp beküldése'}</button>
