@@ -6,6 +6,7 @@
 - Eredmény/kivetítő: a tetszés külön blokk (átlag, szélsők nélküli átlag, medián, szórás, saját értékelés). `src/results/likingStats.ts`.
 - Borfotó: a perembe érő világos, egyszínű háttér és árnyéka megjelenítéskor átlátszó lesz (`src/results/bottleCutout.ts`); a kivetítő fotókerete már nem világos doboz.
 - Host futó körben: a „Játékosok ennél a bornál” lista online/offline + leadta/még nincs tipp; a külön résztvevőlista ilyenkor rejtett (`LobbyView showRoster`).
+- Végső dia: befejezett játéknál a kivetítő „Végeredmény” nézete (`src/results/FinalSummary.tsx`, rangsor: `wineRanking.ts`). Játékosoknak nincs ilyen fül.
 - Pontszöveg: kérdéseknél „1 pont” a „nem ad versenypontot” helyett; saját összpont v3+ esetén „X / (2 + kérdések) pont”.
 
 ## Ellenőrzés

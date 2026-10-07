@@ -6,6 +6,7 @@ import { priceBucketLabel } from '../domain/game';
 import type { GameResults, ResultPhotoApi, WineResult } from './model';
 import { CountUp } from './CountUp';
 import { likingStats } from './likingStats';
+import { FinalSummary } from './FinalSummary';
 import { GuessCharts } from './GuessCharts';
 import { ResultPhoto } from './ResultPhoto';
 import './results.css';
@@ -21,7 +22,11 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
   const wines = roundIds ? roundIds.flatMap(id => results.wines.filter(w => w.id === id)) : results.wines;
   const [selected,setSelected]=useState(roundIds ? 0 : wines.length-1);
   const [direction,setDirection]=useState<-1|0|1>(0);
-  const [view,setView]=useState<'wine'|'guesses'|'ranking'>('wine');
+  const closing=presentation && results.final;
+  const [view,setView]=useState<'final'|'wine'|'guesses'|'ranking'>(closing ? 'final' : 'wine');
+  // The projector lands on the closing slide when the host finishes the tasting.
+  const [wasClosing,setWasClosing]=useState(closing);
+  if(closing!==wasClosing){ setWasClosing(closing); if(closing) setView('final'); }
   const touch=useRef<{x:number;y:number}|null>(null);
   const index=Math.min(selected,wines.length-1);
   const wine=wines[index];
@@ -49,11 +54,12 @@ export function ResultsPanel({ results, gameId, selfId, photos, presentation=fal
     {!presentation && !results.final && <p className="small-note">Csak a már felfedett borok számítanak bele. A sorrend a következő felfedéskor változhat.</p>}
     {results.leaderboard.some(e=>e.unscored>0) && <p className="auth-message">Egy régi pontozású válaszból hiányzik a forintos ártipp. Ez a válasz nem pontozható; az összesítés hiányos.</p>}
     <nav className="results-switch" aria-label="Eredménynézet">
+      {closing && <button className={view==='final'?'button-primary':'button-secondary'} aria-pressed={view==='final'} onClick={()=>setView('final')}>Végeredmény</button>}
       <button className={view==='wine'?'button-primary':'button-secondary'} aria-pressed={view==='wine'} onClick={()=>setView('wine')}>Borlapok</button>
       {presentation && <button className={view==='guesses'?'button-primary':'button-secondary'} aria-pressed={view==='guesses'} onClick={()=>setView('guesses')}>Tippeloszlás</button>}
       <button className={view==='ranking'?'button-primary':'button-secondary'} aria-pressed={view==='ranking'} onClick={()=>setView('ranking')}>Ranglista</button>
     </nav>
-    {view==='guesses' ? <GuessCharts wine={wine} own={null} presentation /> : view==='wine' ? <>
+    {view==='final' && closing ? <FinalSummary results={results} ranking={<Ranking results={results} selfId={null} compact />} /> : view==='guesses' ? <GuessCharts wine={wine} own={null} presentation /> : view==='wine' ? <>
       <nav className="result-navigation" aria-label="Felfedett bor kiválasztása">
         <button className="result-nav-step" disabled={index<=0} onClick={()=>go(-1)}><span aria-hidden="true">‹</span> Előző<span className="result-nav-word"> bor</span></button>
         <label className="result-nav-pick"><span className="sr-only">Felfedett bor</span><select aria-label="Felfedett bor" value={wine.id} onChange={e=>{const next=wines.findIndex(w=>w.id===e.target.value); setDirection(next>index?1:-1); setSelected(next);}}>

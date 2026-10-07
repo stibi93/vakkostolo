@@ -311,3 +311,33 @@
   .results-presentation .results-ranking.is-compact .podium-slot-3 .podium-plinth { height: clamp(80px, 12vh, 124px); }
   .results-presentation .score-table td, .results-presentation .score-table th { font-size: 18px; }
 }
+
+/* Closing slide: headline facts over the player ranking and the full wine table. */
+.final-summary { display: grid; gap: 24px; margin-top: 12px; }
+.final-highlights { display: grid; gap: 16px 24px; margin: 0; }
+.final-highlights > div { min-width: 0; border-top: 3px solid var(--accent); padding-top: 10px; }
+.final-highlights dt { font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.final-highlights dd { margin: 6px 0 0; font: 600 20px/1.2 var(--display); overflow-wrap: break-word; }
+.final-highlights .final-highlight-note { font: 14px/1.4 var(--sans); color: var(--muted); }
+.final-columns { display: grid; gap: 40px; min-width: 0; }
+.final-players, .final-wines { min-width: 0; }
+.final-wines > h3 { margin: 0 0 4px; }
+.final-wine-table th[scope="row"] { font-weight: 600; min-width: 12ch; }
+.final-wine-table td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.final-wine-table td strong { font-size: 18px; }
+.final-wine-table .is-top th, .final-wine-table .is-top td strong { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) {
+  .final-highlights > div { animation: stage-in .5s var(--ease-out) both; }
+  .final-highlights > div:nth-child(2) { animation-delay: .1s; }
+  .final-highlights > div:nth-child(3) { animation-delay: .2s; }
+  .final-highlights > div:nth-child(4) { animation-delay: .3s; }
+}
+@media(min-width:620px) { .final-highlights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media(min-width:850px) {
+  .final-highlights { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .results-presentation .final-highlights dt { font-size: 15px; }
+  .results-presentation .final-highlights dd { font-size: clamp(22px, 2.2vw, 36px); }
+  .results-presentation .final-highlights .final-highlight-note { font-size: 16px; }
+  .results-presentation .final-wines > h3 { font-size: clamp(26px, 2.6vw, 38px); }
+  .results-presentation .final-wine-table td, .results-presentation .final-wine-table th { font-size: 16px; padding: 8px 6px; }
+}

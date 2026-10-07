@@ -151,6 +151,12 @@ A borfotó egyszínű, világos hátterét (és vetett árnyékát) a böngész�
 összpontot és dobogót mutat, és külön nézetben ár, alkohol és egyedi kérdés
 szerint is: ki mit tippelt, és arra mennyi pontot kapott. Ez csak a már
 felfedett borokra vonatkozik.
+Befejezett kóstolónál a kivetítő a „Végeredmény” diára vált (fül, a többi nézet
+elérhető marad). Felül kiemelések: győztes, közönségkedvenc (legmagasabb átlagos
+tetszés), legmegosztóbb bor (legnagyobb szórás, legalább 2 értékelésnél), bor- és
+játékosszám. Alatta a köztes ranglistával azonos dobogó és pontösszesítő, majd az
+összes bor táblázata átlagos tetszés szerint (holtversenyben medián, majd sorszám):
+név, ár, alkoholfok, értékelésszám, átlag, szélsők nélküli átlag, medián, szórás.
 A dokumentációban szereplő mintaszámok nem valódi esemény adatai.
 
 ## Mobil és hozzáférhetőség
